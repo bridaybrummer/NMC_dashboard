@@ -6,7 +6,11 @@ format:
   html:
     toc: false
     theme: cosmo
+    css: styles.css
 ---
+
+
+[🏠 Home](../index.html){.btn .btn-primary}
 
 ```{r}
 #| echo: false

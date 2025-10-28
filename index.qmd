@@ -100,7 +100,7 @@ flowchart TD
 
 ```{r}
 #| label: nmc-checklist-flextable
-#| echo: true
+#| echo: false
 #| message: false
 #| warning: false
 
