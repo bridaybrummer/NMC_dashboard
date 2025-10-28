@@ -22,7 +22,7 @@ if (!dir.exists(".git")) {
 # Add the remote "origin" if it does not exist.
 remotes <- system("git remote", intern = TRUE)
 if (!("origin" %in% remotes)) {
-    system("git remote add origin https://github.com/bridaybrummer/study_stats_site.git")
+    system("git remote add origin https://github.com/bridaybrummer/NMC_dashboard.git")
     cat("Added remote 'origin'.\n")
 } else {
     cat("Remote 'origin' already exists.\n")
