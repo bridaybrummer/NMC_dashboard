@@ -15,6 +15,8 @@ This dashboard aims to make NMC data accessible and actionable for public health
 
 In addition, all coding and analysis will be open sources so that an epidemiologist can reproduce it locally, but also improve the code.
 
+Currently, only the by-province section is functional as a prototype to estbalished the structure of the dashboard/website.
+
 
 The planned structure of the dashboard is as follows:
 ```{mermaid}
