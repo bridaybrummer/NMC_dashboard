@@ -1,0 +1,88 @@
+project:
+  execute-dir: project
+  type: website
+  output-dir: _site
+  render:
+    - index.qmd
+    - overview.qmd
+    - quality.qmd
+    - by-province/index.qmd
+    - by-condition/index.qmd
+    - by-trending/index.qmd
+  #pre-render: scripts/render-by-province.r
+
+website:
+  title: "SA NMC Dashboard"
+  navbar:
+    left:
+      - text: Home
+        href: index.html
+      - text: Overview
+        href: overview.html
+      - text: Trending
+        href: by-trending/index.html
+      - text: By Province
+        menu:
+          - href: by-province/index.qmd
+            text: Overview
+          - href: by-province/ec/index.html
+            text: EC
+          - href: by-province/fs/index.html
+            text: FS
+          - href: by-province/gp/index.html
+            text: GP
+          - href: by-province/kzn/index.html
+            text: KZN
+          - href: by-province/lp/index.html
+            text: LP
+          - href: by-province/mp/index.html
+            text: MP
+          - href: by-province/nc/index.html
+            text: NC
+          - href: by-province/nw/index.html
+            text: NW
+          - href: by-province/wc/index.html
+            text: WC
+      - text: By Condition
+        menu: 
+        - href: by-condition/index.html
+      - text: Data Quality
+        href: quality.html
+  page-footer:
+    left: "Data sources: NMC, Stats SA. Last update: {{< meta last_update >}}"
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    df-print: paged
+    code-tools: false
+    echo: false
+    smooth-scroll: true
+
+execute:
+  echo: false
+  cache: true
+  preamble: |
+    message(">> preamble ran")
+    library(yaml)
+    library(glue)
+    library(dplyr)
+    library(tidyr)
+    library(gtsummary)
+    library(flextable)
+    source("R/aggregator_national.r")
+    source("R/tabulate_functions.r")
+    vars <- yaml::read_yaml("_variables.yml")
+    # To skip scripts/render-by-province.R during a local preview, set the env var first:
+    #   export QUARTO_PREVIEW=1   (macOS/Linux Terminal)
+    # or in R terminal: Sys.setenv(QUARTO_PREVIEW="1")
+    # And check it with Sys.getenv("QUARTO_PREVIEW")
+    # or in PowerShell: $env:QUARTO_PREVIEW="1"; run 'quarto preview'
+    # Remove/unset QUARTO_PREVIEW (or set it to "0") when you want the script to run.
+    if (Sys.getenv("QUARTO_PREVIEW") != "1") {
+      source("scripts/render-by-province.R")
+    }
+
+metadata-files:
+  - _variables.yml

@@ -1,0 +1,9 @@
+---
+title: "Trending Overview"
+format: html
+---
+
+
+This page will show trending conditions based on the CUSUM detection that are currently emerging or have had a signal in the last 14 days. 
+
+These will then bed fed into a forecasting model to estimate potential caseloads in the next 30 days based on the conditions characteristics. 

@@ -1,0 +1,44 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "SA NMC Dashboard",
+    "section": "",
+    "text": "Goals\n\nUse parameterised reports to show simple table of all conditions or provinces.\n\nThis is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites."
+  },
+  {
+    "objectID": "by-province/province.html",
+    "href": "by-province/province.html",
+    "title": "Province overviews",
+    "section": "",
+    "text": "Warning in readLines(file, warn = readLines.warn): incomplete final line found\non '_variables.yml'\n\nGP\n\nGP\n\nEpitable\n\n\nCharacteristicN = 11provincecondition1 (100%)cases461 (100%)1n (%)\n\n\n[1] “GP” GP\n\n\n\n\nWC\n\nWC\n\nEpitable\n\n\nCharacteristicN = 11provincecondition1 (100%)cases471 (100%)1n (%)\n\n\n[1] “WC” WC"
+  },
+  {
+    "objectID": "by-trending/index.html",
+    "href": "by-trending/index.html",
+    "title": "Trending Overview",
+    "section": "",
+    "text": "This page will show trending conditions based on the CUSUM detection that are currently emerging or have had a signal in the last 14 days.\nThese will then bed fed into a forecasting model to estimate potential caseloads in the next 30 days based on the conditions characteristics."
+  },
+  {
+    "objectID": "quality.html",
+    "href": "quality.html",
+    "title": "Quality",
+    "section": "",
+    "text": "About this site"
+  },
+  {
+    "objectID": "by-province/index.html",
+    "href": "by-province/index.html",
+    "title": "By province",
+    "section": "",
+    "text": "EC\nFS\nGP\nKZN\nLP\nMP\nNC\nNW\nWC"
+  },
+  {
+    "objectID": "by-province/index.html#provinces",
+    "href": "by-province/index.html#provinces",
+    "title": "By province",
+    "section": "",
+    "text": "EC\nFS\nGP\nKZN\nLP\nMP\nNC\nNW\nWC"
+  }
+]

@@ -1,0 +1,18 @@
+---
+title: "SA NMC Dashboard"
+page-layout: full
+toc: false
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    anchor-sections: false
+# Optional: surface the shared "last_update" variable inline
+# You can keep this footer also in _quarto.yml site-wide
+---
+# Goals 
+1. Use parameterised reports to show simple table of all conditions or provinces. 
+
+This is a Quarto website.
+
+To learn more about Quarto websites visit <https://quarto.org/docs/websites>.

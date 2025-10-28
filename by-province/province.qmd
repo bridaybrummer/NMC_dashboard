@@ -1,0 +1,71 @@
+---
+title: "Province report"
+params:
+  province: "GP"
+format:
+  html:
+    toc: false
+    theme: cosmo
+---
+
+```{r}
+#| echo: false
+#| include: false
+library(flextable)
+library(dplyr)
+library(tibble)
+library(gtsummary)
+
+
+if (file.exists("R/tabulate_functions.r")) {
+  source("R/tabulate_functions.r")
+} else if (file.exists("../R/tabulate_functions.r")) {
+  source("../R/tabulate_functions.r")
+}
+
+if( file.exists( "R/aggregator_national.r" ) ) {
+  source( "R/aggregator_national.r" )
+} else if( file.exists( "../R/aggregator_national.r" ) ) {
+  source( "../R/aggregator_national.r" )
+}
+
+#source("../R/aggregator_national.r")
+#source("../R/tabulate_functions.r")
+
+# get the parameters from YAML
+
+#params <- yaml::read_yaml("../_variables.yml")
+
+prov <- params$province
+
+
+
+df <- tibble(
+    Province = params$province,
+    Dummy_Value = 123,
+    Note = "Hello from a parameterised page"
+)
+
+tbl_summary(df) -> tbl
+
+
+
+ft <- as_flex_table(tbl) |>
+    autofit()
+
+
+```
+
+```{r}
+#| label: tbl-tabulate-condition
+#| tbl-cap: Counts of notifications by condition in `r params$province[1]`
+
+tabulate_condition(
+    province = params$province[1]
+) -> ft
+
+ft
+
+
+```
+

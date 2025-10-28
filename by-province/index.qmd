@@ -1,0 +1,19 @@
+---
+title: "By province"
+format:
+  html:
+    toc: false
+---
+
+
+## Provinces
+
+- [EC](ec/)
+- [FS](fs/)
+- [GP](gp/)
+- [KZN](kzn/)
+- [LP](lp/)
+- [MP](mp/)
+- [NC](nc/)
+- [NW](nw/)
+- [WC](wc/)
