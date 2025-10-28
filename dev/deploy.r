@@ -32,6 +32,14 @@ if (!("origin" %in% remotes)) {
 cat("Rendering Quarto site...\n")
 system("quarto render")
 
+# 3.1
+if (file.exists("_site/index.html")) {
+  cat("✓ _site/index.html found\n")
+} else {
+  cat("✗ _site/index.html missing - check render output\n")
+  system("ls -la _site/")
+}
+
 # 4. Stage all files.
 system("git add .")
 cat("Staged all files.\n")
