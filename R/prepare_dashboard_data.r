@@ -10,10 +10,8 @@ log_msg <- function(...) {
 
 # --- 1. Load Data ---
 # Use tryCatch to load data, or use sample if file missing (for reproducibility/demo)
-tryCatch({
+dt <- tryCatch({
   # Adjust path as necessary based on your actual data location
-  # Using absolute path based on user workspace info
-  # path <- "/Users/briday/Desktop/SAFETP/CLA/NMC_database/master/new_master.feather"
   path <- file.path(Sys.getenv("HOME"), "Desktop/SAFETP/CLA/NMC_database/master/new_master.feather")
   
   if (!file.exists(path)) {
@@ -23,8 +21,9 @@ tryCatch({
       log_msg("File found at: ", path)
   }
   
-  dt <<- as.data.table(arrow::read_feather(path))
-  log_msg("Successfully loaded data with ", nrow(dt), " rows.")
+  result <- as.data.table(arrow::read_feather(path))
+  log_msg("Successfully loaded data with ", nrow(result), " rows.")
+  result
   
 }, error = function(e) {
   log_msg("Error loading data: ", e$message)
@@ -34,7 +33,7 @@ tryCatch({
   provinces <- c("EC", "FS", "GP", "KZN", "LP", "MP", "NC", "NW", "WC")
   conditions <- c("Measles", "Cholera", "Mpox", "Rabies")
   
-  dt <<- data.table( # use global assignment to ensure dt is available
+  data.table(
     date = sample(dates, 10000, replace = TRUE),
     prov_ = sample(provinces, 10000, replace = TRUE),
     district = paste0("District_", sample(1:5, 10000, replace = TRUE)),
