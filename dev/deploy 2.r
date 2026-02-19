@@ -40,10 +40,9 @@ if (file.exists("_site/index.html")) {
   system("ls -la _site/")
 }
 
-# 4. Stage all files (force-add _site/ which is in .gitignore).
+# 4. Stage all files.
 system("git add .")
-system("git add -f _site/")
-cat("Staged all files (including _site/).\n")
+cat("Staged all files.\n")
 
 # 5. Commit changes if any are staged.
 commit_status <- system("git diff-index --quiet HEAD --")
@@ -96,32 +95,22 @@ if (any(grepl("gh-pages", local_branches))) {
     cat("Deleted local 'gh-pages' branch.\n")
 }
 
-# Copy _site/ to a temp location so it survives branch switching.
-system("rm -rf /tmp/_site_deploy && cp -r _site /tmp/_site_deploy")
-cat("Copied _site/ to temp location.\n")
+# Delete the remote 'gh-pages' branch if it exists.
+# (Ignore errors if the branch doesn't exist.)
+system("git push origin --delete gh-pages", ignore.stderr = TRUE)
+cat("Deleted remote 'gh-pages' branch if it existed.\n")
 
-# Create an orphan gh-pages branch (no history, clean slate).
-system("git checkout --orphan gh-pages")
-system("git rm -rf . 2>/dev/null")              # remove all tracked files
-
-# Copy the rendered site into the repo root and add .nojekyll.
-system("cp -r /tmp/_site_deploy/* .")
-system("touch .nojekyll")
-
-# Stage everything and commit.
-system("git add .")
-system("git commit -m 'Deploy site to gh-pages'")
-cat("Created gh-pages commit from _site/ contents.\n")
+# Create a subtree split from the _site folder into a temporary branch named 'gh-pages'.
+system("git subtree split --prefix _site -b gh-pages")
+cat("Created subtree split for '_site' into 'gh-pages' branch.\n")
 
 # Force push the new 'gh-pages' branch to GitHub.
 system("git push origin gh-pages --force")
 cat("Pushed 'gh-pages' branch to remote.\n")
 
-# Return to main and clean up.
-system("git checkout main")
+# Clean up by deleting the temporary local 'gh-pages' branch.
 system("git branch -D gh-pages")
-system("rm -rf /tmp/_site_deploy")
-cat("Cleaned up local 'gh-pages' branch and temp files.\n")
+cat("Cleaned up local 'gh-pages' branch.\n")
 
 # Final status check.
 cat("\nFinal Git status:\n")
