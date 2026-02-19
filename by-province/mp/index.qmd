@@ -1,0 +1,26 @@
+---
+title: "Mpumalanga"
+subtitle: "Provincial surveillance by NMC category — epidemic curves, incidence & condition breakdown"
+format:
+  html:
+    page-layout: full
+    toc: true
+    toc-depth: 3
+---
+
+```{r}
+#| label: province-params
+#| include: false
+PROV_CODE <- "MP"
+PROV_NAME <- "Mpumalanga"
+```
+
+```{r}
+#| label: render-template
+#| results: asis
+#| echo: false
+#| message: false
+#| warning: false
+res <- knitr::knit_child("by-province/_province_template.qmd", quiet = TRUE)
+cat(res, sep = "\n")
+```

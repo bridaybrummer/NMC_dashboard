@@ -1,8 +1,0 @@
----
-title: "Trending conditions"
-format:
-  html:
-    toc: true
----
-
-A section that shows a selection of trending conditions based on signal detection and burden of disease. 
