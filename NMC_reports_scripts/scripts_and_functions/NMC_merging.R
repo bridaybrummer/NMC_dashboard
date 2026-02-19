@@ -16,7 +16,8 @@ library(openxlsx)
 library(readxl)
 
 # SSE (Data Linkage) Script
-#Sys.setenv(OPENAI_API_KEY = "REDACTED_KEY")
+# NOTE: Set OPENAI_API_KEY in your .env or .Renviron file — never hardcode secrets
+# Sys.setenv(OPENAI_API_KEY = Sys.getenv("OPENAI_API_KEY"))
 #gptstudio.max_tokens = 10000
 
 
