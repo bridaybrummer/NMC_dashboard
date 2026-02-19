@@ -32,12 +32,13 @@ if (!("origin" %in% remotes)) {
 cat("Rendering Quarto site...\n")
 system("quarto render")
 
-# 3.1
+# 3.1 — Abort early if render failed
 if (file.exists("_site/index.html")) {
   cat("✓ _site/index.html found\n")
 } else {
   cat("✗ _site/index.html missing - check render output\n")
   system("ls -la _site/")
+  stop("Render failed — _site/index.html not produced. Aborting deploy.")
 }
 
 # 4. Stage all files (force-add _site/ which is in .gitignore).
@@ -67,6 +68,7 @@ pull_result <- system("git pull origin main --rebase")
 if (pull_result != 0) {
     cat("Pull with rebase failed. Aborting rebase...\n")
     system("git rebase --abort")
+    stop("Rebase failed — resolve conflicts manually before deploying.")
 }
 
 # (Optional) Check again if there are staged changes post-rebase, and commit if needed.
@@ -80,7 +82,10 @@ if (status != 0) {
 
 # 9. Push changes to the remote 'main' branch.
 cat("Pushing changes to remote 'main' branch...\n")
-system("git push -u origin main")
+push_result <- system("git push -u origin main")
+if (push_result != 0) {
+    stop("Push to main failed. Aborting deploy.")
+}
 cat("Main branch updated.\n")
 
 # ====================================
@@ -103,6 +108,10 @@ cat("Copied _site/ to temp location.\n")
 # Create an orphan gh-pages branch (no history, clean slate).
 system("git checkout --orphan gh-pages")
 system("git rm -rf . 2>/dev/null")              # remove all tracked files
+
+# Remove ALL remaining untracked/ignored files (data/, caches, etc.)
+# so they are not accidentally staged and pushed to the public gh-pages branch.
+system("find . -not -name '.git' -not -path './.git/*' -mindepth 1 -delete 2>/dev/null")
 
 # Copy the rendered site into the repo root and add .nojekyll.
 system("cp -r /tmp/_site_deploy/* .")
