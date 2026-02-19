@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>By Province – SA NMC Dashboard</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-502aca659cf5a6683e07c8541966b8d4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<script src="../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="../site_libs/selectize-0.12.4/css/selectize.bootstrap3.css" rel="stylesheet">
+<script src="../site_libs/selectize-0.12.4/js/selectize.min.js"></script>
+<link href="../site_libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet">
+<script src="../site_libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+<script src="../site_libs/ionrangeslider-javascript-2.3.1/js/ion.rangeSlider.min.js"></script>
+<script src="../site_libs/strftime-0.9.2/strftime-min.js"></script>
+<link href="../site_libs/ionrangeslider-css-2.3.1/css/ion.rangeSlider.css" rel="stylesheet">
+<link href="../site_libs/htmltools-fill-0.5.9/fill.css" rel="stylesheet">
+<script src="../site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="../site_libs/plotly-binding-4.11.0/plotly.js"></script>
+<script src="../site_libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="../site_libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
+<script src="../site_libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+<link href="../site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet">
+<script src="../site_libs/datatables-binding-0.33/datatables.js"></script>
+<link href="../site_libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="../site_libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet">
+<script src="../site_libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="../site_libs/jszip-1.13.6/jszip.min.js"></script>
+<script src="../site_libs/pdfmake-1.13.6/pdfmake.js"></script>
+<script src="../site_libs/pdfmake-1.13.6/vfs_fonts.js"></script>
+<link href="../site_libs/dt-ext-buttons-1.13.6/css/buttons.dataTables.min.css" rel="stylesheet">
+<script src="../site_libs/dt-ext-buttons-1.13.6/js/dataTables.buttons.min.js"></script>
+<script src="../site_libs/dt-ext-buttons-1.13.6/js/buttons.html5.min.js"></script>
+<script src="../site_libs/dt-ext-buttons-1.13.6/js/buttons.colVis.min.js"></script>
+<script src="../site_libs/dt-ext-buttons-1.13.6/js/buttons.print.min.js"></script>
+<link href="../site_libs/nouislider-7.0.10/jquery.nouislider.min.css" rel="stylesheet">
+<script src="../site_libs/nouislider-7.0.10/jquery.nouislider.min.js"></script>
+<link href="../site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="../site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">SA NMC Dashboard</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> <i class="bi bi-house-door" role="img">
+</i> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../overview.html"> <i class="bi bi-bar-chart-line" role="img">
+</i> 
+<span class="menu-text">Overview</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-surveillance" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-clipboard2-pulse" role="img">
+</i> 
+ <span class="menu-text">Surveillance</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-surveillance">    
+        <li>
+    <a class="dropdown-item" href="../by-province/index.html">
+ <span class="dropdown-text">By Province — Overview</span></a>
+  </li>  
+        <li><hr class="dropdown-divider"></li>
+        <li>
+    <a class="dropdown-item" href="../by-province/ec/index.html">
+ <span class="dropdown-text">Eastern Cape</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/fs/index.html">
+ <span class="dropdown-text">Free State</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/gp/index.html">
+ <span class="dropdown-text">Gauteng</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/kzn/index.html">
+ <span class="dropdown-text">KwaZulu-Natal</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/lp/index.html">
+ <span class="dropdown-text">Limpopo</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/mp/index.html">
+ <span class="dropdown-text">Mpumalanga</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/nc/index.html">
+ <span class="dropdown-text">Northern Cape</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/nw/index.html">
+ <span class="dropdown-text">North West</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/wc/index.html">
+ <span class="dropdown-text">Western Cape</span></a>
+  </li>  
+        <li><hr class="dropdown-divider"></li>
+        <li>
+    <a class="dropdown-item" href="../by-condition/index.html">
+ <span class="dropdown-text">By Condition</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-analytics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-graph-up-arrow" role="img">
+</i> 
+ <span class="menu-text">Analytics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-analytics">    
+        <li>
+    <a class="dropdown-item" href="../by-trending/index.html">
+ <span class="dropdown-text">Trending &amp; Signals</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../burden-of-disease/index.html">
+ <span class="dropdown-text">Burden of Disease</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-forecasts/index.html">
+ <span class="dropdown-text">Forecasts &amp; Scenarios</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../explorer/index.html"> <i class="bi bi-search" role="img">
+</i> 
+<span class="menu-text">Explorer</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../quality.html"> <i class="bi bi-clipboard-check" role="img">
+</i> 
+<span class="menu-text">Data Quality</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-docs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-book" role="img">
+</i> 
+ <span class="menu-text">Docs</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-docs">    
+        <li>
+    <a class="dropdown-item" href="../methods.html">
+ <span class="dropdown-text">Methods</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../glossary.html">
+ <span class="dropdown-text">Glossary</span></a>
+  </li>  
+        <li><hr class="dropdown-divider"></li>
+        <li>
+    <a class="dropdown-item" href="../about.html">
+ <span class="dropdown-text">About &amp; Credits</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../by-province/index.html">By Province</a></li><li class="breadcrumb-item"><a href="../by-province/index.html">By Province</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">By Province</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../by-province/index.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">By Province</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../by-province/ec/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Eastern Cape</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../by-province/fs/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Free State</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../by-province/gp/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Gauteng</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../by-province/kzn/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">KwaZulu-Natal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../by-province/lp/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Limpopo</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../by-province/mp/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mpumalanga</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../by-province/nc/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Northern Cape</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../by-province/nw/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">North West</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../by-province/wc/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Western Cape</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">By Condition</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../by-condition/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">By Condition</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#filters" id="toc-filters" class="nav-link active" data-scroll-target="#filters">Filters</a></li>
+  <li><a href="#cases-by-province" id="toc-cases-by-province" class="nav-link" data-scroll-target="#cases-by-province">Cases by Province</a></li>
+  <li><a href="#province-sub-pages" id="toc-province-sub-pages" class="nav-link" data-scroll-target="#province-sub-pages">Province Sub-pages</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../by-province/index.html">By Province</a></li><li class="breadcrumb-item"><a href="../by-province/index.html">By Province</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">By Province</h1>
+<p class="subtitle lead">Provincial summary of notifiable conditions — counts, incidence &amp; district drilldown</p>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Development Roadmap — By Province
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 29%">
+<col style="width: 37%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Phase</th>
+<th>Feature</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>v0.1</strong></td>
+<td>Monthly case counts by province × condition (interactive bar chart)</td>
+<td>✅ Done</td>
+</tr>
+<tr class="even">
+<td><strong>v0.1</strong></td>
+<td>Incidence per 100 000 dot-plot, filterable by condition</td>
+<td>✅ Done</td>
+</tr>
+<tr class="odd">
+<td><strong>v0.1</strong></td>
+<td>Searchable &amp; downloadable data table (CSV / Excel)</td>
+<td>✅ Done</td>
+</tr>
+<tr class="even">
+<td><strong>v0.2</strong></td>
+<td>Leaflet choropleth map — province-level counts</td>
+<td>🔲 Planned</td>
+</tr>
+<tr class="odd">
+<td><strong>v0.2</strong></td>
+<td>District drilldown table per province</td>
+<td>🔲 Planned</td>
+</tr>
+<tr class="even">
+<td><strong>v0.3</strong></td>
+<td>Click-to-zoom district maps with Leaflet + lightbox</td>
+<td>🔲 Planned</td>
+</tr>
+<tr class="odd">
+<td><strong>v0.3</strong></td>
+<td>Time-series sparklines per province</td>
+<td>🔲 Planned</td>
+</tr>
+<tr class="even">
+<td><strong>v0.4</strong></td>
+<td>Link to per-province sub-pages (EC, GP, …)</td>
+<td>🔲 Planned</td>
+</tr>
+<tr class="odd">
+<td><strong>v0.5</strong></td>
+<td>EpiNow2 Rt estimates per province fed from <code>agg_province.rds</code></td>
+<td>🔲 Planned</td>
+</tr>
+</tbody>
+</table>
+<p><em>Data pipeline:</em> <code>R/prepare_dashboard_data.r</code> → <code>data/processed/agg_province.rds</code></p>
+</div>
+</div>
+</div>
+<section id="filters" class="level2">
+<h2 class="anchored" data-anchor-id="filters">Filters</h2>
+<p>Use these controls to filter all plots and the table below.</p>
+<div class="cell">
+<div class="cell-output-display no-overflow-x">
+<div style="display:flex; gap:2rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+<div style="min-width:220px;">
+<div id="cond" class="form-group crosstalk-input-select crosstalk-input">
+<label class="control-label" for="cond">Condition</label>
+<div>
+<select multiple=""></select>
+<script type="application/json" data-for="cond">{
+  "items": {
+    "value": ["Acute flaccid paralysis", "Acute rheumatic fever", "Agricultural or stock remedy poisoning", "Anthrax", "Bilharzia (schistosomiasis)", "Botulism", "Brucellosis", "Cholera", "Congenital rubella syndrome", "Congenital syphilis", "Covid-19", "Crimean-congo viral haemorrhagic fever (human)", "Diphtheria", "Ebola virus (VHF)", "Endemic arboviral diseases chikungunya virus", "Endemic arboviral diseases sindbis virus", "Endemic arboviral diseases west nile virus", "Enteric fever (typhoid or paratyphoid fever)", "Food borne illness outbreak", "Haemolytic uraemic syndrome (HUS)", "Haemophilus influenzae type B", "Hepatitis A", "Hepatitis B", "Hepatitis C", "Hepatitis E", "Lead poisoning", "Legionellosis", "Leprosy", "Listeriosis", "Malaria", "Marburg virus (VHF)", "Maternal death (pregnancy, childbirth and puerperium)", "Measles", "Meningococcal disease", "Mercury poisoning", "Mpox", "Non-typhoidal salmonellosis", "Pertussis", "Plague", "Poliomyelitis", "Rabies", "Respiratory disease caused by a novel respiratory pathogen", "Rift valley fever (human)", "Rubella", "Shiga toxin-producing escherichia coli", "Shigellosis", "Smallpox", "Soil transmitted helminths", "Tetanus", "Tuberculosis: extensively drug -resistant (XDR -TB)", "Tuberculosis: multidrug- resistant (MDR -TB)", "Tuberculosis:extra-pulmonary", "Tuberculosis:pulmonary", "Waterborne illness outbreak - undefined", "Yellow fever"],
+    "label": ["Acute flaccid paralysis", "Acute rheumatic fever", "Agricultural or stock remedy poisoning", "Anthrax", "Bilharzia (schistosomiasis)", "Botulism", "Brucellosis", "Cholera", "Congenital rubella syndrome", "Congenital syphilis", "Covid-19", "Crimean-congo viral haemorrhagic fever (human)", "Diphtheria", "Ebola virus (VHF)", "Endemic arboviral diseases chikungunya virus", "Endemic arboviral diseases sindbis virus", "Endemic arboviral diseases west nile virus", "Enteric fever (typhoid or paratyphoid fever)", "Food borne illness outbreak", "Haemolytic uraemic syndrome (HUS)", "Haemophilus influenzae type B", "Hepatitis A", "Hepatitis B", "Hepatitis C", "Hepatitis E", "Lead poisoning", "Legionellosis", "Leprosy", "Listeriosis", "Malaria", "Marburg virus (VHF)", "Maternal death (pregnancy, childbirth and puerperium)", "Measles", "Meningococcal disease", "Mercury poisoning", "Mpox", "Non-typhoidal salmonellosis", "Pertussis", "Plague", "Poliomyelitis", "Rabies", "Respiratory disease caused by a novel respiratory pathogen", "Rift valley fever (human)", "Rubella", "Shiga toxin-producing escherichia coli", "Shigellosis", "Smallpox", "Soil transmitted helminths", "Tetanus", "Tuberculosis: extensively drug -resistant (XDR -TB)", "Tuberculosis: multidrug- resistant (MDR -TB)", "Tuberculosis:extra-pulmonary", "Tuberculosis:pulmonary", "Waterborne illness outbreak - undefined", "Yellow fever"]
+  },
+  "map": {
+    "Acute flaccid paralysis": ["1", "56", "111", "166", "221", "276", "331", "386", "441"],
+    "Acute rheumatic fever": ["2", "57", "112", "167", "222", "277", "332", "387", "442"],
+    "Agricultural or stock remedy poisoning": ["3", "58", "113", "168", "223", "278", "333", "388", "443"],
+    "Anthrax": ["4", "59", "114", "169", "224", "279", "334", "389", "444"],
+    "Bilharzia (schistosomiasis)": ["5", "60", "115", "170", "225", "280", "335", "390", "445"],
+    "Botulism": ["6", "61", "116", "171", "226", "281", "336", "391", "446"],
+    "Brucellosis": ["7", "62", "117", "172", "227", "282", "337", "392", "447"],
+    "Cholera": ["8", "63", "118", "173", "228", "283", "338", "393", "448"],
+    "Congenital rubella syndrome": ["9", "64", "119", "174", "229", "284", "339", "394", "449"],
+    "Congenital syphilis": ["10", "65", "120", "175", "230", "285", "340", "395", "450"],
+    "Covid-19": ["11", "66", "121", "176", "231", "286", "341", "396", "451"],
+    "Crimean-congo viral haemorrhagic fever (human)": ["12", "67", "122", "177", "232", "287", "342", "397", "452"],
+    "Diphtheria": ["13", "68", "123", "178", "233", "288", "343", "398", "453"],
+    "Ebola virus (VHF)": ["14", "69", "124", "179", "234", "289", "344", "399", "454"],
+    "Endemic arboviral diseases chikungunya virus": ["15", "70", "125", "180", "235", "290", "345", "400", "455"],
+    "Endemic arboviral diseases sindbis virus": ["16", "71", "126", "181", "236", "291", "346", "401", "456"],
+    "Endemic arboviral diseases west nile virus": ["17", "72", "127", "182", "237", "292", "347", "402", "457"],
+    "Enteric fever (typhoid or paratyphoid fever)": ["18", "73", "128", "183", "238", "293", "348", "403", "458"],
+    "Food borne illness outbreak": ["19", "74", "129", "184", "239", "294", "349", "404", "459"],
+    "Haemolytic uraemic syndrome (HUS)": ["20", "75", "130", "185", "240", "295", "350", "405", "460"],
+    "Haemophilus influenzae type B": ["21", "76", "131", "186", "241", "296", "351", "406", "461"],
+    "Hepatitis A": ["22", "77", "132", "187", "242", "297", "352", "407", "462"],
+    "Hepatitis B": ["23", "78", "133", "188", "243", "298", "353", "408", "463"],
+    "Hepatitis C": ["24", "79", "134", "189", "244", "299", "354", "409", "464"],
+    "Hepatitis E": ["25", "80", "135", "190", "245", "300", "355", "410", "465"],
+    "Lead poisoning": ["26", "81", "136", "191", "246", "301", "356", "411", "466"],
+    "Legionellosis": ["27", "82", "137", "192", "247", "302", "357", "412", "467"],
+    "Leprosy": ["28", "83", "138", "193", "248", "303", "358", "413", "468"],
+    "Listeriosis": ["29", "84", "139", "194", "249", "304", "359", "414", "469"],
+    "Malaria": ["30", "85", "140", "195", "250", "305", "360", "415", "470"],
+    "Marburg virus (VHF)": ["31", "86", "141", "196", "251", "306", "361", "416", "471"],
+    "Maternal death (pregnancy, childbirth and puerperium)": ["32", "87", "142", "197", "252", "307", "362", "417", "472"],
+    "Measles": ["33", "88", "143", "198", "253", "308", "363", "418", "473"],
+    "Meningococcal disease": ["34", "89", "144", "199", "254", "309", "364", "419", "474"],
+    "Mercury poisoning": ["35", "90", "145", "200", "255", "310", "365", "420", "475"],
+    "Mpox": ["36", "91", "146", "201", "256", "311", "366", "421", "476"],
+    "Non-typhoidal salmonellosis": ["37", "92", "147", "202", "257", "312", "367", "422", "477"],
+    "Pertussis": ["38", "93", "148", "203", "258", "313", "368", "423", "478"],
+    "Plague": ["39", "94", "149", "204", "259", "314", "369", "424", "479"],
+    "Poliomyelitis": ["40", "95", "150", "205", "260", "315", "370", "425", "480"],
+    "Rabies": ["41", "96", "151", "206", "261", "316", "371", "426", "481"],
+    "Respiratory disease caused by a novel respiratory pathogen": ["42", "97", "152", "207", "262", "317", "372", "427", "482"],
+    "Rift valley fever (human)": ["43", "98", "153", "208", "263", "318", "373", "428", "483"],
+    "Rubella": ["44", "99", "154", "209", "264", "319", "374", "429", "484"],
+    "Shiga toxin-producing escherichia coli": ["45", "100", "155", "210", "265", "320", "375", "430", "485"],
+    "Shigellosis": ["46", "101", "156", "211", "266", "321", "376", "431", "486"],
+    "Smallpox": ["47", "102", "157", "212", "267", "322", "377", "432", "487"],
+    "Soil transmitted helminths": ["48", "103", "158", "213", "268", "323", "378", "433", "488"],
+    "Tetanus": ["49", "104", "159", "214", "269", "324", "379", "434", "489"],
+    "Tuberculosis: extensively drug -resistant (XDR -TB)": ["50", "105", "160", "215", "270", "325", "380", "435", "490"],
+    "Tuberculosis: multidrug- resistant (MDR -TB)": ["51", "106", "161", "216", "271", "326", "381", "436", "491"],
+    "Tuberculosis:extra-pulmonary": ["52", "107", "162", "217", "272", "327", "382", "437", "492"],
+    "Tuberculosis:pulmonary": ["53", "108", "163", "218", "273", "328", "383", "438", "493"],
+    "Waterborne illness outbreak - undefined": ["54", "109", "164", "219", "274", "329", "384", "439", "494"],
+    "Yellow fever": ["55", "110", "165", "220", "275", "330", "385", "440", "495"]
+  },
+  "group": ["SharedData7eaa4ded"]
+}</script>
+</div>
+</div>
+</div>
+<div style="min-width:180px;">
+<div class="form-group crosstalk-input crosstalk-input-slider js-range-slider" id="cases">
+<label class="control-label" for="cases">Cases ≥</label>
+<input data-skin="shiny" data-type="double" data-min="0" data-max="925" data-from="0" data-to="925" data-step="10" data-grid="true" data-grid-num="9.25" data-grid-snap="false" data-prettify-separator="," data-keyboard="true" data-keyboard-step="1.08108108108108" data-drag-interval="true" data-data-type="number">
+<script type="application/json" data-for="cases">{
+  "values": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 5, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 16, 17, 17, 18, 18, 18, 19, 19, 20, 20, 20, 20, 20, 20, 21, 21, 22, 23, 23, 23, 24, 24, 26, 26, 32, 37, 37, 38, 39, 41, 42, 44, 49, 57, 59, 63, 71, 90, 93, 106, 110, 123, 146, 156, 170, 186, 217, 224, 226, 237, 278, 317, 371, 449, 830, 855, 925],
+  "keys": ["2", "4", "6", "7", "8", "9", "11", "12", "14", "15", "16", "17", "18", "20", "21", "24", "25", "26", "27", "28", "29", "31", "32", "34", "35", "36", "39", "40", "41", "42", "43", "44", "45", "47", "48", "49", "50", "54", "55", "56", "57", "59", "61", "63", "64", "66", "67", "68", "69", "70", "71", "72", "73", "75", "76", "79", "80", "81", "82", "83", "84", "86", "87", "89", "90", "91", "94", "95", "96", "97", "98", "100", "102", "103", "104", "105", "109", "110", "114", "116", "117", "118", "119", "121", "122", "124", "125", "126", "130", "135", "136", "138", "139", "141", "145", "146", "149", "150", "151", "153", "155", "157", "158", "159", "160", "164", "165", "167", "169", "171", "172", "173", "176", "177", "179", "180", "181", "182", "183", "185", "186", "190", "193", "194", "196", "197", "199", "200", "202", "204", "205", "207", "208", "210", "212", "214", "219", "220", "222", "224", "226", "227", "228", "230", "231", "232", "233", "234", "235", "236", "237", "238", "240", "241", "245", "246", "247", "248", "249", "251", "252", "254", "255", "256", "257", "258", "259", "260", "261", "262", "263", "265", "266", "267", "268", "269", "270", "274", "275", "276", "277", "279", "281", "282", "283", "284", "286", "287", "289", "290", "291", "292", "295", "296", "300", "301", "302", "304", "306", "309", "310", "311", "312", "314", "315", "316", "317", "318", "320", "322", "323", "324", "325", "326", "329", "330", "332", "334", "335", "336", "337", "338", "339", "341", "342", "343", "344", "345", "346", "347", "348", "349", "350", "351", "355", "356", "357", "358", "359", "360", "361", "362", "364", "365", "366", "367", "368", "369", "370", "371", "372", "373", "375", "376", "377", "378", "380", "384", "385", "386", "387", "389", "391", "392", "393", "394", "396", "397", "398", "399", "400", "401", "402", "403", "404", "405", "406", "409", "410", "411", "412", "413", "414", "416", "417", "419", "420", "421", "422", "424", "425", "427", "428", "430", "431", "432", "433", "434", "435", "439", "440", "442", "444", "446", "447", "449", "451", "452", "454", "455", "456", "457", "459", "460", "466", "468", "471", "472", "475", "476", "479", "480", "482", "483", "485", "487", "488", "489", "494", "495", "13", "60", "62", "112", "127", "174", "189", "191", "192", "201", "206", "213", "221", "223", "229", "244", "288", "299", "303", "307", "321", "333", "379", "388", "390", "426", "441", "448", "458", "461", "464", "481", "37", "51", "101", "123", "131", "137", "142", "152", "178", "278", "293", "313", "331", "354", "374", "381", "436", "465", "467", "469", "3", "38", "74", "92", "106", "144", "147", "156", "168", "215", "264", "271", "490", "1", "93", "111", "209", "211", "352", "443", "395", "30", "85", "99", "242", "243", "294", "297", "319", "19", "166", "423", "46", "285", "418", "453", "474", "486", "88", "134", "340", "407", "484", "22", "77", "115", "298", "353", "429", "203", "239", "445", "463", "154", "184", "470", "128", "33", "272", "10", "408", "478", "327", "477", "58", "65", "78", "148", "253", "415", "161", "187", "120", "5", "143", "363", "129", "216", "132", "462", "107", "437", "491", "280", "308", "113", "382", "133", "52", "198", "450", "175", "140", "23", "250", "225", "305", "492", "328", "273", "217", "170", "108", "438", "473", "195", "383", "162", "188", "53", "218", "163", "493"],
+  "group": ["SharedData7eaa4ded"]
+}</script>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p><strong>Data through:</strong> 19 February 2026</p>
+<hr>
+</section>
+<section id="cases-by-province" class="level2 tabset">
+<h2 class="tabset anchored" data-anchor-id="cases-by-province">Cases by Province</h2>
+<section id="stacked-bar-chart" class="level3">
+<h3 class="anchored" data-anchor-id="stacked-bar-chart">Stacked Bar Chart</h3>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in RColorBrewer::brewer.pal(max(N, 3L), "Set2"): n too large, allowed maximum for palette Set2 is 8
+Returning the palette you asked for with that many colors
+Warning in RColorBrewer::brewer.pal(max(N, 3L), "Set2"): n too large, allowed maximum for palette Set2 is 8
+Returning the palette you asked for with that many colors</code></pre>
+</div>
+<div id="fig-prov-bar" class="cell-output-display quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-prov-bar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-2b0b60905f596f8ed60e" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-2b0b60905f596f8ed60e">{"x":{"visdat":{"10ba751a91939":["function () ","plotlyVisDat"]},"cur_data":"10ba751a91939","attrs":{"10ba751a91939":{"x":{},"y":{},"hoverinfo":"text","text":{},"color":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"barmode":"stack","xaxis":{"domain":[0,1],"automargin":true,"title":"Province","categoryorder":"total descending","type":"category","categoryarray":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"Cases"},"legend":{"orientation":"h","y":-0.20000000000000001},"dragmode":"zoom","hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[4,0,4,7,1,0,2,0,1],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Acute flaccid paralysis<br>EC: 4 cases","Acute flaccid paralysis<br>FS: 0 cases","Acute flaccid paralysis<br>GP: 4 cases","Acute flaccid paralysis<br>KZN: 7 cases","Acute flaccid paralysis<br>LP: 1 cases","Acute flaccid paralysis<br>MP: 0 cases","Acute flaccid paralysis<br>NC: 2 cases","Acute flaccid paralysis<br>NW: 0 cases","Acute flaccid paralysis<br>WC: 1 cases"],"type":"bar","key":["1","56","111","166","221","276","331","386","441"],"set":"SharedData7eaa4ded","name":"Acute flaccid paralysis","marker":{"color":"rgba(102,194,165,1)","line":{"color":"rgba(102,194,165,1)"}},"textfont":{"color":"rgba(102,194,165,1)"},"error_y":{"color":"rgba(102,194,165,1)"},"error_x":{"color":"rgba(102,194,165,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,1,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Acute rheumatic fever<br>EC: 0 cases","Acute rheumatic fever<br>FS: 0 cases","Acute rheumatic fever<br>GP: 1 cases","Acute rheumatic fever<br>KZN: 0 cases","Acute rheumatic fever<br>LP: 0 cases","Acute rheumatic fever<br>MP: 0 cases","Acute rheumatic fever<br>NC: 0 cases","Acute rheumatic fever<br>NW: 0 cases","Acute rheumatic fever<br>WC: 0 cases"],"type":"bar","key":["2","57","112","167","222","277","332","387","442"],"set":"SharedData7eaa4ded","name":"Acute rheumatic fever","marker":{"color":"rgba(133,189,156,1)","line":{"color":"rgba(133,189,156,1)"}},"textfont":{"color":"rgba(133,189,156,1)"},"error_y":{"color":"rgba(133,189,156,1)"},"error_x":{"color":"rgba(133,189,156,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[3,20,41,3,1,2,1,1,4],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Agricultural or stock remedy poisoning<br>EC: 3 cases","Agricultural or stock remedy poisoning<br>FS: 20 cases","Agricultural or stock remedy poisoning<br>GP: 41 cases","Agricultural or stock remedy poisoning<br>KZN: 3 cases","Agricultural or stock remedy poisoning<br>LP: 1 cases","Agricultural or stock remedy poisoning<br>MP: 2 cases","Agricultural or stock remedy poisoning<br>NC: 1 cases","Agricultural or stock remedy poisoning<br>NW: 1 cases","Agricultural or stock remedy poisoning<br>WC: 4 cases"],"type":"bar","key":["3","58","113","168","223","278","333","388","443"],"set":"SharedData7eaa4ded","name":"Agricultural or stock remedy poisoning","marker":{"color":"rgba(157,183,147,1)","line":{"color":"rgba(157,183,147,1)"}},"textfont":{"color":"rgba(157,183,147,1)"},"error_y":{"color":"rgba(157,183,147,1)"},"error_x":{"color":"rgba(157,183,147,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Anthrax<br>EC: 0 cases","Anthrax<br>FS: 0 cases","Anthrax<br>GP: 0 cases","Anthrax<br>KZN: 0 cases","Anthrax<br>LP: 0 cases","Anthrax<br>MP: 0 cases","Anthrax<br>NC: 0 cases","Anthrax<br>NW: 0 cases","Anthrax<br>WC: 0 cases"],"type":"bar","key":["4","59","114","169","224","279","334","389","444"],"set":"SharedData7eaa4ded","name":"Anthrax","marker":{"color":"rgba(178,177,139,1)","line":{"color":"rgba(178,177,139,1)"}},"textfont":{"color":"rgba(178,177,139,1)"},"error_y":{"color":"rgba(178,177,139,1)"},"error_x":{"color":"rgba(178,177,139,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[23,1,10,186,106,38,0,1,11],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Bilharzia (schistosomiasis)<br>EC: 23 cases","Bilharzia (schistosomiasis)<br>FS: 1 cases","Bilharzia (schistosomiasis)<br>GP: 10 cases","Bilharzia (schistosomiasis)<br>KZN: 186 cases","Bilharzia (schistosomiasis)<br>LP: 106 cases","Bilharzia (schistosomiasis)<br>MP: 38 cases","Bilharzia (schistosomiasis)<br>NC: 0 cases","Bilharzia (schistosomiasis)<br>NW: 1 cases","Bilharzia (schistosomiasis)<br>WC: 11 cases"],"type":"bar","key":["5","60","115","170","225","280","335","390","445"],"set":"SharedData7eaa4ded","name":"Bilharzia (schistosomiasis)","marker":{"color":"rgba(196,171,130,1)","line":{"color":"rgba(196,171,130,1)"}},"textfont":{"color":"rgba(196,171,130,1)"},"error_y":{"color":"rgba(196,171,130,1)"},"error_x":{"color":"rgba(196,171,130,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Botulism<br>EC: 0 cases","Botulism<br>FS: 0 cases","Botulism<br>GP: 0 cases","Botulism<br>KZN: 0 cases","Botulism<br>LP: 0 cases","Botulism<br>MP: 0 cases","Botulism<br>NC: 0 cases","Botulism<br>NW: 0 cases","Botulism<br>WC: 0 cases"],"type":"bar","key":["6","61","116","171","226","281","336","391","446"],"set":"SharedData7eaa4ded","name":"Botulism","marker":{"color":"rgba(213,164,121,1)","line":{"color":"rgba(213,164,121,1)"}},"textfont":{"color":"rgba(213,164,121,1)"},"error_y":{"color":"rgba(213,164,121,1)"},"error_x":{"color":"rgba(213,164,121,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,1,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Brucellosis<br>EC: 0 cases","Brucellosis<br>FS: 1 cases","Brucellosis<br>GP: 0 cases","Brucellosis<br>KZN: 0 cases","Brucellosis<br>LP: 0 cases","Brucellosis<br>MP: 0 cases","Brucellosis<br>NC: 0 cases","Brucellosis<br>NW: 0 cases","Brucellosis<br>WC: 0 cases"],"type":"bar","key":["7","62","117","172","227","282","337","392","447"],"set":"SharedData7eaa4ded","name":"Brucellosis","marker":{"color":"rgba(228,156,113,1)","line":{"color":"rgba(228,156,113,1)"}},"textfont":{"color":"rgba(228,156,113,1)"},"error_y":{"color":"rgba(228,156,113,1)"},"error_x":{"color":"rgba(228,156,113,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,1],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Cholera<br>EC: 0 cases","Cholera<br>FS: 0 cases","Cholera<br>GP: 0 cases","Cholera<br>KZN: 0 cases","Cholera<br>LP: 0 cases","Cholera<br>MP: 0 cases","Cholera<br>NC: 0 cases","Cholera<br>NW: 0 cases","Cholera<br>WC: 1 cases"],"type":"bar","key":["8","63","118","173","228","283","338","393","448"],"set":"SharedData7eaa4ded","name":"Cholera","marker":{"color":"rgba(242,148,104,1)","line":{"color":"rgba(242,148,104,1)"}},"textfont":{"color":"rgba(242,148,104,1)"},"error_y":{"color":"rgba(242,148,104,1)"},"error_x":{"color":"rgba(242,148,104,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,1,1,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Congenital rubella syndrome<br>EC: 0 cases","Congenital rubella syndrome<br>FS: 0 cases","Congenital rubella syndrome<br>GP: 0 cases","Congenital rubella syndrome<br>KZN: 1 cases","Congenital rubella syndrome<br>LP: 1 cases","Congenital rubella syndrome<br>MP: 0 cases","Congenital rubella syndrome<br>NC: 0 cases","Congenital rubella syndrome<br>NW: 0 cases","Congenital rubella syndrome<br>WC: 0 cases"],"type":"bar","key":["9","64","119","174","229","284","339","394","449"],"set":"SharedData7eaa4ded","name":"Congenital rubella syndrome","marker":{"color":"rgba(249,142,102,1)","line":{"color":"rgba(249,142,102,1)"}},"textfont":{"color":"rgba(249,142,102,1)"},"error_y":{"color":"rgba(249,142,102,1)"},"error_x":{"color":"rgba(249,142,102,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[18,20,22,63,0,8,9,5,59],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Congenital syphilis<br>EC: 18 cases","Congenital syphilis<br>FS: 20 cases","Congenital syphilis<br>GP: 22 cases","Congenital syphilis<br>KZN: 63 cases","Congenital syphilis<br>LP: 0 cases","Congenital syphilis<br>MP: 8 cases","Congenital syphilis<br>NC: 9 cases","Congenital syphilis<br>NW: 5 cases","Congenital syphilis<br>WC: 59 cases"],"type":"bar","key":["10","65","120","175","230","285","340","395","450"],"set":"SharedData7eaa4ded","name":"Congenital syphilis","marker":{"color":"rgba(238,145,116,1)","line":{"color":"rgba(238,145,116,1)"}},"textfont":{"color":"rgba(238,145,116,1)"},"error_y":{"color":"rgba(238,145,116,1)"},"error_x":{"color":"rgba(238,145,116,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Covid-19<br>EC: 0 cases","Covid-19<br>FS: 0 cases","Covid-19<br>GP: 0 cases","Covid-19<br>KZN: 0 cases","Covid-19<br>LP: 0 cases","Covid-19<br>MP: 0 cases","Covid-19<br>NC: 0 cases","Covid-19<br>NW: 0 cases","Covid-19<br>WC: 0 cases"],"type":"bar","key":["11","66","121","176","231","286","341","396","451"],"set":"SharedData7eaa4ded","name":"Covid-19","marker":{"color":"rgba(227,147,130,1)","line":{"color":"rgba(227,147,130,1)"}},"textfont":{"color":"rgba(227,147,130,1)"},"error_y":{"color":"rgba(227,147,130,1)"},"error_x":{"color":"rgba(227,147,130,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Crimean-congo viral haemorrhagic fever (human)<br>EC: 0 cases","Crimean-congo viral haemorrhagic fever (human)<br>FS: 0 cases","Crimean-congo viral haemorrhagic fever (human)<br>GP: 0 cases","Crimean-congo viral haemorrhagic fever (human)<br>KZN: 0 cases","Crimean-congo viral haemorrhagic fever (human)<br>LP: 0 cases","Crimean-congo viral haemorrhagic fever (human)<br>MP: 0 cases","Crimean-congo viral haemorrhagic fever (human)<br>NC: 0 cases","Crimean-congo viral haemorrhagic fever (human)<br>NW: 0 cases","Crimean-congo viral haemorrhagic fever (human)<br>WC: 0 cases"],"type":"bar","key":["12","67","122","177","232","287","342","397","452"],"set":"SharedData7eaa4ded","name":"Crimean-congo viral haemorrhagic fever (human)","marker":{"color":"rgba(215,150,143,1)","line":{"color":"rgba(215,150,143,1)"}},"textfont":{"color":"rgba(215,150,143,1)"},"error_y":{"color":"rgba(215,150,143,1)"},"error_x":{"color":"rgba(215,150,143,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[1,0,2,2,0,1,0,0,8],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Diphtheria<br>EC: 1 cases","Diphtheria<br>FS: 0 cases","Diphtheria<br>GP: 2 cases","Diphtheria<br>KZN: 2 cases","Diphtheria<br>LP: 0 cases","Diphtheria<br>MP: 1 cases","Diphtheria<br>NC: 0 cases","Diphtheria<br>NW: 0 cases","Diphtheria<br>WC: 8 cases"],"type":"bar","key":["13","68","123","178","233","288","343","398","453"],"set":"SharedData7eaa4ded","name":"Diphtheria","marker":{"color":"rgba(201,152,157,1)","line":{"color":"rgba(201,152,157,1)"}},"textfont":{"color":"rgba(201,152,157,1)"},"error_y":{"color":"rgba(201,152,157,1)"},"error_x":{"color":"rgba(201,152,157,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Ebola virus (VHF)<br>EC: 0 cases","Ebola virus (VHF)<br>FS: 0 cases","Ebola virus (VHF)<br>GP: 0 cases","Ebola virus (VHF)<br>KZN: 0 cases","Ebola virus (VHF)<br>LP: 0 cases","Ebola virus (VHF)<br>MP: 0 cases","Ebola virus (VHF)<br>NC: 0 cases","Ebola virus (VHF)<br>NW: 0 cases","Ebola virus (VHF)<br>WC: 0 cases"],"type":"bar","key":["14","69","124","179","234","289","344","399","454"],"set":"SharedData7eaa4ded","name":"Ebola virus (VHF)","marker":{"color":"rgba(187,155,170,1)","line":{"color":"rgba(187,155,170,1)"}},"textfont":{"color":"rgba(187,155,170,1)"},"error_y":{"color":"rgba(187,155,170,1)"},"error_x":{"color":"rgba(187,155,170,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Endemic arboviral diseases chikungunya virus<br>EC: 0 cases","Endemic arboviral diseases chikungunya virus<br>FS: 0 cases","Endemic arboviral diseases chikungunya virus<br>GP: 0 cases","Endemic arboviral diseases chikungunya virus<br>KZN: 0 cases","Endemic arboviral diseases chikungunya virus<br>LP: 0 cases","Endemic arboviral diseases chikungunya virus<br>MP: 0 cases","Endemic arboviral diseases chikungunya virus<br>NC: 0 cases","Endemic arboviral diseases chikungunya virus<br>NW: 0 cases","Endemic arboviral diseases chikungunya virus<br>WC: 0 cases"],"type":"bar","key":["15","70","125","180","235","290","345","400","455"],"set":"SharedData7eaa4ded","name":"Endemic arboviral diseases chikungunya virus","marker":{"color":"rgba(170,157,184,1)","line":{"color":"rgba(170,157,184,1)"}},"textfont":{"color":"rgba(170,157,184,1)"},"error_y":{"color":"rgba(170,157,184,1)"},"error_x":{"color":"rgba(170,157,184,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Endemic arboviral diseases sindbis virus<br>EC: 0 cases","Endemic arboviral diseases sindbis virus<br>FS: 0 cases","Endemic arboviral diseases sindbis virus<br>GP: 0 cases","Endemic arboviral diseases sindbis virus<br>KZN: 0 cases","Endemic arboviral diseases sindbis virus<br>LP: 0 cases","Endemic arboviral diseases sindbis virus<br>MP: 0 cases","Endemic arboviral diseases sindbis virus<br>NC: 0 cases","Endemic arboviral diseases sindbis virus<br>NW: 0 cases","Endemic arboviral diseases sindbis virus<br>WC: 0 cases"],"type":"bar","key":["16","71","126","181","236","291","346","401","456"],"set":"SharedData7eaa4ded","name":"Endemic arboviral diseases sindbis virus","marker":{"color":"rgba(150,159,197,1)","line":{"color":"rgba(150,159,197,1)"}},"textfont":{"color":"rgba(150,159,197,1)"},"error_y":{"color":"rgba(150,159,197,1)"},"error_x":{"color":"rgba(150,159,197,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,1,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Endemic arboviral diseases west nile virus<br>EC: 0 cases","Endemic arboviral diseases west nile virus<br>FS: 0 cases","Endemic arboviral diseases west nile virus<br>GP: 1 cases","Endemic arboviral diseases west nile virus<br>KZN: 0 cases","Endemic arboviral diseases west nile virus<br>LP: 0 cases","Endemic arboviral diseases west nile virus<br>MP: 0 cases","Endemic arboviral diseases west nile virus<br>NC: 0 cases","Endemic arboviral diseases west nile virus<br>NW: 0 cases","Endemic arboviral diseases west nile virus<br>WC: 0 cases"],"type":"bar","key":["17","72","127","182","237","292","347","402","457"],"set":"SharedData7eaa4ded","name":"Endemic arboviral diseases west nile virus","marker":{"color":"rgba(149,159,202,1)","line":{"color":"rgba(149,159,202,1)"}},"textfont":{"color":"rgba(149,159,202,1)"},"error_y":{"color":"rgba(149,159,202,1)"},"error_x":{"color":"rgba(149,159,202,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,16,0,0,2,0,0,1],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Enteric fever (typhoid or paratyphoid fever)<br>EC: 0 cases","Enteric fever (typhoid or paratyphoid fever)<br>FS: 0 cases","Enteric fever (typhoid or paratyphoid fever)<br>GP: 16 cases","Enteric fever (typhoid or paratyphoid fever)<br>KZN: 0 cases","Enteric fever (typhoid or paratyphoid fever)<br>LP: 0 cases","Enteric fever (typhoid or paratyphoid fever)<br>MP: 2 cases","Enteric fever (typhoid or paratyphoid fever)<br>NC: 0 cases","Enteric fever (typhoid or paratyphoid fever)<br>NW: 0 cases","Enteric fever (typhoid or paratyphoid fever)<br>WC: 1 cases"],"type":"bar","key":["18","73","128","183","238","293","348","403","458"],"set":"SharedData7eaa4ded","name":"Enteric fever (typhoid or paratyphoid fever)","marker":{"color":"rgba(162,157,201,1)","line":{"color":"rgba(162,157,201,1)"}},"textfont":{"color":"rgba(162,157,201,1)"},"error_y":{"color":"rgba(162,157,201,1)"},"error_x":{"color":"rgba(162,157,201,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[7,3,24,12,11,6,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Food borne illness outbreak<br>EC: 7 cases","Food borne illness outbreak<br>FS: 3 cases","Food borne illness outbreak<br>GP: 24 cases","Food borne illness outbreak<br>KZN: 12 cases","Food borne illness outbreak<br>LP: 11 cases","Food borne illness outbreak<br>MP: 6 cases","Food borne illness outbreak<br>NC: 0 cases","Food borne illness outbreak<br>NW: 0 cases","Food borne illness outbreak<br>WC: 0 cases"],"type":"bar","key":["19","74","129","184","239","294","349","404","459"],"set":"SharedData7eaa4ded","name":"Food borne illness outbreak","marker":{"color":"rgba(175,154,200,1)","line":{"color":"rgba(175,154,200,1)"}},"textfont":{"color":"rgba(175,154,200,1)"},"error_y":{"color":"rgba(175,154,200,1)"},"error_x":{"color":"rgba(175,154,200,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Haemolytic uraemic syndrome (HUS)<br>EC: 0 cases","Haemolytic uraemic syndrome (HUS)<br>FS: 0 cases","Haemolytic uraemic syndrome (HUS)<br>GP: 0 cases","Haemolytic uraemic syndrome (HUS)<br>KZN: 0 cases","Haemolytic uraemic syndrome (HUS)<br>LP: 0 cases","Haemolytic uraemic syndrome (HUS)<br>MP: 0 cases","Haemolytic uraemic syndrome (HUS)<br>NC: 0 cases","Haemolytic uraemic syndrome (HUS)<br>NW: 0 cases","Haemolytic uraemic syndrome (HUS)<br>WC: 0 cases"],"type":"bar","key":["20","75","130","185","240","295","350","405","460"],"set":"SharedData7eaa4ded","name":"Haemolytic uraemic syndrome (HUS)","marker":{"color":"rgba(187,151,199,1)","line":{"color":"rgba(187,151,199,1)"}},"textfont":{"color":"rgba(187,151,199,1)"},"error_y":{"color":"rgba(187,151,199,1)"},"error_x":{"color":"rgba(187,151,199,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,2,0,0,0,0,0,1],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Haemophilus influenzae type B<br>EC: 0 cases","Haemophilus influenzae type B<br>FS: 0 cases","Haemophilus influenzae type B<br>GP: 2 cases","Haemophilus influenzae type B<br>KZN: 0 cases","Haemophilus influenzae type B<br>LP: 0 cases","Haemophilus influenzae type B<br>MP: 0 cases","Haemophilus influenzae type B<br>NC: 0 cases","Haemophilus influenzae type B<br>NW: 0 cases","Haemophilus influenzae type B<br>WC: 1 cases"],"type":"bar","key":["21","76","131","186","241","296","351","406","461"],"set":"SharedData7eaa4ded","name":"Haemophilus influenzae type B","marker":{"color":"rgba(198,149,198,1)","line":{"color":"rgba(198,149,198,1)"}},"textfont":{"color":"rgba(198,149,198,1)"},"error_y":{"color":"rgba(198,149,198,1)"},"error_x":{"color":"rgba(198,149,198,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[10,10,26,21,6,6,4,9,26],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Hepatitis A<br>EC: 10 cases","Hepatitis A<br>FS: 10 cases","Hepatitis A<br>GP: 26 cases","Hepatitis A<br>KZN: 21 cases","Hepatitis A<br>LP: 6 cases","Hepatitis A<br>MP: 6 cases","Hepatitis A<br>NC: 4 cases","Hepatitis A<br>NW: 9 cases","Hepatitis A<br>WC: 26 cases"],"type":"bar","key":["22","77","132","187","242","297","352","407","462"],"set":"SharedData7eaa4ded","name":"Hepatitis A","marker":{"color":"rgba(209,146,197,1)","line":{"color":"rgba(209,146,197,1)"}},"textfont":{"color":"rgba(209,146,197,1)"},"error_y":{"color":"rgba(209,146,197,1)"},"error_x":{"color":"rgba(209,146,197,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[90,20,44,371,6,10,10,18,11],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Hepatitis B<br>EC: 90 cases","Hepatitis B<br>FS: 20 cases","Hepatitis B<br>GP: 44 cases","Hepatitis B<br>KZN: 371 cases","Hepatitis B<br>LP: 6 cases","Hepatitis B<br>MP: 10 cases","Hepatitis B<br>NC: 10 cases","Hepatitis B<br>NW: 18 cases","Hepatitis B<br>WC: 11 cases"],"type":"bar","key":["23","78","133","188","243","298","353","408","463"],"set":"SharedData7eaa4ded","name":"Hepatitis B","marker":{"color":"rgba(219,142,196,1)","line":{"color":"rgba(219,142,196,1)"}},"textfont":{"color":"rgba(219,142,196,1)"},"error_y":{"color":"rgba(219,142,196,1)"},"error_x":{"color":"rgba(219,142,196,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,9,1,1,1,2,0,1],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Hepatitis C<br>EC: 0 cases","Hepatitis C<br>FS: 0 cases","Hepatitis C<br>GP: 9 cases","Hepatitis C<br>KZN: 1 cases","Hepatitis C<br>LP: 1 cases","Hepatitis C<br>MP: 1 cases","Hepatitis C<br>NC: 2 cases","Hepatitis C<br>NW: 0 cases","Hepatitis C<br>WC: 1 cases"],"type":"bar","key":["24","79","134","189","244","299","354","409","464"],"set":"SharedData7eaa4ded","name":"Hepatitis C","marker":{"color":"rgba(230,139,195,1)","line":{"color":"rgba(230,139,195,1)"}},"textfont":{"color":"rgba(230,139,195,1)"},"error_y":{"color":"rgba(230,139,195,1)"},"error_x":{"color":"rgba(230,139,195,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,2],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Hepatitis E<br>EC: 0 cases","Hepatitis E<br>FS: 0 cases","Hepatitis E<br>GP: 0 cases","Hepatitis E<br>KZN: 0 cases","Hepatitis E<br>LP: 0 cases","Hepatitis E<br>MP: 0 cases","Hepatitis E<br>NC: 0 cases","Hepatitis E<br>NW: 0 cases","Hepatitis E<br>WC: 2 cases"],"type":"bar","key":["25","80","135","190","245","300","355","410","465"],"set":"SharedData7eaa4ded","name":"Hepatitis E","marker":{"color":"rgba(226,148,184,1)","line":{"color":"rgba(226,148,184,1)"}},"textfont":{"color":"rgba(226,148,184,1)"},"error_y":{"color":"rgba(226,148,184,1)"},"error_x":{"color":"rgba(226,148,184,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,1,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Lead poisoning<br>EC: 0 cases","Lead poisoning<br>FS: 0 cases","Lead poisoning<br>GP: 0 cases","Lead poisoning<br>KZN: 1 cases","Lead poisoning<br>LP: 0 cases","Lead poisoning<br>MP: 0 cases","Lead poisoning<br>NC: 0 cases","Lead poisoning<br>NW: 0 cases","Lead poisoning<br>WC: 0 cases"],"type":"bar","key":["26","81","136","191","246","301","356","411","466"],"set":"SharedData7eaa4ded","name":"Lead poisoning","marker":{"color":"rgba(220,160,171,1)","line":{"color":"rgba(220,160,171,1)"}},"textfont":{"color":"rgba(220,160,171,1)"},"error_y":{"color":"rgba(220,160,171,1)"},"error_x":{"color":"rgba(220,160,171,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,2,1,0,0,0,0,2],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Legionellosis<br>EC: 0 cases","Legionellosis<br>FS: 0 cases","Legionellosis<br>GP: 2 cases","Legionellosis<br>KZN: 1 cases","Legionellosis<br>LP: 0 cases","Legionellosis<br>MP: 0 cases","Legionellosis<br>NC: 0 cases","Legionellosis<br>NW: 0 cases","Legionellosis<br>WC: 2 cases"],"type":"bar","key":["27","82","137","192","247","302","357","412","467"],"set":"SharedData7eaa4ded","name":"Legionellosis","marker":{"color":"rgba(213,170,158,1)","line":{"color":"rgba(213,170,158,1)"}},"textfont":{"color":"rgba(213,170,158,1)"},"error_y":{"color":"rgba(213,170,158,1)"},"error_x":{"color":"rgba(213,170,158,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,1,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Leprosy<br>EC: 0 cases","Leprosy<br>FS: 0 cases","Leprosy<br>GP: 0 cases","Leprosy<br>KZN: 0 cases","Leprosy<br>LP: 0 cases","Leprosy<br>MP: 1 cases","Leprosy<br>NC: 0 cases","Leprosy<br>NW: 0 cases","Leprosy<br>WC: 0 cases"],"type":"bar","key":["28","83","138","193","248","303","358","413","468"],"set":"SharedData7eaa4ded","name":"Leprosy","marker":{"color":"rgba(205,180,144,1)","line":{"color":"rgba(205,180,144,1)"}},"textfont":{"color":"rgba(205,180,144,1)"},"error_y":{"color":"rgba(205,180,144,1)"},"error_x":{"color":"rgba(205,180,144,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,2],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Listeriosis<br>EC: 0 cases","Listeriosis<br>FS: 0 cases","Listeriosis<br>GP: 0 cases","Listeriosis<br>KZN: 0 cases","Listeriosis<br>LP: 0 cases","Listeriosis<br>MP: 0 cases","Listeriosis<br>NC: 0 cases","Listeriosis<br>NW: 0 cases","Listeriosis<br>WC: 2 cases"],"type":"bar","key":["29","84","139","194","249","304","359","414","469"],"set":"SharedData7eaa4ded","name":"Listeriosis","marker":{"color":"rgba(197,190,130,1)","line":{"color":"rgba(197,190,130,1)"}},"textfont":{"color":"rgba(197,190,130,1)"},"error_y":{"color":"rgba(197,190,130,1)"},"error_x":{"color":"rgba(197,190,130,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[6,6,71,237,93,110,0,20,12],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Malaria<br>EC: 6 cases","Malaria<br>FS: 6 cases","Malaria<br>GP: 71 cases","Malaria<br>KZN: 237 cases","Malaria<br>LP: 93 cases","Malaria<br>MP: 110 cases","Malaria<br>NC: 0 cases","Malaria<br>NW: 20 cases","Malaria<br>WC: 12 cases"],"type":"bar","key":["30","85","140","195","250","305","360","415","470"],"set":"SharedData7eaa4ded","name":"Malaria","marker":{"color":"rgba(187,199,115,1)","line":{"color":"rgba(187,199,115,1)"}},"textfont":{"color":"rgba(187,199,115,1)"},"error_y":{"color":"rgba(187,199,115,1)"},"error_x":{"color":"rgba(187,199,115,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Marburg virus (VHF)<br>EC: 0 cases","Marburg virus (VHF)<br>FS: 0 cases","Marburg virus (VHF)<br>GP: 0 cases","Marburg virus (VHF)<br>KZN: 0 cases","Marburg virus (VHF)<br>LP: 0 cases","Marburg virus (VHF)<br>MP: 0 cases","Marburg virus (VHF)<br>NC: 0 cases","Marburg virus (VHF)<br>NW: 0 cases","Marburg virus (VHF)<br>WC: 0 cases"],"type":"bar","key":["31","86","141","196","251","306","361","416","471"],"set":"SharedData7eaa4ded","name":"Marburg virus (VHF)","marker":{"color":"rgba(176,208,99,1)","line":{"color":"rgba(176,208,99,1)"}},"textfont":{"color":"rgba(176,208,99,1)"},"error_y":{"color":"rgba(176,208,99,1)"},"error_x":{"color":"rgba(176,208,99,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,2,0,0,1,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Maternal death (pregnancy, childbirth and puerperium)<br>EC: 0 cases","Maternal death (pregnancy, childbirth and puerperium)<br>FS: 0 cases","Maternal death (pregnancy, childbirth and puerperium)<br>GP: 2 cases","Maternal death (pregnancy, childbirth and puerperium)<br>KZN: 0 cases","Maternal death (pregnancy, childbirth and puerperium)<br>LP: 0 cases","Maternal death (pregnancy, childbirth and puerperium)<br>MP: 1 cases","Maternal death (pregnancy, childbirth and puerperium)<br>NC: 0 cases","Maternal death (pregnancy, childbirth and puerperium)<br>NW: 0 cases","Maternal death (pregnancy, childbirth and puerperium)<br>WC: 0 cases"],"type":"bar","key":["32","87","142","197","252","307","362","417","472"],"set":"SharedData7eaa4ded","name":"Maternal death (pregnancy, childbirth and puerperium)","marker":{"color":"rgba(168,216,83,1)","line":{"color":"rgba(168,216,83,1)"}},"textfont":{"color":"rgba(168,216,83,1)"},"error_y":{"color":"rgba(168,216,83,1)"},"error_x":{"color":"rgba(168,216,83,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[17,9,23,57,20,39,23,8,226],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Measles<br>EC: 17 cases","Measles<br>FS: 9 cases","Measles<br>GP: 23 cases","Measles<br>KZN: 57 cases","Measles<br>LP: 20 cases","Measles<br>MP: 39 cases","Measles<br>NC: 23 cases","Measles<br>NW: 8 cases","Measles<br>WC: 226 cases"],"type":"bar","key":["33","88","143","198","253","308","363","418","473"],"set":"SharedData7eaa4ded","name":"Measles","marker":{"color":"rgba(181,216,79,1)","line":{"color":"rgba(181,216,79,1)"}},"textfont":{"color":"rgba(181,216,79,1)"},"error_y":{"color":"rgba(181,216,79,1)"},"error_x":{"color":"rgba(181,216,79,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,3,0,0,0,0,0,8],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Meningococcal disease<br>EC: 0 cases","Meningococcal disease<br>FS: 0 cases","Meningococcal disease<br>GP: 3 cases","Meningococcal disease<br>KZN: 0 cases","Meningococcal disease<br>LP: 0 cases","Meningococcal disease<br>MP: 0 cases","Meningococcal disease<br>NC: 0 cases","Meningococcal disease<br>NW: 0 cases","Meningococcal disease<br>WC: 8 cases"],"type":"bar","key":["34","89","144","199","254","309","364","419","474"],"set":"SharedData7eaa4ded","name":"Meningococcal disease","marker":{"color":"rgba(193,217,75,1)","line":{"color":"rgba(193,217,75,1)"}},"textfont":{"color":"rgba(193,217,75,1)"},"error_y":{"color":"rgba(193,217,75,1)"},"error_x":{"color":"rgba(193,217,75,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Mercury poisoning<br>EC: 0 cases","Mercury poisoning<br>FS: 0 cases","Mercury poisoning<br>GP: 0 cases","Mercury poisoning<br>KZN: 0 cases","Mercury poisoning<br>LP: 0 cases","Mercury poisoning<br>MP: 0 cases","Mercury poisoning<br>NC: 0 cases","Mercury poisoning<br>NW: 0 cases","Mercury poisoning<br>WC: 0 cases"],"type":"bar","key":["35","90","145","200","255","310","365","420","475"],"set":"SharedData7eaa4ded","name":"Mercury poisoning","marker":{"color":"rgba(205,217,71,1)","line":{"color":"rgba(205,217,71,1)"}},"textfont":{"color":"rgba(205,217,71,1)"},"error_y":{"color":"rgba(205,217,71,1)"},"error_x":{"color":"rgba(205,217,71,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,1,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Mpox<br>EC: 0 cases","Mpox<br>FS: 0 cases","Mpox<br>GP: 0 cases","Mpox<br>KZN: 1 cases","Mpox<br>LP: 0 cases","Mpox<br>MP: 0 cases","Mpox<br>NC: 0 cases","Mpox<br>NW: 0 cases","Mpox<br>WC: 0 cases"],"type":"bar","key":["36","91","146","201","256","311","366","421","476"],"set":"SharedData7eaa4ded","name":"Mpox","marker":{"color":"rgba(216,217,66,1)","line":{"color":"rgba(216,217,66,1)"}},"textfont":{"color":"rgba(216,217,66,1)"},"error_y":{"color":"rgba(216,217,66,1)"},"error_x":{"color":"rgba(216,217,66,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[2,3,3,0,0,0,0,0,19],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Non-typhoidal salmonellosis<br>EC: 2 cases","Non-typhoidal salmonellosis<br>FS: 3 cases","Non-typhoidal salmonellosis<br>GP: 3 cases","Non-typhoidal salmonellosis<br>KZN: 0 cases","Non-typhoidal salmonellosis<br>LP: 0 cases","Non-typhoidal salmonellosis<br>MP: 0 cases","Non-typhoidal salmonellosis<br>NC: 0 cases","Non-typhoidal salmonellosis<br>NW: 0 cases","Non-typhoidal salmonellosis<br>WC: 19 cases"],"type":"bar","key":["37","92","147","202","257","312","367","422","477"],"set":"SharedData7eaa4ded","name":"Non-typhoidal salmonellosis","marker":{"color":"rgba(227,217,62,1)","line":{"color":"rgba(227,217,62,1)"}},"textfont":{"color":"rgba(227,217,62,1)"},"error_y":{"color":"rgba(227,217,62,1)"},"error_x":{"color":"rgba(227,217,62,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[3,4,20,11,0,2,0,7,18],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Pertussis<br>EC: 3 cases","Pertussis<br>FS: 4 cases","Pertussis<br>GP: 20 cases","Pertussis<br>KZN: 11 cases","Pertussis<br>LP: 0 cases","Pertussis<br>MP: 2 cases","Pertussis<br>NC: 0 cases","Pertussis<br>NW: 7 cases","Pertussis<br>WC: 18 cases"],"type":"bar","key":["38","93","148","203","258","313","368","423","478"],"set":"SharedData7eaa4ded","name":"Pertussis","marker":{"color":"rgba(238,217,56,1)","line":{"color":"rgba(238,217,56,1)"}},"textfont":{"color":"rgba(238,217,56,1)"},"error_y":{"color":"rgba(238,217,56,1)"},"error_x":{"color":"rgba(238,217,56,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Plague<br>EC: 0 cases","Plague<br>FS: 0 cases","Plague<br>GP: 0 cases","Plague<br>KZN: 0 cases","Plague<br>LP: 0 cases","Plague<br>MP: 0 cases","Plague<br>NC: 0 cases","Plague<br>NW: 0 cases","Plague<br>WC: 0 cases"],"type":"bar","key":["39","94","149","204","259","314","369","424","479"],"set":"SharedData7eaa4ded","name":"Plague","marker":{"color":"rgba(249,217,51,1)","line":{"color":"rgba(249,217,51,1)"}},"textfont":{"color":"rgba(249,217,51,1)"},"error_y":{"color":"rgba(249,217,51,1)"},"error_x":{"color":"rgba(249,217,51,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Poliomyelitis<br>EC: 0 cases","Poliomyelitis<br>FS: 0 cases","Poliomyelitis<br>GP: 0 cases","Poliomyelitis<br>KZN: 0 cases","Poliomyelitis<br>LP: 0 cases","Poliomyelitis<br>MP: 0 cases","Poliomyelitis<br>NC: 0 cases","Poliomyelitis<br>NW: 0 cases","Poliomyelitis<br>WC: 0 cases"],"type":"bar","key":["40","95","150","205","260","315","370","425","480"],"set":"SharedData7eaa4ded","name":"Poliomyelitis","marker":{"color":"rgba(254,216,56,1)","line":{"color":"rgba(254,216,56,1)"}},"textfont":{"color":"rgba(254,216,56,1)"},"error_y":{"color":"rgba(254,216,56,1)"},"error_x":{"color":"rgba(254,216,56,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,1,0,0,0,1,1],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Rabies<br>EC: 0 cases","Rabies<br>FS: 0 cases","Rabies<br>GP: 0 cases","Rabies<br>KZN: 1 cases","Rabies<br>LP: 0 cases","Rabies<br>MP: 0 cases","Rabies<br>NC: 0 cases","Rabies<br>NW: 1 cases","Rabies<br>WC: 1 cases"],"type":"bar","key":["41","96","151","206","261","316","371","426","481"],"set":"SharedData7eaa4ded","name":"Rabies","marker":{"color":"rgba(251,213,73,1)","line":{"color":"rgba(251,213,73,1)"}},"textfont":{"color":"rgba(251,213,73,1)"},"error_y":{"color":"rgba(251,213,73,1)"},"error_x":{"color":"rgba(251,213,73,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,2,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Respiratory disease caused by a novel respiratory pathogen<br>EC: 0 cases","Respiratory disease caused by a novel respiratory pathogen<br>FS: 0 cases","Respiratory disease caused by a novel respiratory pathogen<br>GP: 2 cases","Respiratory disease caused by a novel respiratory pathogen<br>KZN: 0 cases","Respiratory disease caused by a novel respiratory pathogen<br>LP: 0 cases","Respiratory disease caused by a novel respiratory pathogen<br>MP: 0 cases","Respiratory disease caused by a novel respiratory pathogen<br>NC: 0 cases","Respiratory disease caused by a novel respiratory pathogen<br>NW: 0 cases","Respiratory disease caused by a novel respiratory pathogen<br>WC: 0 cases"],"type":"bar","key":["42","97","152","207","262","317","372","427","482"],"set":"SharedData7eaa4ded","name":"Respiratory disease caused by a novel respiratory pathogen","marker":{"color":"rgba(248,210,87,1)","line":{"color":"rgba(248,210,87,1)"}},"textfont":{"color":"rgba(248,210,87,1)"},"error_y":{"color":"rgba(248,210,87,1)"},"error_x":{"color":"rgba(248,210,87,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Rift valley fever (human)<br>EC: 0 cases","Rift valley fever (human)<br>FS: 0 cases","Rift valley fever (human)<br>GP: 0 cases","Rift valley fever (human)<br>KZN: 0 cases","Rift valley fever (human)<br>LP: 0 cases","Rift valley fever (human)<br>MP: 0 cases","Rift valley fever (human)<br>NC: 0 cases","Rift valley fever (human)<br>NW: 0 cases","Rift valley fever (human)<br>WC: 0 cases"],"type":"bar","key":["43","98","153","208","263","318","373","428","483"],"set":"SharedData7eaa4ded","name":"Rift valley fever (human)","marker":{"color":"rgba(245,207,100,1)","line":{"color":"rgba(245,207,100,1)"}},"textfont":{"color":"rgba(245,207,100,1)"},"error_y":{"color":"rgba(245,207,100,1)"},"error_x":{"color":"rgba(245,207,100,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,6,12,4,3,6,2,10,9],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Rubella<br>EC: 0 cases","Rubella<br>FS: 6 cases","Rubella<br>GP: 12 cases","Rubella<br>KZN: 4 cases","Rubella<br>LP: 3 cases","Rubella<br>MP: 6 cases","Rubella<br>NC: 2 cases","Rubella<br>NW: 10 cases","Rubella<br>WC: 9 cases"],"type":"bar","key":["44","99","154","209","264","319","374","429","484"],"set":"SharedData7eaa4ded","name":"Rubella","marker":{"color":"rgba(242,205,112,1)","line":{"color":"rgba(242,205,112,1)"}},"textfont":{"color":"rgba(242,205,112,1)"},"error_y":{"color":"rgba(242,205,112,1)"},"error_x":{"color":"rgba(242,205,112,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Shiga toxin-producing escherichia coli<br>EC: 0 cases","Shiga toxin-producing escherichia coli<br>FS: 0 cases","Shiga toxin-producing escherichia coli<br>GP: 0 cases","Shiga toxin-producing escherichia coli<br>KZN: 0 cases","Shiga toxin-producing escherichia coli<br>LP: 0 cases","Shiga toxin-producing escherichia coli<br>MP: 0 cases","Shiga toxin-producing escherichia coli<br>NC: 0 cases","Shiga toxin-producing escherichia coli<br>NW: 0 cases","Shiga toxin-producing escherichia coli<br>WC: 0 cases"],"type":"bar","key":["45","100","155","210","265","320","375","430","485"],"set":"SharedData7eaa4ded","name":"Shiga toxin-producing escherichia coli","marker":{"color":"rgba(238,202,123,1)","line":{"color":"rgba(238,202,123,1)"}},"textfont":{"color":"rgba(238,202,123,1)"},"error_y":{"color":"rgba(238,202,123,1)"},"error_x":{"color":"rgba(238,202,123,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[8,2,3,4,0,1,0,0,8],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Shigellosis<br>EC: 8 cases","Shigellosis<br>FS: 2 cases","Shigellosis<br>GP: 3 cases","Shigellosis<br>KZN: 4 cases","Shigellosis<br>LP: 0 cases","Shigellosis<br>MP: 1 cases","Shigellosis<br>NC: 0 cases","Shigellosis<br>NW: 0 cases","Shigellosis<br>WC: 8 cases"],"type":"bar","key":["46","101","156","211","266","321","376","431","486"],"set":"SharedData7eaa4ded","name":"Shigellosis","marker":{"color":"rgba(234,199,134,1)","line":{"color":"rgba(234,199,134,1)"}},"textfont":{"color":"rgba(234,199,134,1)"},"error_y":{"color":"rgba(234,199,134,1)"},"error_x":{"color":"rgba(234,199,134,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Smallpox<br>EC: 0 cases","Smallpox<br>FS: 0 cases","Smallpox<br>GP: 0 cases","Smallpox<br>KZN: 0 cases","Smallpox<br>LP: 0 cases","Smallpox<br>MP: 0 cases","Smallpox<br>NC: 0 cases","Smallpox<br>NW: 0 cases","Smallpox<br>WC: 0 cases"],"type":"bar","key":["47","102","157","212","267","322","377","432","487"],"set":"SharedData7eaa4ded","name":"Smallpox","marker":{"color":"rgba(230,197,145,1)","line":{"color":"rgba(230,197,145,1)"}},"textfont":{"color":"rgba(230,197,145,1)"},"error_y":{"color":"rgba(230,197,145,1)"},"error_x":{"color":"rgba(230,197,145,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,1,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Soil transmitted helminths<br>EC: 0 cases","Soil transmitted helminths<br>FS: 0 cases","Soil transmitted helminths<br>GP: 0 cases","Soil transmitted helminths<br>KZN: 1 cases","Soil transmitted helminths<br>LP: 0 cases","Soil transmitted helminths<br>MP: 0 cases","Soil transmitted helminths<br>NC: 0 cases","Soil transmitted helminths<br>NW: 0 cases","Soil transmitted helminths<br>WC: 0 cases"],"type":"bar","key":["48","103","158","213","268","323","378","433","488"],"set":"SharedData7eaa4ded","name":"Soil transmitted helminths","marker":{"color":"rgba(225,194,151,1)","line":{"color":"rgba(225,194,151,1)"}},"textfont":{"color":"rgba(225,194,151,1)"},"error_y":{"color":"rgba(225,194,151,1)"},"error_x":{"color":"rgba(225,194,151,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,1,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Tetanus<br>EC: 0 cases","Tetanus<br>FS: 0 cases","Tetanus<br>GP: 0 cases","Tetanus<br>KZN: 0 cases","Tetanus<br>LP: 0 cases","Tetanus<br>MP: 0 cases","Tetanus<br>NC: 1 cases","Tetanus<br>NW: 0 cases","Tetanus<br>WC: 0 cases"],"type":"bar","key":["49","104","159","214","269","324","379","434","489"],"set":"SharedData7eaa4ded","name":"Tetanus","marker":{"color":"rgba(219,192,155,1)","line":{"color":"rgba(219,192,155,1)"}},"textfont":{"color":"rgba(219,192,155,1)"},"error_y":{"color":"rgba(219,192,155,1)"},"error_x":{"color":"rgba(219,192,155,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,3,0,0,0,0,3],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Tuberculosis: extensively drug -resistant (XDR -TB)<br>EC: 0 cases","Tuberculosis: extensively drug -resistant (XDR -TB)<br>FS: 0 cases","Tuberculosis: extensively drug -resistant (XDR -TB)<br>GP: 0 cases","Tuberculosis: extensively drug -resistant (XDR -TB)<br>KZN: 3 cases","Tuberculosis: extensively drug -resistant (XDR -TB)<br>LP: 0 cases","Tuberculosis: extensively drug -resistant (XDR -TB)<br>MP: 0 cases","Tuberculosis: extensively drug -resistant (XDR -TB)<br>NC: 0 cases","Tuberculosis: extensively drug -resistant (XDR -TB)<br>NW: 0 cases","Tuberculosis: extensively drug -resistant (XDR -TB)<br>WC: 3 cases"],"type":"bar","key":["50","105","160","215","270","325","380","435","490"],"set":"SharedData7eaa4ded","name":"Tuberculosis: extensively drug -resistant (XDR -TB)","marker":{"color":"rgba(212,190,159,1)","line":{"color":"rgba(212,190,159,1)"}},"textfont":{"color":"rgba(212,190,159,1)"},"error_y":{"color":"rgba(212,190,159,1)"},"error_x":{"color":"rgba(212,190,159,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[2,3,21,24,3,0,2,2,37],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Tuberculosis: multidrug- resistant (MDR -TB)<br>EC: 2 cases","Tuberculosis: multidrug- resistant (MDR -TB)<br>FS: 3 cases","Tuberculosis: multidrug- resistant (MDR -TB)<br>GP: 21 cases","Tuberculosis: multidrug- resistant (MDR -TB)<br>KZN: 24 cases","Tuberculosis: multidrug- resistant (MDR -TB)<br>LP: 3 cases","Tuberculosis: multidrug- resistant (MDR -TB)<br>MP: 0 cases","Tuberculosis: multidrug- resistant (MDR -TB)<br>NC: 2 cases","Tuberculosis: multidrug- resistant (MDR -TB)<br>NW: 2 cases","Tuberculosis: multidrug- resistant (MDR -TB)<br>WC: 37 cases"],"type":"bar","key":["51","106","161","216","271","326","381","436","491"],"set":"SharedData7eaa4ded","name":"Tuberculosis: multidrug- resistant (MDR -TB)","marker":{"color":"rgba(206,188,163,1)","line":{"color":"rgba(206,188,163,1)"}},"textfont":{"color":"rgba(206,188,163,1)"},"error_y":{"color":"rgba(206,188,163,1)"},"error_x":{"color":"rgba(206,188,163,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[49,32,317,170,17,19,42,37,123],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Tuberculosis:extra-pulmonary<br>EC: 49 cases","Tuberculosis:extra-pulmonary<br>FS: 32 cases","Tuberculosis:extra-pulmonary<br>GP: 317 cases","Tuberculosis:extra-pulmonary<br>KZN: 170 cases","Tuberculosis:extra-pulmonary<br>LP: 17 cases","Tuberculosis:extra-pulmonary<br>MP: 19 cases","Tuberculosis:extra-pulmonary<br>NC: 42 cases","Tuberculosis:extra-pulmonary<br>NW: 37 cases","Tuberculosis:extra-pulmonary<br>WC: 123 cases"],"type":"bar","key":["52","107","162","217","272","327","382","437","492"],"set":"SharedData7eaa4ded","name":"Tuberculosis:extra-pulmonary","marker":{"color":"rgba(200,186,167,1)","line":{"color":"rgba(200,186,167,1)"}},"textfont":{"color":"rgba(200,186,167,1)"},"error_y":{"color":"rgba(200,186,167,1)"},"error_x":{"color":"rgba(200,186,167,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[449,217,855,830,156,146,278,224,925],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Tuberculosis:pulmonary<br>EC: 449 cases","Tuberculosis:pulmonary<br>FS: 217 cases","Tuberculosis:pulmonary<br>GP: 855 cases","Tuberculosis:pulmonary<br>KZN: 830 cases","Tuberculosis:pulmonary<br>LP: 156 cases","Tuberculosis:pulmonary<br>MP: 146 cases","Tuberculosis:pulmonary<br>NC: 278 cases","Tuberculosis:pulmonary<br>NW: 224 cases","Tuberculosis:pulmonary<br>WC: 925 cases"],"type":"bar","key":["53","108","163","218","273","328","383","438","493"],"set":"SharedData7eaa4ded","name":"Tuberculosis:pulmonary","marker":{"color":"rgba(193,183,171,1)","line":{"color":"rgba(193,183,171,1)"}},"textfont":{"color":"rgba(193,183,171,1)"},"error_y":{"color":"rgba(193,183,171,1)"},"error_x":{"color":"rgba(193,183,171,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Waterborne illness outbreak - undefined<br>EC: 0 cases","Waterborne illness outbreak - undefined<br>FS: 0 cases","Waterborne illness outbreak - undefined<br>GP: 0 cases","Waterborne illness outbreak - undefined<br>KZN: 0 cases","Waterborne illness outbreak - undefined<br>LP: 0 cases","Waterborne illness outbreak - undefined<br>MP: 0 cases","Waterborne illness outbreak - undefined<br>NC: 0 cases","Waterborne illness outbreak - undefined<br>NW: 0 cases","Waterborne illness outbreak - undefined<br>WC: 0 cases"],"type":"bar","key":["54","109","164","219","274","329","384","439","494"],"set":"SharedData7eaa4ded","name":"Waterborne illness outbreak - undefined","marker":{"color":"rgba(186,181,175,1)","line":{"color":"rgba(186,181,175,1)"}},"textfont":{"color":"rgba(186,181,175,1)"},"error_y":{"color":"rgba(186,181,175,1)"},"error_x":{"color":"rgba(186,181,175,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Yellow fever<br>EC: 0 cases","Yellow fever<br>FS: 0 cases","Yellow fever<br>GP: 0 cases","Yellow fever<br>KZN: 0 cases","Yellow fever<br>LP: 0 cases","Yellow fever<br>MP: 0 cases","Yellow fever<br>NC: 0 cases","Yellow fever<br>NW: 0 cases","Yellow fever<br>WC: 0 cases"],"type":"bar","key":["55","110","165","220","275","330","385","440","495"],"set":"SharedData7eaa4ded","name":"Yellow fever","marker":{"color":"rgba(179,179,179,1)","line":{"color":"rgba(179,179,179,1)"}},"textfont":{"color":"rgba(179,179,179,1)"},"error_y":{"color":"rgba(179,179,179,1)"},"error_x":{"color":"rgba(179,179,179,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0,"ctGroups":["SharedData7eaa4ded"]},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-prov-bar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Monthly case counts stacked by condition (current month)
+</figcaption>
+</figure>
+</div>
+</div>
+</section>
+<section id="incidence-dot-plot" class="level3">
+<h3 class="anchored" data-anchor-id="incidence-dot-plot">Incidence Dot-plot</h3>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in RColorBrewer::brewer.pal(max(N, 3L), "Set2"): n too large, allowed maximum for palette Set2 is 8
+Returning the palette you asked for with that many colors
+Warning in RColorBrewer::brewer.pal(max(N, 3L), "Set2"): n too large, allowed maximum for palette Set2 is 8
+Returning the palette you asked for with that many colors</code></pre>
+</div>
+<div id="fig-prov-incidence" class="cell-output-display quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-prov-incidence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-433c2fbf77dccd3deb7e" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-433c2fbf77dccd3deb7e">{"x":{"visdat":{"10ba77abbae43":["function () ","plotlyVisDat"]},"cur_data":"10ba77abbae43","attrs":{"10ba77abbae43":{"x":{},"y":{},"mode":"markers","marker":{"size":10,"opacity":0.80000000000000004},"hoverinfo":"text","text":{},"color":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"yaxis":{"domain":[0,1],"automargin":true,"title":"Incidence per 100 000"},"xaxis":{"domain":[0,1],"automargin":true,"title":"Province","type":"category","categoryorder":"array","categoryarray":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"]},"legend":{"orientation":"h","y":-0.20000000000000001},"dragmode":"zoom","hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0.059999999999999998,0,0.029999999999999999,0.059999999999999998,0.02,0,0.14999999999999999,0,0.01],"mode":"markers","marker":{"color":"rgba(102,194,165,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(102,194,165,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Acute flaccid paralysis<br>EC: 0.06 per 100k","Acute flaccid paralysis<br>FS: 0 per 100k","Acute flaccid paralysis<br>GP: 0.03 per 100k","Acute flaccid paralysis<br>KZN: 0.06 per 100k","Acute flaccid paralysis<br>LP: 0.02 per 100k","Acute flaccid paralysis<br>MP: 0 per 100k","Acute flaccid paralysis<br>NC: 0.15 per 100k","Acute flaccid paralysis<br>NW: 0 per 100k","Acute flaccid paralysis<br>WC: 0.01 per 100k"],"type":"scatter","key":["1","56","111","166","221","276","331","386","441"],"set":"SharedData7eaa4ded","name":"Acute flaccid paralysis","textfont":{"color":"rgba(102,194,165,1)"},"error_y":{"color":"rgba(102,194,165,1)"},"error_x":{"color":"rgba(102,194,165,1)"},"line":{"color":"rgba(102,194,165,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0.01,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(133,189,156,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(133,189,156,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Acute rheumatic fever<br>EC: 0 per 100k","Acute rheumatic fever<br>FS: 0 per 100k","Acute rheumatic fever<br>GP: 0.01 per 100k","Acute rheumatic fever<br>KZN: 0 per 100k","Acute rheumatic fever<br>LP: 0 per 100k","Acute rheumatic fever<br>MP: 0 per 100k","Acute rheumatic fever<br>NC: 0 per 100k","Acute rheumatic fever<br>NW: 0 per 100k","Acute rheumatic fever<br>WC: 0 per 100k"],"type":"scatter","key":["2","57","112","167","222","277","332","387","442"],"set":"SharedData7eaa4ded","name":"Acute rheumatic fever","textfont":{"color":"rgba(133,189,156,1)"},"error_y":{"color":"rgba(133,189,156,1)"},"error_x":{"color":"rgba(133,189,156,1)"},"line":{"color":"rgba(133,189,156,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0.040000000000000001,0.68999999999999995,0.26000000000000001,0.029999999999999999,0.02,0.040000000000000001,0.080000000000000002,0.02,0.059999999999999998],"mode":"markers","marker":{"color":"rgba(157,183,147,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(157,183,147,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Agricultural or stock remedy poisoning<br>EC: 0.04 per 100k","Agricultural or stock remedy poisoning<br>FS: 0.69 per 100k","Agricultural or stock remedy poisoning<br>GP: 0.26 per 100k","Agricultural or stock remedy poisoning<br>KZN: 0.03 per 100k","Agricultural or stock remedy poisoning<br>LP: 0.02 per 100k","Agricultural or stock remedy poisoning<br>MP: 0.04 per 100k","Agricultural or stock remedy poisoning<br>NC: 0.08 per 100k","Agricultural or stock remedy poisoning<br>NW: 0.02 per 100k","Agricultural or stock remedy poisoning<br>WC: 0.06 per 100k"],"type":"scatter","key":["3","58","113","168","223","278","333","388","443"],"set":"SharedData7eaa4ded","name":"Agricultural or stock remedy poisoning","textfont":{"color":"rgba(157,183,147,1)"},"error_y":{"color":"rgba(157,183,147,1)"},"error_x":{"color":"rgba(157,183,147,1)"},"line":{"color":"rgba(157,183,147,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(178,177,139,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(178,177,139,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Anthrax<br>EC: 0 per 100k","Anthrax<br>FS: 0 per 100k","Anthrax<br>GP: 0 per 100k","Anthrax<br>KZN: 0 per 100k","Anthrax<br>LP: 0 per 100k","Anthrax<br>MP: 0 per 100k","Anthrax<br>NC: 0 per 100k","Anthrax<br>NW: 0 per 100k","Anthrax<br>WC: 0 per 100k"],"type":"scatter","key":["4","59","114","169","224","279","334","389","444"],"set":"SharedData7eaa4ded","name":"Anthrax","textfont":{"color":"rgba(178,177,139,1)"},"error_y":{"color":"rgba(178,177,139,1)"},"error_x":{"color":"rgba(178,177,139,1)"},"line":{"color":"rgba(178,177,139,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0.34000000000000002,0.029999999999999999,0.059999999999999998,1.6200000000000001,1.8,0.81000000000000005,0,0.02,0.14999999999999999],"mode":"markers","marker":{"color":"rgba(196,171,130,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(196,171,130,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Bilharzia (schistosomiasis)<br>EC: 0.34 per 100k","Bilharzia (schistosomiasis)<br>FS: 0.03 per 100k","Bilharzia (schistosomiasis)<br>GP: 0.06 per 100k","Bilharzia (schistosomiasis)<br>KZN: 1.62 per 100k","Bilharzia (schistosomiasis)<br>LP: 1.8 per 100k","Bilharzia (schistosomiasis)<br>MP: 0.81 per 100k","Bilharzia (schistosomiasis)<br>NC: 0 per 100k","Bilharzia (schistosomiasis)<br>NW: 0.02 per 100k","Bilharzia (schistosomiasis)<br>WC: 0.15 per 100k"],"type":"scatter","key":["5","60","115","170","225","280","335","390","445"],"set":"SharedData7eaa4ded","name":"Bilharzia (schistosomiasis)","textfont":{"color":"rgba(196,171,130,1)"},"error_y":{"color":"rgba(196,171,130,1)"},"error_x":{"color":"rgba(196,171,130,1)"},"line":{"color":"rgba(196,171,130,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(213,164,121,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(213,164,121,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Botulism<br>EC: 0 per 100k","Botulism<br>FS: 0 per 100k","Botulism<br>GP: 0 per 100k","Botulism<br>KZN: 0 per 100k","Botulism<br>LP: 0 per 100k","Botulism<br>MP: 0 per 100k","Botulism<br>NC: 0 per 100k","Botulism<br>NW: 0 per 100k","Botulism<br>WC: 0 per 100k"],"type":"scatter","key":["6","61","116","171","226","281","336","391","446"],"set":"SharedData7eaa4ded","name":"Botulism","textfont":{"color":"rgba(213,164,121,1)"},"error_y":{"color":"rgba(213,164,121,1)"},"error_x":{"color":"rgba(213,164,121,1)"},"line":{"color":"rgba(213,164,121,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0.029999999999999999,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(228,156,113,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(228,156,113,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Brucellosis<br>EC: 0 per 100k","Brucellosis<br>FS: 0.03 per 100k","Brucellosis<br>GP: 0 per 100k","Brucellosis<br>KZN: 0 per 100k","Brucellosis<br>LP: 0 per 100k","Brucellosis<br>MP: 0 per 100k","Brucellosis<br>NC: 0 per 100k","Brucellosis<br>NW: 0 per 100k","Brucellosis<br>WC: 0 per 100k"],"type":"scatter","key":["7","62","117","172","227","282","337","392","447"],"set":"SharedData7eaa4ded","name":"Brucellosis","textfont":{"color":"rgba(228,156,113,1)"},"error_y":{"color":"rgba(228,156,113,1)"},"error_x":{"color":"rgba(228,156,113,1)"},"line":{"color":"rgba(228,156,113,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0.01],"mode":"markers","marker":{"color":"rgba(242,148,104,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(242,148,104,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Cholera<br>EC: 0 per 100k","Cholera<br>FS: 0 per 100k","Cholera<br>GP: 0 per 100k","Cholera<br>KZN: 0 per 100k","Cholera<br>LP: 0 per 100k","Cholera<br>MP: 0 per 100k","Cholera<br>NC: 0 per 100k","Cholera<br>NW: 0 per 100k","Cholera<br>WC: 0.01 per 100k"],"type":"scatter","key":["8","63","118","173","228","283","338","393","448"],"set":"SharedData7eaa4ded","name":"Cholera","textfont":{"color":"rgba(242,148,104,1)"},"error_y":{"color":"rgba(242,148,104,1)"},"error_x":{"color":"rgba(242,148,104,1)"},"line":{"color":"rgba(242,148,104,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0.01,0.02,0,0,0,0],"mode":"markers","marker":{"color":"rgba(249,142,102,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(249,142,102,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Congenital rubella syndrome<br>EC: 0 per 100k","Congenital rubella syndrome<br>FS: 0 per 100k","Congenital rubella syndrome<br>GP: 0 per 100k","Congenital rubella syndrome<br>KZN: 0.01 per 100k","Congenital rubella syndrome<br>LP: 0.02 per 100k","Congenital rubella syndrome<br>MP: 0 per 100k","Congenital rubella syndrome<br>NC: 0 per 100k","Congenital rubella syndrome<br>NW: 0 per 100k","Congenital rubella syndrome<br>WC: 0 per 100k"],"type":"scatter","key":["9","64","119","174","229","284","339","394","449"],"set":"SharedData7eaa4ded","name":"Congenital rubella syndrome","textfont":{"color":"rgba(249,142,102,1)"},"error_y":{"color":"rgba(249,142,102,1)"},"error_x":{"color":"rgba(249,142,102,1)"},"line":{"color":"rgba(249,142,102,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0.27000000000000002,0.68999999999999995,0.14000000000000001,0.55000000000000004,0,0.17000000000000001,0.68999999999999995,0.12,0.82999999999999996],"mode":"markers","marker":{"color":"rgba(238,145,116,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(238,145,116,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Congenital syphilis<br>EC: 0.27 per 100k","Congenital syphilis<br>FS: 0.69 per 100k","Congenital syphilis<br>GP: 0.14 per 100k","Congenital syphilis<br>KZN: 0.55 per 100k","Congenital syphilis<br>LP: 0 per 100k","Congenital syphilis<br>MP: 0.17 per 100k","Congenital syphilis<br>NC: 0.69 per 100k","Congenital syphilis<br>NW: 0.12 per 100k","Congenital syphilis<br>WC: 0.83 per 100k"],"type":"scatter","key":["10","65","120","175","230","285","340","395","450"],"set":"SharedData7eaa4ded","name":"Congenital syphilis","textfont":{"color":"rgba(238,145,116,1)"},"error_y":{"color":"rgba(238,145,116,1)"},"error_x":{"color":"rgba(238,145,116,1)"},"line":{"color":"rgba(238,145,116,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(227,147,130,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(227,147,130,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Covid-19<br>EC: 0 per 100k","Covid-19<br>FS: 0 per 100k","Covid-19<br>GP: 0 per 100k","Covid-19<br>KZN: 0 per 100k","Covid-19<br>LP: 0 per 100k","Covid-19<br>MP: 0 per 100k","Covid-19<br>NC: 0 per 100k","Covid-19<br>NW: 0 per 100k","Covid-19<br>WC: 0 per 100k"],"type":"scatter","key":["11","66","121","176","231","286","341","396","451"],"set":"SharedData7eaa4ded","name":"Covid-19","textfont":{"color":"rgba(227,147,130,1)"},"error_y":{"color":"rgba(227,147,130,1)"},"error_x":{"color":"rgba(227,147,130,1)"},"line":{"color":"rgba(227,147,130,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(215,150,143,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(215,150,143,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Crimean-congo viral haemorrhagic fever (human)<br>EC: 0 per 100k","Crimean-congo viral haemorrhagic fever (human)<br>FS: 0 per 100k","Crimean-congo viral haemorrhagic fever (human)<br>GP: 0 per 100k","Crimean-congo viral haemorrhagic fever (human)<br>KZN: 0 per 100k","Crimean-congo viral haemorrhagic fever (human)<br>LP: 0 per 100k","Crimean-congo viral haemorrhagic fever (human)<br>MP: 0 per 100k","Crimean-congo viral haemorrhagic fever (human)<br>NC: 0 per 100k","Crimean-congo viral haemorrhagic fever (human)<br>NW: 0 per 100k","Crimean-congo viral haemorrhagic fever (human)<br>WC: 0 per 100k"],"type":"scatter","key":["12","67","122","177","232","287","342","397","452"],"set":"SharedData7eaa4ded","name":"Crimean-congo viral haemorrhagic fever (human)","textfont":{"color":"rgba(215,150,143,1)"},"error_y":{"color":"rgba(215,150,143,1)"},"error_x":{"color":"rgba(215,150,143,1)"},"line":{"color":"rgba(215,150,143,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0.01,0,0.01,0.02,0,0.02,0,0,0.11],"mode":"markers","marker":{"color":"rgba(201,152,157,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(201,152,157,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Diphtheria<br>EC: 0.01 per 100k","Diphtheria<br>FS: 0 per 100k","Diphtheria<br>GP: 0.01 per 100k","Diphtheria<br>KZN: 0.02 per 100k","Diphtheria<br>LP: 0 per 100k","Diphtheria<br>MP: 0.02 per 100k","Diphtheria<br>NC: 0 per 100k","Diphtheria<br>NW: 0 per 100k","Diphtheria<br>WC: 0.11 per 100k"],"type":"scatter","key":["13","68","123","178","233","288","343","398","453"],"set":"SharedData7eaa4ded","name":"Diphtheria","textfont":{"color":"rgba(201,152,157,1)"},"error_y":{"color":"rgba(201,152,157,1)"},"error_x":{"color":"rgba(201,152,157,1)"},"line":{"color":"rgba(201,152,157,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(187,155,170,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(187,155,170,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Ebola virus (VHF)<br>EC: 0 per 100k","Ebola virus (VHF)<br>FS: 0 per 100k","Ebola virus (VHF)<br>GP: 0 per 100k","Ebola virus (VHF)<br>KZN: 0 per 100k","Ebola virus (VHF)<br>LP: 0 per 100k","Ebola virus (VHF)<br>MP: 0 per 100k","Ebola virus (VHF)<br>NC: 0 per 100k","Ebola virus (VHF)<br>NW: 0 per 100k","Ebola virus (VHF)<br>WC: 0 per 100k"],"type":"scatter","key":["14","69","124","179","234","289","344","399","454"],"set":"SharedData7eaa4ded","name":"Ebola virus (VHF)","textfont":{"color":"rgba(187,155,170,1)"},"error_y":{"color":"rgba(187,155,170,1)"},"error_x":{"color":"rgba(187,155,170,1)"},"line":{"color":"rgba(187,155,170,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(170,157,184,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(170,157,184,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Endemic arboviral diseases chikungunya virus<br>EC: 0 per 100k","Endemic arboviral diseases chikungunya virus<br>FS: 0 per 100k","Endemic arboviral diseases chikungunya virus<br>GP: 0 per 100k","Endemic arboviral diseases chikungunya virus<br>KZN: 0 per 100k","Endemic arboviral diseases chikungunya virus<br>LP: 0 per 100k","Endemic arboviral diseases chikungunya virus<br>MP: 0 per 100k","Endemic arboviral diseases chikungunya virus<br>NC: 0 per 100k","Endemic arboviral diseases chikungunya virus<br>NW: 0 per 100k","Endemic arboviral diseases chikungunya virus<br>WC: 0 per 100k"],"type":"scatter","key":["15","70","125","180","235","290","345","400","455"],"set":"SharedData7eaa4ded","name":"Endemic arboviral diseases chikungunya virus","textfont":{"color":"rgba(170,157,184,1)"},"error_y":{"color":"rgba(170,157,184,1)"},"error_x":{"color":"rgba(170,157,184,1)"},"line":{"color":"rgba(170,157,184,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(150,159,197,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(150,159,197,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Endemic arboviral diseases sindbis virus<br>EC: 0 per 100k","Endemic arboviral diseases sindbis virus<br>FS: 0 per 100k","Endemic arboviral diseases sindbis virus<br>GP: 0 per 100k","Endemic arboviral diseases sindbis virus<br>KZN: 0 per 100k","Endemic arboviral diseases sindbis virus<br>LP: 0 per 100k","Endemic arboviral diseases sindbis virus<br>MP: 0 per 100k","Endemic arboviral diseases sindbis virus<br>NC: 0 per 100k","Endemic arboviral diseases sindbis virus<br>NW: 0 per 100k","Endemic arboviral diseases sindbis virus<br>WC: 0 per 100k"],"type":"scatter","key":["16","71","126","181","236","291","346","401","456"],"set":"SharedData7eaa4ded","name":"Endemic arboviral diseases sindbis virus","textfont":{"color":"rgba(150,159,197,1)"},"error_y":{"color":"rgba(150,159,197,1)"},"error_x":{"color":"rgba(150,159,197,1)"},"line":{"color":"rgba(150,159,197,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0.01,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(149,159,202,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(149,159,202,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Endemic arboviral diseases west nile virus<br>EC: 0 per 100k","Endemic arboviral diseases west nile virus<br>FS: 0 per 100k","Endemic arboviral diseases west nile virus<br>GP: 0.01 per 100k","Endemic arboviral diseases west nile virus<br>KZN: 0 per 100k","Endemic arboviral diseases west nile virus<br>LP: 0 per 100k","Endemic arboviral diseases west nile virus<br>MP: 0 per 100k","Endemic arboviral diseases west nile virus<br>NC: 0 per 100k","Endemic arboviral diseases west nile virus<br>NW: 0 per 100k","Endemic arboviral diseases west nile virus<br>WC: 0 per 100k"],"type":"scatter","key":["17","72","127","182","237","292","347","402","457"],"set":"SharedData7eaa4ded","name":"Endemic arboviral diseases west nile virus","textfont":{"color":"rgba(149,159,202,1)"},"error_y":{"color":"rgba(149,159,202,1)"},"error_x":{"color":"rgba(149,159,202,1)"},"line":{"color":"rgba(149,159,202,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0.10000000000000001,0,0,0.040000000000000001,0,0,0.01],"mode":"markers","marker":{"color":"rgba(162,157,201,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(162,157,201,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Enteric fever (typhoid or paratyphoid fever)<br>EC: 0 per 100k","Enteric fever (typhoid or paratyphoid fever)<br>FS: 0 per 100k","Enteric fever (typhoid or paratyphoid fever)<br>GP: 0.1 per 100k","Enteric fever (typhoid or paratyphoid fever)<br>KZN: 0 per 100k","Enteric fever (typhoid or paratyphoid fever)<br>LP: 0 per 100k","Enteric fever (typhoid or paratyphoid fever)<br>MP: 0.04 per 100k","Enteric fever (typhoid or paratyphoid fever)<br>NC: 0 per 100k","Enteric fever (typhoid or paratyphoid fever)<br>NW: 0 per 100k","Enteric fever (typhoid or paratyphoid fever)<br>WC: 0.01 per 100k"],"type":"scatter","key":["18","73","128","183","238","293","348","403","458"],"set":"SharedData7eaa4ded","name":"Enteric fever (typhoid or paratyphoid fever)","textfont":{"color":"rgba(162,157,201,1)"},"error_y":{"color":"rgba(162,157,201,1)"},"error_x":{"color":"rgba(162,157,201,1)"},"line":{"color":"rgba(162,157,201,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0.10000000000000001,0.10000000000000001,0.14999999999999999,0.10000000000000001,0.19,0.13,0,0,0],"mode":"markers","marker":{"color":"rgba(175,154,200,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(175,154,200,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Food borne illness outbreak<br>EC: 0.1 per 100k","Food borne illness outbreak<br>FS: 0.1 per 100k","Food borne illness outbreak<br>GP: 0.15 per 100k","Food borne illness outbreak<br>KZN: 0.1 per 100k","Food borne illness outbreak<br>LP: 0.19 per 100k","Food borne illness outbreak<br>MP: 0.13 per 100k","Food borne illness outbreak<br>NC: 0 per 100k","Food borne illness outbreak<br>NW: 0 per 100k","Food borne illness outbreak<br>WC: 0 per 100k"],"type":"scatter","key":["19","74","129","184","239","294","349","404","459"],"set":"SharedData7eaa4ded","name":"Food borne illness outbreak","textfont":{"color":"rgba(175,154,200,1)"},"error_y":{"color":"rgba(175,154,200,1)"},"error_x":{"color":"rgba(175,154,200,1)"},"line":{"color":"rgba(175,154,200,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(187,151,199,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(187,151,199,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Haemolytic uraemic syndrome (HUS)<br>EC: 0 per 100k","Haemolytic uraemic syndrome (HUS)<br>FS: 0 per 100k","Haemolytic uraemic syndrome (HUS)<br>GP: 0 per 100k","Haemolytic uraemic syndrome (HUS)<br>KZN: 0 per 100k","Haemolytic uraemic syndrome (HUS)<br>LP: 0 per 100k","Haemolytic uraemic syndrome (HUS)<br>MP: 0 per 100k","Haemolytic uraemic syndrome (HUS)<br>NC: 0 per 100k","Haemolytic uraemic syndrome (HUS)<br>NW: 0 per 100k","Haemolytic uraemic syndrome (HUS)<br>WC: 0 per 100k"],"type":"scatter","key":["20","75","130","185","240","295","350","405","460"],"set":"SharedData7eaa4ded","name":"Haemolytic uraemic syndrome (HUS)","textfont":{"color":"rgba(187,151,199,1)"},"error_y":{"color":"rgba(187,151,199,1)"},"error_x":{"color":"rgba(187,151,199,1)"},"line":{"color":"rgba(187,151,199,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0.01,0,0,0,0,0,0.01],"mode":"markers","marker":{"color":"rgba(198,149,198,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(198,149,198,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Haemophilus influenzae type B<br>EC: 0 per 100k","Haemophilus influenzae type B<br>FS: 0 per 100k","Haemophilus influenzae type B<br>GP: 0.01 per 100k","Haemophilus influenzae type B<br>KZN: 0 per 100k","Haemophilus influenzae type B<br>LP: 0 per 100k","Haemophilus influenzae type B<br>MP: 0 per 100k","Haemophilus influenzae type B<br>NC: 0 per 100k","Haemophilus influenzae type B<br>NW: 0 per 100k","Haemophilus influenzae type B<br>WC: 0.01 per 100k"],"type":"scatter","key":["21","76","131","186","241","296","351","406","461"],"set":"SharedData7eaa4ded","name":"Haemophilus influenzae type B","textfont":{"color":"rgba(198,149,198,1)"},"error_y":{"color":"rgba(198,149,198,1)"},"error_x":{"color":"rgba(198,149,198,1)"},"line":{"color":"rgba(198,149,198,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0.14999999999999999,0.34000000000000002,0.17000000000000001,0.17999999999999999,0.10000000000000001,0.13,0.31,0.22,0.37],"mode":"markers","marker":{"color":"rgba(209,146,197,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(209,146,197,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Hepatitis A<br>EC: 0.15 per 100k","Hepatitis A<br>FS: 0.34 per 100k","Hepatitis A<br>GP: 0.17 per 100k","Hepatitis A<br>KZN: 0.18 per 100k","Hepatitis A<br>LP: 0.1 per 100k","Hepatitis A<br>MP: 0.13 per 100k","Hepatitis A<br>NC: 0.31 per 100k","Hepatitis A<br>NW: 0.22 per 100k","Hepatitis A<br>WC: 0.37 per 100k"],"type":"scatter","key":["22","77","132","187","242","297","352","407","462"],"set":"SharedData7eaa4ded","name":"Hepatitis A","textfont":{"color":"rgba(209,146,197,1)"},"error_y":{"color":"rgba(209,146,197,1)"},"error_x":{"color":"rgba(209,146,197,1)"},"line":{"color":"rgba(209,146,197,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[1.3400000000000001,0.68999999999999995,0.28000000000000003,3.23,0.10000000000000001,0.20999999999999999,0.77000000000000002,0.44,0.14999999999999999],"mode":"markers","marker":{"color":"rgba(219,142,196,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(219,142,196,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Hepatitis B<br>EC: 1.34 per 100k","Hepatitis B<br>FS: 0.69 per 100k","Hepatitis B<br>GP: 0.28 per 100k","Hepatitis B<br>KZN: 3.23 per 100k","Hepatitis B<br>LP: 0.1 per 100k","Hepatitis B<br>MP: 0.21 per 100k","Hepatitis B<br>NC: 0.77 per 100k","Hepatitis B<br>NW: 0.44 per 100k","Hepatitis B<br>WC: 0.15 per 100k"],"type":"scatter","key":["23","78","133","188","243","298","353","408","463"],"set":"SharedData7eaa4ded","name":"Hepatitis B","textfont":{"color":"rgba(219,142,196,1)"},"error_y":{"color":"rgba(219,142,196,1)"},"error_x":{"color":"rgba(219,142,196,1)"},"line":{"color":"rgba(219,142,196,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0.059999999999999998,0.01,0.02,0.02,0.14999999999999999,0,0.01],"mode":"markers","marker":{"color":"rgba(230,139,195,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(230,139,195,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Hepatitis C<br>EC: 0 per 100k","Hepatitis C<br>FS: 0 per 100k","Hepatitis C<br>GP: 0.06 per 100k","Hepatitis C<br>KZN: 0.01 per 100k","Hepatitis C<br>LP: 0.02 per 100k","Hepatitis C<br>MP: 0.02 per 100k","Hepatitis C<br>NC: 0.15 per 100k","Hepatitis C<br>NW: 0 per 100k","Hepatitis C<br>WC: 0.01 per 100k"],"type":"scatter","key":["24","79","134","189","244","299","354","409","464"],"set":"SharedData7eaa4ded","name":"Hepatitis C","textfont":{"color":"rgba(230,139,195,1)"},"error_y":{"color":"rgba(230,139,195,1)"},"error_x":{"color":"rgba(230,139,195,1)"},"line":{"color":"rgba(230,139,195,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0.029999999999999999],"mode":"markers","marker":{"color":"rgba(226,148,184,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(226,148,184,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Hepatitis E<br>EC: 0 per 100k","Hepatitis E<br>FS: 0 per 100k","Hepatitis E<br>GP: 0 per 100k","Hepatitis E<br>KZN: 0 per 100k","Hepatitis E<br>LP: 0 per 100k","Hepatitis E<br>MP: 0 per 100k","Hepatitis E<br>NC: 0 per 100k","Hepatitis E<br>NW: 0 per 100k","Hepatitis E<br>WC: 0.03 per 100k"],"type":"scatter","key":["25","80","135","190","245","300","355","410","465"],"set":"SharedData7eaa4ded","name":"Hepatitis E","textfont":{"color":"rgba(226,148,184,1)"},"error_y":{"color":"rgba(226,148,184,1)"},"error_x":{"color":"rgba(226,148,184,1)"},"line":{"color":"rgba(226,148,184,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0.01,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(220,160,171,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(220,160,171,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Lead poisoning<br>EC: 0 per 100k","Lead poisoning<br>FS: 0 per 100k","Lead poisoning<br>GP: 0 per 100k","Lead poisoning<br>KZN: 0.01 per 100k","Lead poisoning<br>LP: 0 per 100k","Lead poisoning<br>MP: 0 per 100k","Lead poisoning<br>NC: 0 per 100k","Lead poisoning<br>NW: 0 per 100k","Lead poisoning<br>WC: 0 per 100k"],"type":"scatter","key":["26","81","136","191","246","301","356","411","466"],"set":"SharedData7eaa4ded","name":"Lead poisoning","textfont":{"color":"rgba(220,160,171,1)"},"error_y":{"color":"rgba(220,160,171,1)"},"error_x":{"color":"rgba(220,160,171,1)"},"line":{"color":"rgba(220,160,171,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0.01,0.01,0,0,0,0,0.029999999999999999],"mode":"markers","marker":{"color":"rgba(213,170,158,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(213,170,158,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Legionellosis<br>EC: 0 per 100k","Legionellosis<br>FS: 0 per 100k","Legionellosis<br>GP: 0.01 per 100k","Legionellosis<br>KZN: 0.01 per 100k","Legionellosis<br>LP: 0 per 100k","Legionellosis<br>MP: 0 per 100k","Legionellosis<br>NC: 0 per 100k","Legionellosis<br>NW: 0 per 100k","Legionellosis<br>WC: 0.03 per 100k"],"type":"scatter","key":["27","82","137","192","247","302","357","412","467"],"set":"SharedData7eaa4ded","name":"Legionellosis","textfont":{"color":"rgba(213,170,158,1)"},"error_y":{"color":"rgba(213,170,158,1)"},"error_x":{"color":"rgba(213,170,158,1)"},"line":{"color":"rgba(213,170,158,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0.02,0,0,0],"mode":"markers","marker":{"color":"rgba(205,180,144,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(205,180,144,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Leprosy<br>EC: 0 per 100k","Leprosy<br>FS: 0 per 100k","Leprosy<br>GP: 0 per 100k","Leprosy<br>KZN: 0 per 100k","Leprosy<br>LP: 0 per 100k","Leprosy<br>MP: 0.02 per 100k","Leprosy<br>NC: 0 per 100k","Leprosy<br>NW: 0 per 100k","Leprosy<br>WC: 0 per 100k"],"type":"scatter","key":["28","83","138","193","248","303","358","413","468"],"set":"SharedData7eaa4ded","name":"Leprosy","textfont":{"color":"rgba(205,180,144,1)"},"error_y":{"color":"rgba(205,180,144,1)"},"error_x":{"color":"rgba(205,180,144,1)"},"line":{"color":"rgba(205,180,144,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0.029999999999999999],"mode":"markers","marker":{"color":"rgba(197,190,130,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(197,190,130,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Listeriosis<br>EC: 0 per 100k","Listeriosis<br>FS: 0 per 100k","Listeriosis<br>GP: 0 per 100k","Listeriosis<br>KZN: 0 per 100k","Listeriosis<br>LP: 0 per 100k","Listeriosis<br>MP: 0 per 100k","Listeriosis<br>NC: 0 per 100k","Listeriosis<br>NW: 0 per 100k","Listeriosis<br>WC: 0.03 per 100k"],"type":"scatter","key":["29","84","139","194","249","304","359","414","469"],"set":"SharedData7eaa4ded","name":"Listeriosis","textfont":{"color":"rgba(197,190,130,1)"},"error_y":{"color":"rgba(197,190,130,1)"},"error_x":{"color":"rgba(197,190,130,1)"},"line":{"color":"rgba(197,190,130,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0.089999999999999997,0.20999999999999999,0.46000000000000002,2.0600000000000001,1.5800000000000001,2.3399999999999999,0,0.48999999999999999,0.17000000000000001],"mode":"markers","marker":{"color":"rgba(187,199,115,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(187,199,115,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Malaria<br>EC: 0.09 per 100k","Malaria<br>FS: 0.21 per 100k","Malaria<br>GP: 0.46 per 100k","Malaria<br>KZN: 2.06 per 100k","Malaria<br>LP: 1.58 per 100k","Malaria<br>MP: 2.34 per 100k","Malaria<br>NC: 0 per 100k","Malaria<br>NW: 0.49 per 100k","Malaria<br>WC: 0.17 per 100k"],"type":"scatter","key":["30","85","140","195","250","305","360","415","470"],"set":"SharedData7eaa4ded","name":"Malaria","textfont":{"color":"rgba(187,199,115,1)"},"error_y":{"color":"rgba(187,199,115,1)"},"error_x":{"color":"rgba(187,199,115,1)"},"line":{"color":"rgba(187,199,115,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(176,208,99,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(176,208,99,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Marburg virus (VHF)<br>EC: 0 per 100k","Marburg virus (VHF)<br>FS: 0 per 100k","Marburg virus (VHF)<br>GP: 0 per 100k","Marburg virus (VHF)<br>KZN: 0 per 100k","Marburg virus (VHF)<br>LP: 0 per 100k","Marburg virus (VHF)<br>MP: 0 per 100k","Marburg virus (VHF)<br>NC: 0 per 100k","Marburg virus (VHF)<br>NW: 0 per 100k","Marburg virus (VHF)<br>WC: 0 per 100k"],"type":"scatter","key":["31","86","141","196","251","306","361","416","471"],"set":"SharedData7eaa4ded","name":"Marburg virus (VHF)","textfont":{"color":"rgba(176,208,99,1)"},"error_y":{"color":"rgba(176,208,99,1)"},"error_x":{"color":"rgba(176,208,99,1)"},"line":{"color":"rgba(176,208,99,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0.01,0,0,0.02,0,0,0],"mode":"markers","marker":{"color":"rgba(168,216,83,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(168,216,83,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Maternal death (pregnancy, childbirth and puerperium)<br>EC: 0 per 100k","Maternal death (pregnancy, childbirth and puerperium)<br>FS: 0 per 100k","Maternal death (pregnancy, childbirth and puerperium)<br>GP: 0.01 per 100k","Maternal death (pregnancy, childbirth and puerperium)<br>KZN: 0 per 100k","Maternal death (pregnancy, childbirth and puerperium)<br>LP: 0 per 100k","Maternal death (pregnancy, childbirth and puerperium)<br>MP: 0.02 per 100k","Maternal death (pregnancy, childbirth and puerperium)<br>NC: 0 per 100k","Maternal death (pregnancy, childbirth and puerperium)<br>NW: 0 per 100k","Maternal death (pregnancy, childbirth and puerperium)<br>WC: 0 per 100k"],"type":"scatter","key":["32","87","142","197","252","307","362","417","472"],"set":"SharedData7eaa4ded","name":"Maternal death (pregnancy, childbirth and puerperium)","textfont":{"color":"rgba(168,216,83,1)"},"error_y":{"color":"rgba(168,216,83,1)"},"error_x":{"color":"rgba(168,216,83,1)"},"line":{"color":"rgba(168,216,83,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0.25,0.31,0.14999999999999999,0.5,0.34000000000000002,0.82999999999999996,1.77,0.20000000000000001,3.1800000000000002],"mode":"markers","marker":{"color":"rgba(181,216,79,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(181,216,79,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Measles<br>EC: 0.25 per 100k","Measles<br>FS: 0.31 per 100k","Measles<br>GP: 0.15 per 100k","Measles<br>KZN: 0.5 per 100k","Measles<br>LP: 0.34 per 100k","Measles<br>MP: 0.83 per 100k","Measles<br>NC: 1.77 per 100k","Measles<br>NW: 0.2 per 100k","Measles<br>WC: 3.18 per 100k"],"type":"scatter","key":["33","88","143","198","253","308","363","418","473"],"set":"SharedData7eaa4ded","name":"Measles","textfont":{"color":"rgba(181,216,79,1)"},"error_y":{"color":"rgba(181,216,79,1)"},"error_x":{"color":"rgba(181,216,79,1)"},"line":{"color":"rgba(181,216,79,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0.02,0,0,0,0,0,0.11],"mode":"markers","marker":{"color":"rgba(193,217,75,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(193,217,75,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Meningococcal disease<br>EC: 0 per 100k","Meningococcal disease<br>FS: 0 per 100k","Meningococcal disease<br>GP: 0.02 per 100k","Meningococcal disease<br>KZN: 0 per 100k","Meningococcal disease<br>LP: 0 per 100k","Meningococcal disease<br>MP: 0 per 100k","Meningococcal disease<br>NC: 0 per 100k","Meningococcal disease<br>NW: 0 per 100k","Meningococcal disease<br>WC: 0.11 per 100k"],"type":"scatter","key":["34","89","144","199","254","309","364","419","474"],"set":"SharedData7eaa4ded","name":"Meningococcal disease","textfont":{"color":"rgba(193,217,75,1)"},"error_y":{"color":"rgba(193,217,75,1)"},"error_x":{"color":"rgba(193,217,75,1)"},"line":{"color":"rgba(193,217,75,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(205,217,71,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(205,217,71,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Mercury poisoning<br>EC: 0 per 100k","Mercury poisoning<br>FS: 0 per 100k","Mercury poisoning<br>GP: 0 per 100k","Mercury poisoning<br>KZN: 0 per 100k","Mercury poisoning<br>LP: 0 per 100k","Mercury poisoning<br>MP: 0 per 100k","Mercury poisoning<br>NC: 0 per 100k","Mercury poisoning<br>NW: 0 per 100k","Mercury poisoning<br>WC: 0 per 100k"],"type":"scatter","key":["35","90","145","200","255","310","365","420","475"],"set":"SharedData7eaa4ded","name":"Mercury poisoning","textfont":{"color":"rgba(205,217,71,1)"},"error_y":{"color":"rgba(205,217,71,1)"},"error_x":{"color":"rgba(205,217,71,1)"},"line":{"color":"rgba(205,217,71,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0.01,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(216,217,66,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(216,217,66,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Mpox<br>EC: 0 per 100k","Mpox<br>FS: 0 per 100k","Mpox<br>GP: 0 per 100k","Mpox<br>KZN: 0.01 per 100k","Mpox<br>LP: 0 per 100k","Mpox<br>MP: 0 per 100k","Mpox<br>NC: 0 per 100k","Mpox<br>NW: 0 per 100k","Mpox<br>WC: 0 per 100k"],"type":"scatter","key":["36","91","146","201","256","311","366","421","476"],"set":"SharedData7eaa4ded","name":"Mpox","textfont":{"color":"rgba(216,217,66,1)"},"error_y":{"color":"rgba(216,217,66,1)"},"error_x":{"color":"rgba(216,217,66,1)"},"line":{"color":"rgba(216,217,66,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0.029999999999999999,0.10000000000000001,0.02,0,0,0,0,0,0.27000000000000002],"mode":"markers","marker":{"color":"rgba(227,217,62,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(227,217,62,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Non-typhoidal salmonellosis<br>EC: 0.03 per 100k","Non-typhoidal salmonellosis<br>FS: 0.1 per 100k","Non-typhoidal salmonellosis<br>GP: 0.02 per 100k","Non-typhoidal salmonellosis<br>KZN: 0 per 100k","Non-typhoidal salmonellosis<br>LP: 0 per 100k","Non-typhoidal salmonellosis<br>MP: 0 per 100k","Non-typhoidal salmonellosis<br>NC: 0 per 100k","Non-typhoidal salmonellosis<br>NW: 0 per 100k","Non-typhoidal salmonellosis<br>WC: 0.27 per 100k"],"type":"scatter","key":["37","92","147","202","257","312","367","422","477"],"set":"SharedData7eaa4ded","name":"Non-typhoidal salmonellosis","textfont":{"color":"rgba(227,217,62,1)"},"error_y":{"color":"rgba(227,217,62,1)"},"error_x":{"color":"rgba(227,217,62,1)"},"line":{"color":"rgba(227,217,62,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0.040000000000000001,0.14000000000000001,0.13,0.10000000000000001,0,0.040000000000000001,0,0.17000000000000001,0.25],"mode":"markers","marker":{"color":"rgba(238,217,56,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(238,217,56,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Pertussis<br>EC: 0.04 per 100k","Pertussis<br>FS: 0.14 per 100k","Pertussis<br>GP: 0.13 per 100k","Pertussis<br>KZN: 0.1 per 100k","Pertussis<br>LP: 0 per 100k","Pertussis<br>MP: 0.04 per 100k","Pertussis<br>NC: 0 per 100k","Pertussis<br>NW: 0.17 per 100k","Pertussis<br>WC: 0.25 per 100k"],"type":"scatter","key":["38","93","148","203","258","313","368","423","478"],"set":"SharedData7eaa4ded","name":"Pertussis","textfont":{"color":"rgba(238,217,56,1)"},"error_y":{"color":"rgba(238,217,56,1)"},"error_x":{"color":"rgba(238,217,56,1)"},"line":{"color":"rgba(238,217,56,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(249,217,51,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(249,217,51,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Plague<br>EC: 0 per 100k","Plague<br>FS: 0 per 100k","Plague<br>GP: 0 per 100k","Plague<br>KZN: 0 per 100k","Plague<br>LP: 0 per 100k","Plague<br>MP: 0 per 100k","Plague<br>NC: 0 per 100k","Plague<br>NW: 0 per 100k","Plague<br>WC: 0 per 100k"],"type":"scatter","key":["39","94","149","204","259","314","369","424","479"],"set":"SharedData7eaa4ded","name":"Plague","textfont":{"color":"rgba(249,217,51,1)"},"error_y":{"color":"rgba(249,217,51,1)"},"error_x":{"color":"rgba(249,217,51,1)"},"line":{"color":"rgba(249,217,51,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(254,216,56,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(254,216,56,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Poliomyelitis<br>EC: 0 per 100k","Poliomyelitis<br>FS: 0 per 100k","Poliomyelitis<br>GP: 0 per 100k","Poliomyelitis<br>KZN: 0 per 100k","Poliomyelitis<br>LP: 0 per 100k","Poliomyelitis<br>MP: 0 per 100k","Poliomyelitis<br>NC: 0 per 100k","Poliomyelitis<br>NW: 0 per 100k","Poliomyelitis<br>WC: 0 per 100k"],"type":"scatter","key":["40","95","150","205","260","315","370","425","480"],"set":"SharedData7eaa4ded","name":"Poliomyelitis","textfont":{"color":"rgba(254,216,56,1)"},"error_y":{"color":"rgba(254,216,56,1)"},"error_x":{"color":"rgba(254,216,56,1)"},"line":{"color":"rgba(254,216,56,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0.01,0,0,0,0.02,0.01],"mode":"markers","marker":{"color":"rgba(251,213,73,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(251,213,73,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Rabies<br>EC: 0 per 100k","Rabies<br>FS: 0 per 100k","Rabies<br>GP: 0 per 100k","Rabies<br>KZN: 0.01 per 100k","Rabies<br>LP: 0 per 100k","Rabies<br>MP: 0 per 100k","Rabies<br>NC: 0 per 100k","Rabies<br>NW: 0.02 per 100k","Rabies<br>WC: 0.01 per 100k"],"type":"scatter","key":["41","96","151","206","261","316","371","426","481"],"set":"SharedData7eaa4ded","name":"Rabies","textfont":{"color":"rgba(251,213,73,1)"},"error_y":{"color":"rgba(251,213,73,1)"},"error_x":{"color":"rgba(251,213,73,1)"},"line":{"color":"rgba(251,213,73,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0.01,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(248,210,87,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(248,210,87,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Respiratory disease caused by a novel respiratory pathogen<br>EC: 0 per 100k","Respiratory disease caused by a novel respiratory pathogen<br>FS: 0 per 100k","Respiratory disease caused by a novel respiratory pathogen<br>GP: 0.01 per 100k","Respiratory disease caused by a novel respiratory pathogen<br>KZN: 0 per 100k","Respiratory disease caused by a novel respiratory pathogen<br>LP: 0 per 100k","Respiratory disease caused by a novel respiratory pathogen<br>MP: 0 per 100k","Respiratory disease caused by a novel respiratory pathogen<br>NC: 0 per 100k","Respiratory disease caused by a novel respiratory pathogen<br>NW: 0 per 100k","Respiratory disease caused by a novel respiratory pathogen<br>WC: 0 per 100k"],"type":"scatter","key":["42","97","152","207","262","317","372","427","482"],"set":"SharedData7eaa4ded","name":"Respiratory disease caused by a novel respiratory pathogen","textfont":{"color":"rgba(248,210,87,1)"},"error_y":{"color":"rgba(248,210,87,1)"},"error_x":{"color":"rgba(248,210,87,1)"},"line":{"color":"rgba(248,210,87,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(245,207,100,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(245,207,100,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Rift valley fever (human)<br>EC: 0 per 100k","Rift valley fever (human)<br>FS: 0 per 100k","Rift valley fever (human)<br>GP: 0 per 100k","Rift valley fever (human)<br>KZN: 0 per 100k","Rift valley fever (human)<br>LP: 0 per 100k","Rift valley fever (human)<br>MP: 0 per 100k","Rift valley fever (human)<br>NC: 0 per 100k","Rift valley fever (human)<br>NW: 0 per 100k","Rift valley fever (human)<br>WC: 0 per 100k"],"type":"scatter","key":["43","98","153","208","263","318","373","428","483"],"set":"SharedData7eaa4ded","name":"Rift valley fever (human)","textfont":{"color":"rgba(245,207,100,1)"},"error_y":{"color":"rgba(245,207,100,1)"},"error_x":{"color":"rgba(245,207,100,1)"},"line":{"color":"rgba(245,207,100,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0.20999999999999999,0.080000000000000002,0.029999999999999999,0.050000000000000003,0.13,0.14999999999999999,0.23999999999999999,0.13],"mode":"markers","marker":{"color":"rgba(242,205,112,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(242,205,112,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Rubella<br>EC: 0 per 100k","Rubella<br>FS: 0.21 per 100k","Rubella<br>GP: 0.08 per 100k","Rubella<br>KZN: 0.03 per 100k","Rubella<br>LP: 0.05 per 100k","Rubella<br>MP: 0.13 per 100k","Rubella<br>NC: 0.15 per 100k","Rubella<br>NW: 0.24 per 100k","Rubella<br>WC: 0.13 per 100k"],"type":"scatter","key":["44","99","154","209","264","319","374","429","484"],"set":"SharedData7eaa4ded","name":"Rubella","textfont":{"color":"rgba(242,205,112,1)"},"error_y":{"color":"rgba(242,205,112,1)"},"error_x":{"color":"rgba(242,205,112,1)"},"line":{"color":"rgba(242,205,112,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(238,202,123,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(238,202,123,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Shiga toxin-producing escherichia coli<br>EC: 0 per 100k","Shiga toxin-producing escherichia coli<br>FS: 0 per 100k","Shiga toxin-producing escherichia coli<br>GP: 0 per 100k","Shiga toxin-producing escherichia coli<br>KZN: 0 per 100k","Shiga toxin-producing escherichia coli<br>LP: 0 per 100k","Shiga toxin-producing escherichia coli<br>MP: 0 per 100k","Shiga toxin-producing escherichia coli<br>NC: 0 per 100k","Shiga toxin-producing escherichia coli<br>NW: 0 per 100k","Shiga toxin-producing escherichia coli<br>WC: 0 per 100k"],"type":"scatter","key":["45","100","155","210","265","320","375","430","485"],"set":"SharedData7eaa4ded","name":"Shiga toxin-producing escherichia coli","textfont":{"color":"rgba(238,202,123,1)"},"error_y":{"color":"rgba(238,202,123,1)"},"error_x":{"color":"rgba(238,202,123,1)"},"line":{"color":"rgba(238,202,123,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0.12,0.070000000000000007,0.02,0.029999999999999999,0,0.02,0,0,0.11],"mode":"markers","marker":{"color":"rgba(234,199,134,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(234,199,134,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Shigellosis<br>EC: 0.12 per 100k","Shigellosis<br>FS: 0.07 per 100k","Shigellosis<br>GP: 0.02 per 100k","Shigellosis<br>KZN: 0.03 per 100k","Shigellosis<br>LP: 0 per 100k","Shigellosis<br>MP: 0.02 per 100k","Shigellosis<br>NC: 0 per 100k","Shigellosis<br>NW: 0 per 100k","Shigellosis<br>WC: 0.11 per 100k"],"type":"scatter","key":["46","101","156","211","266","321","376","431","486"],"set":"SharedData7eaa4ded","name":"Shigellosis","textfont":{"color":"rgba(234,199,134,1)"},"error_y":{"color":"rgba(234,199,134,1)"},"error_x":{"color":"rgba(234,199,134,1)"},"line":{"color":"rgba(234,199,134,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(230,197,145,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(230,197,145,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Smallpox<br>EC: 0 per 100k","Smallpox<br>FS: 0 per 100k","Smallpox<br>GP: 0 per 100k","Smallpox<br>KZN: 0 per 100k","Smallpox<br>LP: 0 per 100k","Smallpox<br>MP: 0 per 100k","Smallpox<br>NC: 0 per 100k","Smallpox<br>NW: 0 per 100k","Smallpox<br>WC: 0 per 100k"],"type":"scatter","key":["47","102","157","212","267","322","377","432","487"],"set":"SharedData7eaa4ded","name":"Smallpox","textfont":{"color":"rgba(230,197,145,1)"},"error_y":{"color":"rgba(230,197,145,1)"},"error_x":{"color":"rgba(230,197,145,1)"},"line":{"color":"rgba(230,197,145,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0.01,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(225,194,151,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(225,194,151,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Soil transmitted helminths<br>EC: 0 per 100k","Soil transmitted helminths<br>FS: 0 per 100k","Soil transmitted helminths<br>GP: 0 per 100k","Soil transmitted helminths<br>KZN: 0.01 per 100k","Soil transmitted helminths<br>LP: 0 per 100k","Soil transmitted helminths<br>MP: 0 per 100k","Soil transmitted helminths<br>NC: 0 per 100k","Soil transmitted helminths<br>NW: 0 per 100k","Soil transmitted helminths<br>WC: 0 per 100k"],"type":"scatter","key":["48","103","158","213","268","323","378","433","488"],"set":"SharedData7eaa4ded","name":"Soil transmitted helminths","textfont":{"color":"rgba(225,194,151,1)"},"error_y":{"color":"rgba(225,194,151,1)"},"error_x":{"color":"rgba(225,194,151,1)"},"line":{"color":"rgba(225,194,151,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0.080000000000000002,0,0],"mode":"markers","marker":{"color":"rgba(219,192,155,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(219,192,155,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Tetanus<br>EC: 0 per 100k","Tetanus<br>FS: 0 per 100k","Tetanus<br>GP: 0 per 100k","Tetanus<br>KZN: 0 per 100k","Tetanus<br>LP: 0 per 100k","Tetanus<br>MP: 0 per 100k","Tetanus<br>NC: 0.08 per 100k","Tetanus<br>NW: 0 per 100k","Tetanus<br>WC: 0 per 100k"],"type":"scatter","key":["49","104","159","214","269","324","379","434","489"],"set":"SharedData7eaa4ded","name":"Tetanus","textfont":{"color":"rgba(219,192,155,1)"},"error_y":{"color":"rgba(219,192,155,1)"},"error_x":{"color":"rgba(219,192,155,1)"},"line":{"color":"rgba(219,192,155,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0.029999999999999999,0,0,0,0,0.040000000000000001],"mode":"markers","marker":{"color":"rgba(212,190,159,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(212,190,159,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Tuberculosis: extensively drug -resistant (XDR -TB)<br>EC: 0 per 100k","Tuberculosis: extensively drug -resistant (XDR -TB)<br>FS: 0 per 100k","Tuberculosis: extensively drug -resistant (XDR -TB)<br>GP: 0 per 100k","Tuberculosis: extensively drug -resistant (XDR -TB)<br>KZN: 0.03 per 100k","Tuberculosis: extensively drug -resistant (XDR -TB)<br>LP: 0 per 100k","Tuberculosis: extensively drug -resistant (XDR -TB)<br>MP: 0 per 100k","Tuberculosis: extensively drug -resistant (XDR -TB)<br>NC: 0 per 100k","Tuberculosis: extensively drug -resistant (XDR -TB)<br>NW: 0 per 100k","Tuberculosis: extensively drug -resistant (XDR -TB)<br>WC: 0.04 per 100k"],"type":"scatter","key":["50","105","160","215","270","325","380","435","490"],"set":"SharedData7eaa4ded","name":"Tuberculosis: extensively drug -resistant (XDR -TB)","textfont":{"color":"rgba(212,190,159,1)"},"error_y":{"color":"rgba(212,190,159,1)"},"error_x":{"color":"rgba(212,190,159,1)"},"line":{"color":"rgba(212,190,159,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0.029999999999999999,0.10000000000000001,0.14000000000000001,0.20999999999999999,0.050000000000000003,0,0.14999999999999999,0.050000000000000003,0.52000000000000002],"mode":"markers","marker":{"color":"rgba(206,188,163,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(206,188,163,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Tuberculosis: multidrug- resistant (MDR -TB)<br>EC: 0.03 per 100k","Tuberculosis: multidrug- resistant (MDR -TB)<br>FS: 0.1 per 100k","Tuberculosis: multidrug- resistant (MDR -TB)<br>GP: 0.14 per 100k","Tuberculosis: multidrug- resistant (MDR -TB)<br>KZN: 0.21 per 100k","Tuberculosis: multidrug- resistant (MDR -TB)<br>LP: 0.05 per 100k","Tuberculosis: multidrug- resistant (MDR -TB)<br>MP: 0 per 100k","Tuberculosis: multidrug- resistant (MDR -TB)<br>NC: 0.15 per 100k","Tuberculosis: multidrug- resistant (MDR -TB)<br>NW: 0.05 per 100k","Tuberculosis: multidrug- resistant (MDR -TB)<br>WC: 0.52 per 100k"],"type":"scatter","key":["51","106","161","216","271","326","381","436","491"],"set":"SharedData7eaa4ded","name":"Tuberculosis: multidrug- resistant (MDR -TB)","textfont":{"color":"rgba(206,188,163,1)"},"error_y":{"color":"rgba(206,188,163,1)"},"error_x":{"color":"rgba(206,188,163,1)"},"line":{"color":"rgba(206,188,163,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0.72999999999999998,1.1000000000000001,2.0499999999999998,1.48,0.28999999999999998,0.40000000000000002,3.23,0.90000000000000002,1.73],"mode":"markers","marker":{"color":"rgba(200,186,167,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(200,186,167,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Tuberculosis:extra-pulmonary<br>EC: 0.73 per 100k","Tuberculosis:extra-pulmonary<br>FS: 1.1 per 100k","Tuberculosis:extra-pulmonary<br>GP: 2.05 per 100k","Tuberculosis:extra-pulmonary<br>KZN: 1.48 per 100k","Tuberculosis:extra-pulmonary<br>LP: 0.29 per 100k","Tuberculosis:extra-pulmonary<br>MP: 0.4 per 100k","Tuberculosis:extra-pulmonary<br>NC: 3.23 per 100k","Tuberculosis:extra-pulmonary<br>NW: 0.9 per 100k","Tuberculosis:extra-pulmonary<br>WC: 1.73 per 100k"],"type":"scatter","key":["52","107","162","217","272","327","382","437","492"],"set":"SharedData7eaa4ded","name":"Tuberculosis:extra-pulmonary","textfont":{"color":"rgba(200,186,167,1)"},"error_y":{"color":"rgba(200,186,167,1)"},"error_x":{"color":"rgba(200,186,167,1)"},"line":{"color":"rgba(200,186,167,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[6.7000000000000002,7.4800000000000004,5.5199999999999996,7.2199999999999998,2.6400000000000001,3.1099999999999999,21.379999999999999,5.46,13.029999999999999],"mode":"markers","marker":{"color":"rgba(193,183,171,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(193,183,171,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Tuberculosis:pulmonary<br>EC: 6.7 per 100k","Tuberculosis:pulmonary<br>FS: 7.48 per 100k","Tuberculosis:pulmonary<br>GP: 5.52 per 100k","Tuberculosis:pulmonary<br>KZN: 7.22 per 100k","Tuberculosis:pulmonary<br>LP: 2.64 per 100k","Tuberculosis:pulmonary<br>MP: 3.11 per 100k","Tuberculosis:pulmonary<br>NC: 21.38 per 100k","Tuberculosis:pulmonary<br>NW: 5.46 per 100k","Tuberculosis:pulmonary<br>WC: 13.03 per 100k"],"type":"scatter","key":["53","108","163","218","273","328","383","438","493"],"set":"SharedData7eaa4ded","name":"Tuberculosis:pulmonary","textfont":{"color":"rgba(193,183,171,1)"},"error_y":{"color":"rgba(193,183,171,1)"},"error_x":{"color":"rgba(193,183,171,1)"},"line":{"color":"rgba(193,183,171,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(186,181,175,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(186,181,175,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Waterborne illness outbreak - undefined<br>EC: 0 per 100k","Waterborne illness outbreak - undefined<br>FS: 0 per 100k","Waterborne illness outbreak - undefined<br>GP: 0 per 100k","Waterborne illness outbreak - undefined<br>KZN: 0 per 100k","Waterborne illness outbreak - undefined<br>LP: 0 per 100k","Waterborne illness outbreak - undefined<br>MP: 0 per 100k","Waterborne illness outbreak - undefined<br>NC: 0 per 100k","Waterborne illness outbreak - undefined<br>NW: 0 per 100k","Waterborne illness outbreak - undefined<br>WC: 0 per 100k"],"type":"scatter","key":["54","109","164","219","274","329","384","439","494"],"set":"SharedData7eaa4ded","name":"Waterborne illness outbreak - undefined","textfont":{"color":"rgba(186,181,175,1)"},"error_y":{"color":"rgba(186,181,175,1)"},"error_x":{"color":"rgba(186,181,175,1)"},"line":{"color":"rgba(186,181,175,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null},{"x":["EC","FS","GP","KZN","LP","MP","NC","NW","WC"],"y":[0,0,0,0,0,0,0,0,0],"mode":"markers","marker":{"color":"rgba(179,179,179,1)","size":10,"opacity":0.80000000000000004,"line":{"color":"rgba(179,179,179,1)"}},"hoverinfo":["text","text","text","text","text","text","text","text","text"],"text":["Yellow fever<br>EC: 0 per 100k","Yellow fever<br>FS: 0 per 100k","Yellow fever<br>GP: 0 per 100k","Yellow fever<br>KZN: 0 per 100k","Yellow fever<br>LP: 0 per 100k","Yellow fever<br>MP: 0 per 100k","Yellow fever<br>NC: 0 per 100k","Yellow fever<br>NW: 0 per 100k","Yellow fever<br>WC: 0 per 100k"],"type":"scatter","key":["55","110","165","220","275","330","385","440","495"],"set":"SharedData7eaa4ded","name":"Yellow fever","textfont":{"color":"rgba(179,179,179,1)"},"error_y":{"color":"rgba(179,179,179,1)"},"error_x":{"color":"rgba(179,179,179,1)"},"line":{"color":"rgba(179,179,179,1)"},"xaxis":"x","yaxis":"y","_isNestedKey":false,"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0,"ctGroups":["SharedData7eaa4ded"]},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-prov-incidence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Incidence per 100 000 population by province (current month)
+</figcaption>
+</figure>
+</div>
+</div>
+</section>
+<section id="data-table" class="level3">
+<h3 class="anchored" data-anchor-id="data-table">Data Table</h3>
+<div class="cell">
+<div id="tbl-prov-data" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-prov-data-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1
+</figcaption>
+<div aria-describedby="tbl-prov-data-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-54dcadb3ddd7a67f0578" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-54dcadb3ddd7a67f0578">{"x":{"crosstalkOptions":{"key":["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82","83","84","85","86","87","88","89","90","91","92","93","94","95","96","97","98","99","100","101","102","103","104","105","106","107","108","109","110","111","112","113","114","115","116","117","118","119","120","121","122","123","124","125","126","127","128","129","130","131","132","133","134","135","136","137","138","139","140","141","142","143","144","145","146","147","148","149","150","151","152","153","154","155","156","157","158","159","160","161","162","163","164","165","166","167","168","169","170","171","172","173","174","175","176","177","178","179","180","181","182","183","184","185","186","187","188","189","190","191","192","193","194","195","196","197","198","199","200","201","202","203","204","205","206","207","208","209","210","211","212","213","214","215","216","217","218","219","220","221","222","223","224","225","226","227","228","229","230","231","232","233","234","235","236","237","238","239","240","241","242","243","244","245","246","247","248","249","250","251","252","253","254","255","256","257","258","259","260","261","262","263","264","265","266","267","268","269","270","271","272","273","274","275","276","277","278","279","280","281","282","283","284","285","286","287","288","289","290","291","292","293","294","295","296","297","298","299","300","301","302","303","304","305","306","307","308","309","310","311","312","313","314","315","316","317","318","319","320","321","322","323","324","325","326","327","328","329","330","331","332","333","334","335","336","337","338","339","340","341","342","343","344","345","346","347","348","349","350","351","352","353","354","355","356","357","358","359","360","361","362","363","364","365","366","367","368","369","370","371","372","373","374","375","376","377","378","379","380","381","382","383","384","385","386","387","388","389","390","391","392","393","394","395","396","397","398","399","400","401","402","403","404","405","406","407","408","409","410","411","412","413","414","415","416","417","418","419","420","421","422","423","424","425","426","427","428","429","430","431","432","433","434","435","436","437","438","439","440","441","442","443","444","445","446","447","448","449","450","451","452","453","454","455","456","457","458","459","460","461","462","463","464","465","466","467","468","469","470","471","472","473","474","475","476","477","478","479","480","481","482","483","484","485","486","487","488","489","490","491","492","493","494","495"],"group":"SharedData7eaa4ded"},"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0\" data-max=\"925\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0\" data-max=\"21.38\" data-scale=\"2\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","extensions":["Buttons"],"data":[["EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","EC","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","FS","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","GP","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","KZN","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","LP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","MP","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NC","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","NW","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC","WC"],["Acute flaccid paralysis","Acute rheumatic fever","Agricultural or stock remedy poisoning","Anthrax","Bilharzia (schistosomiasis)","Botulism","Brucellosis","Cholera","Congenital rubella syndrome","Congenital syphilis","Covid-19","Crimean-congo viral haemorrhagic fever (human)","Diphtheria","Ebola virus (VHF)","Endemic arboviral diseases chikungunya virus","Endemic arboviral diseases sindbis virus","Endemic arboviral diseases west nile virus","Enteric fever (typhoid or paratyphoid fever)","Food borne illness outbreak","Haemolytic uraemic syndrome (HUS)","Haemophilus influenzae type B","Hepatitis A","Hepatitis B","Hepatitis C","Hepatitis E","Lead poisoning","Legionellosis","Leprosy","Listeriosis","Malaria","Marburg virus (VHF)","Maternal death (pregnancy, childbirth and puerperium)","Measles","Meningococcal disease","Mercury poisoning","Mpox","Non-typhoidal salmonellosis","Pertussis","Plague","Poliomyelitis","Rabies","Respiratory disease caused by a novel respiratory pathogen","Rift valley fever (human)","Rubella","Shiga toxin-producing escherichia coli","Shigellosis","Smallpox","Soil transmitted helminths","Tetanus","Tuberculosis: extensively drug -resistant (XDR -TB)","Tuberculosis: multidrug- resistant (MDR -TB)","Tuberculosis:extra-pulmonary","Tuberculosis:pulmonary","Waterborne illness outbreak - undefined","Yellow fever","Acute flaccid paralysis","Acute rheumatic fever","Agricultural or stock remedy poisoning","Anthrax","Bilharzia (schistosomiasis)","Botulism","Brucellosis","Cholera","Congenital rubella syndrome","Congenital syphilis","Covid-19","Crimean-congo viral haemorrhagic fever (human)","Diphtheria","Ebola virus (VHF)","Endemic arboviral diseases chikungunya virus","Endemic arboviral diseases sindbis virus","Endemic arboviral diseases west nile virus","Enteric fever (typhoid or paratyphoid fever)","Food borne illness outbreak","Haemolytic uraemic syndrome (HUS)","Haemophilus influenzae type B","Hepatitis A","Hepatitis B","Hepatitis C","Hepatitis E","Lead poisoning","Legionellosis","Leprosy","Listeriosis","Malaria","Marburg virus (VHF)","Maternal death (pregnancy, childbirth and puerperium)","Measles","Meningococcal disease","Mercury poisoning","Mpox","Non-typhoidal salmonellosis","Pertussis","Plague","Poliomyelitis","Rabies","Respiratory disease caused by a novel respiratory pathogen","Rift valley fever (human)","Rubella","Shiga toxin-producing escherichia coli","Shigellosis","Smallpox","Soil transmitted helminths","Tetanus","Tuberculosis: extensively drug -resistant (XDR -TB)","Tuberculosis: multidrug- resistant (MDR -TB)","Tuberculosis:extra-pulmonary","Tuberculosis:pulmonary","Waterborne illness outbreak - undefined","Yellow fever","Acute flaccid paralysis","Acute rheumatic fever","Agricultural or stock remedy poisoning","Anthrax","Bilharzia (schistosomiasis)","Botulism","Brucellosis","Cholera","Congenital rubella syndrome","Congenital syphilis","Covid-19","Crimean-congo viral haemorrhagic fever (human)","Diphtheria","Ebola virus (VHF)","Endemic arboviral diseases chikungunya virus","Endemic arboviral diseases sindbis virus","Endemic arboviral diseases west nile virus","Enteric fever (typhoid or paratyphoid fever)","Food borne illness outbreak","Haemolytic uraemic syndrome (HUS)","Haemophilus influenzae type B","Hepatitis A","Hepatitis B","Hepatitis C","Hepatitis E","Lead poisoning","Legionellosis","Leprosy","Listeriosis","Malaria","Marburg virus (VHF)","Maternal death (pregnancy, childbirth and puerperium)","Measles","Meningococcal disease","Mercury poisoning","Mpox","Non-typhoidal salmonellosis","Pertussis","Plague","Poliomyelitis","Rabies","Respiratory disease caused by a novel respiratory pathogen","Rift valley fever (human)","Rubella","Shiga toxin-producing escherichia coli","Shigellosis","Smallpox","Soil transmitted helminths","Tetanus","Tuberculosis: extensively drug -resistant (XDR -TB)","Tuberculosis: multidrug- resistant (MDR -TB)","Tuberculosis:extra-pulmonary","Tuberculosis:pulmonary","Waterborne illness outbreak - undefined","Yellow fever","Acute flaccid paralysis","Acute rheumatic fever","Agricultural or stock remedy poisoning","Anthrax","Bilharzia (schistosomiasis)","Botulism","Brucellosis","Cholera","Congenital rubella syndrome","Congenital syphilis","Covid-19","Crimean-congo viral haemorrhagic fever (human)","Diphtheria","Ebola virus (VHF)","Endemic arboviral diseases chikungunya virus","Endemic arboviral diseases sindbis virus","Endemic arboviral diseases west nile virus","Enteric fever (typhoid or paratyphoid fever)","Food borne illness outbreak","Haemolytic uraemic syndrome (HUS)","Haemophilus influenzae type B","Hepatitis A","Hepatitis B","Hepatitis C","Hepatitis E","Lead poisoning","Legionellosis","Leprosy","Listeriosis","Malaria","Marburg virus (VHF)","Maternal death (pregnancy, childbirth and puerperium)","Measles","Meningococcal disease","Mercury poisoning","Mpox","Non-typhoidal salmonellosis","Pertussis","Plague","Poliomyelitis","Rabies","Respiratory disease caused by a novel respiratory pathogen","Rift valley fever (human)","Rubella","Shiga toxin-producing escherichia coli","Shigellosis","Smallpox","Soil transmitted helminths","Tetanus","Tuberculosis: extensively drug -resistant (XDR -TB)","Tuberculosis: multidrug- resistant (MDR -TB)","Tuberculosis:extra-pulmonary","Tuberculosis:pulmonary","Waterborne illness outbreak - undefined","Yellow fever","Acute flaccid paralysis","Acute rheumatic fever","Agricultural or stock remedy poisoning","Anthrax","Bilharzia (schistosomiasis)","Botulism","Brucellosis","Cholera","Congenital rubella syndrome","Congenital syphilis","Covid-19","Crimean-congo viral haemorrhagic fever (human)","Diphtheria","Ebola virus (VHF)","Endemic arboviral diseases chikungunya virus","Endemic arboviral diseases sindbis virus","Endemic arboviral diseases west nile virus","Enteric fever (typhoid or paratyphoid fever)","Food borne illness outbreak","Haemolytic uraemic syndrome (HUS)","Haemophilus influenzae type B","Hepatitis A","Hepatitis B","Hepatitis C","Hepatitis E","Lead poisoning","Legionellosis","Leprosy","Listeriosis","Malaria","Marburg virus (VHF)","Maternal death (pregnancy, childbirth and puerperium)","Measles","Meningococcal disease","Mercury poisoning","Mpox","Non-typhoidal salmonellosis","Pertussis","Plague","Poliomyelitis","Rabies","Respiratory disease caused by a novel respiratory pathogen","Rift valley fever (human)","Rubella","Shiga toxin-producing escherichia coli","Shigellosis","Smallpox","Soil transmitted helminths","Tetanus","Tuberculosis: extensively drug -resistant (XDR -TB)","Tuberculosis: multidrug- resistant (MDR -TB)","Tuberculosis:extra-pulmonary","Tuberculosis:pulmonary","Waterborne illness outbreak - undefined","Yellow fever","Acute flaccid paralysis","Acute rheumatic fever","Agricultural or stock remedy poisoning","Anthrax","Bilharzia (schistosomiasis)","Botulism","Brucellosis","Cholera","Congenital rubella syndrome","Congenital syphilis","Covid-19","Crimean-congo viral haemorrhagic fever (human)","Diphtheria","Ebola virus (VHF)","Endemic arboviral diseases chikungunya virus","Endemic arboviral diseases sindbis virus","Endemic arboviral diseases west nile virus","Enteric fever (typhoid or paratyphoid fever)","Food borne illness outbreak","Haemolytic uraemic syndrome (HUS)","Haemophilus influenzae type B","Hepatitis A","Hepatitis B","Hepatitis C","Hepatitis E","Lead poisoning","Legionellosis","Leprosy","Listeriosis","Malaria","Marburg virus (VHF)","Maternal death (pregnancy, childbirth and puerperium)","Measles","Meningococcal disease","Mercury poisoning","Mpox","Non-typhoidal salmonellosis","Pertussis","Plague","Poliomyelitis","Rabies","Respiratory disease caused by a novel respiratory pathogen","Rift valley fever (human)","Rubella","Shiga toxin-producing escherichia coli","Shigellosis","Smallpox","Soil transmitted helminths","Tetanus","Tuberculosis: extensively drug -resistant (XDR -TB)","Tuberculosis: multidrug- resistant (MDR -TB)","Tuberculosis:extra-pulmonary","Tuberculosis:pulmonary","Waterborne illness outbreak - undefined","Yellow fever","Acute flaccid paralysis","Acute rheumatic fever","Agricultural or stock remedy poisoning","Anthrax","Bilharzia (schistosomiasis)","Botulism","Brucellosis","Cholera","Congenital rubella syndrome","Congenital syphilis","Covid-19","Crimean-congo viral haemorrhagic fever (human)","Diphtheria","Ebola virus (VHF)","Endemic arboviral diseases chikungunya virus","Endemic arboviral diseases sindbis virus","Endemic arboviral diseases west nile virus","Enteric fever (typhoid or paratyphoid fever)","Food borne illness outbreak","Haemolytic uraemic syndrome (HUS)","Haemophilus influenzae type B","Hepatitis A","Hepatitis B","Hepatitis C","Hepatitis E","Lead poisoning","Legionellosis","Leprosy","Listeriosis","Malaria","Marburg virus (VHF)","Maternal death (pregnancy, childbirth and puerperium)","Measles","Meningococcal disease","Mercury poisoning","Mpox","Non-typhoidal salmonellosis","Pertussis","Plague","Poliomyelitis","Rabies","Respiratory disease caused by a novel respiratory pathogen","Rift valley fever (human)","Rubella","Shiga toxin-producing escherichia coli","Shigellosis","Smallpox","Soil transmitted helminths","Tetanus","Tuberculosis: extensively drug -resistant (XDR -TB)","Tuberculosis: multidrug- resistant (MDR -TB)","Tuberculosis:extra-pulmonary","Tuberculosis:pulmonary","Waterborne illness outbreak - undefined","Yellow fever","Acute flaccid paralysis","Acute rheumatic fever","Agricultural or stock remedy poisoning","Anthrax","Bilharzia (schistosomiasis)","Botulism","Brucellosis","Cholera","Congenital rubella syndrome","Congenital syphilis","Covid-19","Crimean-congo viral haemorrhagic fever (human)","Diphtheria","Ebola virus (VHF)","Endemic arboviral diseases chikungunya virus","Endemic arboviral diseases sindbis virus","Endemic arboviral diseases west nile virus","Enteric fever (typhoid or paratyphoid fever)","Food borne illness outbreak","Haemolytic uraemic syndrome (HUS)","Haemophilus influenzae type B","Hepatitis A","Hepatitis B","Hepatitis C","Hepatitis E","Lead poisoning","Legionellosis","Leprosy","Listeriosis","Malaria","Marburg virus (VHF)","Maternal death (pregnancy, childbirth and puerperium)","Measles","Meningococcal disease","Mercury poisoning","Mpox","Non-typhoidal salmonellosis","Pertussis","Plague","Poliomyelitis","Rabies","Respiratory disease caused by a novel respiratory pathogen","Rift valley fever (human)","Rubella","Shiga toxin-producing escherichia coli","Shigellosis","Smallpox","Soil transmitted helminths","Tetanus","Tuberculosis: extensively drug -resistant (XDR -TB)","Tuberculosis: multidrug- resistant (MDR -TB)","Tuberculosis:extra-pulmonary","Tuberculosis:pulmonary","Waterborne illness outbreak - undefined","Yellow fever","Acute flaccid paralysis","Acute rheumatic fever","Agricultural or stock remedy poisoning","Anthrax","Bilharzia (schistosomiasis)","Botulism","Brucellosis","Cholera","Congenital rubella syndrome","Congenital syphilis","Covid-19","Crimean-congo viral haemorrhagic fever (human)","Diphtheria","Ebola virus (VHF)","Endemic arboviral diseases chikungunya virus","Endemic arboviral diseases sindbis virus","Endemic arboviral diseases west nile virus","Enteric fever (typhoid or paratyphoid fever)","Food borne illness outbreak","Haemolytic uraemic syndrome (HUS)","Haemophilus influenzae type B","Hepatitis A","Hepatitis B","Hepatitis C","Hepatitis E","Lead poisoning","Legionellosis","Leprosy","Listeriosis","Malaria","Marburg virus (VHF)","Maternal death (pregnancy, childbirth and puerperium)","Measles","Meningococcal disease","Mercury poisoning","Mpox","Non-typhoidal salmonellosis","Pertussis","Plague","Poliomyelitis","Rabies","Respiratory disease caused by a novel respiratory pathogen","Rift valley fever (human)","Rubella","Shiga toxin-producing escherichia coli","Shigellosis","Smallpox","Soil transmitted helminths","Tetanus","Tuberculosis: extensively drug -resistant (XDR -TB)","Tuberculosis: multidrug- resistant (MDR -TB)","Tuberculosis:extra-pulmonary","Tuberculosis:pulmonary","Waterborne illness outbreak - undefined","Yellow fever"],[4,0,3,0,23,0,0,0,0,18,0,0,1,0,0,0,0,0,7,0,0,10,90,0,0,0,0,0,0,6,0,0,17,0,0,0,2,3,0,0,0,0,0,0,0,8,0,0,0,0,2,49,449,0,0,0,0,20,0,1,0,1,0,0,20,0,0,0,0,0,0,0,0,3,0,0,10,20,0,0,0,0,0,0,6,0,0,9,0,0,0,3,4,0,0,0,0,0,6,0,2,0,0,0,0,3,32,217,0,0,4,1,41,0,10,0,0,0,0,22,0,0,2,0,0,0,1,16,24,0,2,26,44,9,0,0,2,0,0,71,0,2,23,3,0,0,3,20,0,0,0,2,0,12,0,3,0,0,0,0,21,317,855,0,0,7,0,3,0,186,0,0,0,1,63,0,0,2,0,0,0,0,0,12,0,0,21,371,1,0,1,1,0,0,237,0,0,57,0,0,1,0,11,0,0,1,0,0,4,0,4,0,1,0,3,24,170,830,0,0,1,0,1,0,106,0,0,0,1,0,0,0,0,0,0,0,0,0,11,0,0,6,6,1,0,0,0,0,0,93,0,0,20,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,3,17,156,0,0,0,0,2,0,38,0,0,0,0,8,0,0,1,0,0,0,0,2,6,0,0,6,10,1,0,0,0,1,0,110,0,1,39,0,0,0,0,2,0,0,0,0,0,6,0,1,0,0,0,0,0,19,146,0,0,2,0,1,0,0,0,0,0,0,9,0,0,0,0,0,0,0,0,0,0,0,4,10,2,0,0,0,0,0,0,0,0,23,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,1,0,2,42,278,0,0,0,0,1,0,1,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,9,18,0,0,0,0,0,0,20,0,0,8,0,0,0,0,7,0,0,1,0,0,10,0,0,0,0,0,0,2,37,224,0,0,1,0,4,0,11,0,0,1,0,59,0,0,8,0,0,0,0,1,0,0,1,26,11,1,2,0,2,0,2,12,0,0,226,8,0,0,19,18,0,0,1,0,0,9,0,8,0,0,0,3,37,123,925,0,0],[0.06,0,0.04,0,0.34,0,0,0,0,0.27,0,0,0.01,0,0,0,0,0,0.1,0,0,0.15,1.34,0,0,0,0,0,0,0.09,0,0,0.25,0,0,0,0.03,0.04,0,0,0,0,0,0,0,0.12,0,0,0,0,0.03,0.73,6.7,0,0,0,0,0.6899999999999999,0,0.03,0,0.03,0,0,0.6899999999999999,0,0,0,0,0,0,0,0,0.1,0,0,0.34,0.6899999999999999,0,0,0,0,0,0,0.21,0,0,0.31,0,0,0,0.1,0.14,0,0,0,0,0,0.21,0,0.07000000000000001,0,0,0,0,0.1,1.1,7.48,0,0,0.03,0.01,0.26,0,0.06,0,0,0,0,0.14,0,0,0.01,0,0,0,0.01,0.1,0.15,0,0.01,0.17,0.28,0.06,0,0,0.01,0,0,0.46,0,0.01,0.15,0.02,0,0,0.02,0.13,0,0,0,0.01,0,0.08,0,0.02,0,0,0,0,0.14,2.05,5.52,0,0,0.06,0,0.03,0,1.62,0,0,0,0.01,0.55,0,0,0.02,0,0,0,0,0,0.1,0,0,0.18,3.23,0.01,0,0.01,0.01,0,0,2.06,0,0,0.5,0,0,0.01,0,0.1,0,0,0.01,0,0,0.03,0,0.03,0,0.01,0,0.03,0.21,1.48,7.22,0,0,0.02,0,0.02,0,1.8,0,0,0,0.02,0,0,0,0,0,0,0,0,0,0.19,0,0,0.1,0.1,0.02,0,0,0,0,0,1.58,0,0,0.34,0,0,0,0,0,0,0,0,0,0,0.05,0,0,0,0,0,0,0.05,0.29,2.64,0,0,0,0,0.04,0,0.8100000000000001,0,0,0,0,0.17,0,0,0.02,0,0,0,0,0.04,0.13,0,0,0.13,0.21,0.02,0,0,0,0.02,0,2.34,0,0.02,0.83,0,0,0,0,0.04,0,0,0,0,0,0.13,0,0.02,0,0,0,0,0,0.4,3.11,0,0,0.15,0,0.08,0,0,0,0,0,0,0.6899999999999999,0,0,0,0,0,0,0,0,0,0,0,0.31,0.77,0.15,0,0,0,0,0,0,0,0,1.77,0,0,0,0,0,0,0,0,0,0,0.15,0,0,0,0,0.08,0,0.15,3.23,21.38,0,0,0,0,0.02,0,0.02,0,0,0,0,0.12,0,0,0,0,0,0,0,0,0,0,0,0.22,0.44,0,0,0,0,0,0,0.49,0,0,0.2,0,0,0,0,0.17,0,0,0.02,0,0,0.24,0,0,0,0,0,0,0.05,0.9,5.46,0,0,0.01,0,0.06,0,0.15,0,0,0.01,0,0.83,0,0,0.11,0,0,0,0,0.01,0,0,0.01,0.37,0.15,0.01,0.03,0,0.03,0,0.03,0.17,0,0,3.18,0.11,0,0,0.27,0.25,0,0,0.01,0,0,0.13,0,0.11,0,0,0,0.04,0.52,1.73,13.03,0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Province<\/th>\n      <th>Condition<\/th>\n      <th>cases<\/th>\n      <th>incidence_100k<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"Bfrtip","buttons":["csv","excel","pdf"],"pageLength":20,"scrollX":true,"columnDefs":[{"className":"dt-right","targets":[2,3]},{"name":"Province","targets":0},{"name":"Condition","targets":1},{"name":"cases","targets":2},{"name":"incidence_100k","targets":3}],"order":[],"autoWidth":false,"orderClasses":false,"orderCellsTop":true,"lengthMenu":[10,20,25,50,100]},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="province-sub-pages" class="level2">
+<h2 class="anchored" data-anchor-id="province-sub-pages">Province Sub-pages</h2>
+<p>Individual province dashboards with district-level drilldowns:</p>
+<div class="quarto-layout-panel" data-layout-ncol="3">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<p><a href="ec/index.html" class="btn btn-outline-primary btn-sm">Eastern Cape</a> <a href="fs/index.html" class="btn btn-outline-primary btn-sm">Free State</a> <a href="gp/index.html" class="btn btn-outline-primary btn-sm">Gauteng</a> <a href="kzn/index.html" class="btn btn-outline-primary btn-sm">KwaZulu-Natal</a> <a href="lp/index.html" class="btn btn-outline-primary btn-sm">Limpopo</a> <a href="mp/index.html" class="btn btn-outline-primary btn-sm">Mpumalanga</a> <a href="nc/index.html" class="btn btn-outline-primary btn-sm">Northern Cape</a> <a href="nw/index.html" class="btn btn-outline-primary btn-sm">North West</a> <a href="wc/index.html" class="btn btn-outline-primary btn-sm">Western Cape</a></p>
+</div>
+</div>
+</div>
+<hr>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Related Sections
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><a href="../by-condition/index.html">By Condition</a> — condition-first view with national trends</li>
+<li><a href="../by-trending/index.html">Trending &amp; Signals</a> — signal detection for emerging conditions</li>
+<li><a href="../burden-of-disease/index.html">Burden of Disease</a> — YLL, DALYs &amp; age-standardised rates</li>
+<li><a href="../by-forecasts/index.html">Forecasts</a> — short-term predictive models</li>
+<li><a href="../explorer/index.html">Explorer</a> — custom data queries and downloads</li>
+<li><a href="../quality.html">Data Quality</a> — reporting completeness underpinning this data</li>
+</ul>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Data sources: NMC, Stats SA · Last update: 2025-10-16</p>
+</div>   
+    <div class="nav-footer-center">
+<p>SA NMC Epidemiological Intelligence Dashboard</p>
+</div>
+    <div class="nav-footer-right">
+<p><a href="methods.html">Methods</a> · <a href="glossary.html">Glossary</a> · <a href="about.html">About</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

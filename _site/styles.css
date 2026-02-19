@@ -1,0 +1,323 @@
+/* ─── SA NMC Dashboard – Custom Styles ─────────────────────────────────────── */
+
+/* ── Typography & Base ──────────────────────────────────────────────────────── */
+body {
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: #1e293b;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* ── Navbar Branding ────────────────────────────────────────────────────────── */
+.navbar {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.navbar .navbar-brand {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* ── Card / Panel Styling ───────────────────────────────────────────────────── */
+.card, .callout, .quarto-dashboard-card {
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover, .quarto-dashboard-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Section Cards on Home Page ─────────────────────────────────────────────── */
+.section-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.section-card:hover {
+  border-color: #2563eb;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.12);
+  transform: translateY(-2px);
+  text-decoration: none;
+  color: inherit;
+}
+
+.section-card h3 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.section-card p {
+  margin-bottom: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+/* Section card category badges */
+.badge-descriptive {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge-interactive {
+  background-color: #ccfbf1;
+  color: #0f766e;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge-analytical {
+  background-color: #fef3c7;
+  color: #b45309;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge-predictive {
+  background-color: #ede9fe;
+  color: #7c3aed;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge-quality {
+  background-color: #fce7f3;
+  color: #be185d;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Grid Layout for Section Cards ──────────────────────────────────────────── */
+.section-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+/* ── Status Indicator Dots ──────────────────────────────────────────────────── */
+.status-active {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  margin-right: 0.4rem;
+  animation: pulse-green 2s infinite;
+}
+
+.status-planned {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #94a3b8;
+  margin-right: 0.4rem;
+}
+
+.status-dev {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #f59e0b;
+  margin-right: 0.4rem;
+  animation: pulse-amber 2s infinite;
+}
+
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes pulse-amber {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ── Roadmap Table on Home Page ─────────────────────────────────────────────── */
+.flextable-shadow-host {
+  overflow-x: auto;
+  border-radius: 6px;
+}
+
+/* ── Callout Tweaks ─────────────────────────────────────────────────────────── */
+.callout {
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+}
+
+/* ── Sidebar Refinements ────────────────────────────────────────────────────── */
+.sidebar nav {
+  font-size: 0.9rem;
+}
+
+.sidebar .sidebar-item-text {
+  padding: 0.3rem 0;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────────── */
+.quarto-page-footer {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+/* ── Data Table Overrides ───────────────────────────────────────────────────── */
+table.dataTable {
+  font-size: 0.88rem;
+}
+
+table.dataTable thead th {
+  background-color: #f8fafc;
+  font-weight: 600;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+/* ── Plotly / Leaflet Container ─────────────────────────────────────────────── */
+.plotly, .leaflet-container {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  margin-bottom: 1rem;
+}
+
+/* ── Quick-nav Hero Section ─────────────────────────────────────────────────── */
+.hero-intro {
+  background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.hero-intro h2 {
+  margin-top: 0;
+  color: #1e40af;
+}
+
+.hero-intro p {
+  color: #475569;
+  max-width: 75ch;
+}
+
+/* ── Responsive: Collapse Grid on Small Screens ─────────────────────────────── */
+@media (max-width: 768px) {
+  .section-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-intro {
+    padding: 1.25rem;
+  }
+}
+
+/* ── Province Report KPI Cards ────────────────────────────────────────────────── */
+.kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  transition: box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.kpi-card .kpi-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e40af;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.kpi-card .kpi-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #334155;
+  margin-top: 0.25rem;
+}
+
+.kpi-card .kpi-sub {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-top: 0.15rem;
+}
+
+/* ── Province Navigation Grid ────────────────────────────────────────────────── */
+.prov-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.prov-nav-grid .btn {
+  display: block;
+  text-align: center;
+}
+
+/* ── Tabset Styling ─────────────────────────────────────────────────────────── */
+.nav-tabs .nav-link {
+  font-weight: 500;
+  color: #475569;
+  border-radius: 6px 6px 0 0;
+  padding: 0.6rem 1.2rem;
+  transition: all 0.15s ease;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #1e40af;
+  background-color: #f0f4ff;
+}
+
+.nav-tabs .nav-link.active {
+  color: #1e40af;
+  font-weight: 600;
+  border-bottom: 2px solid #2563eb;
+}
+
+.tab-content {
+  padding-top: 1rem;
+}
+
+/* ── Mermaid Diagram Sizing ─────────────────────────────────────────────────── */
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
