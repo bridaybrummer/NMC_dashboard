@@ -1,19 +1,159 @@
 ---
-title: "By province"
+title: "By Province"
+subtitle: "Provincial summary of notifiable conditions — counts, incidence & district drilldown"
 format:
   html:
-    toc: false
+    page-layout: full
+    toc: true
+    toc-depth: 2
 ---
 
+::: {.callout-note collapse="true"}
+## Development Roadmap — By Province
 
-## Provinces
+| Phase | Feature | Status |
+|-------|---------|--------|
+| **v0.1** | Monthly case counts by province × condition (interactive bar chart) | ✅ Done |
+| **v0.1** | Incidence per 100 000 dot-plot, filterable by condition | ✅ Done |
+| **v0.1** | Searchable & downloadable data table (CSV / Excel) | ✅ Done |
+| **v0.2** | Leaflet choropleth map — province-level counts | 🔲 Planned |
+| **v0.2** | District drilldown table per province | 🔲 Planned |
+| **v0.3** | Click-to-zoom district maps with Leaflet + lightbox | 🔲 Planned |
+| **v0.3** | Time-series sparklines per province | 🔲 Planned |
+| **v0.4** | Link to per-province sub-pages (EC, GP, …) | 🔲 Planned |
+| **v0.5** | EpiNow2 Rt estimates per province fed from `agg_province.rds` | 🔲 Planned |
 
-- [EC](ec/)
-- [FS](fs/)
-- [GP](gp/)
-- [KZN](kzn/)
-- [LP](lp/)
-- [MP](mp/)
-- [NC](nc/)
-- [NW](nw/)
-- [WC](wc/)
+*Data pipeline:* `R/prepare_dashboard_data.r` → `data/processed/agg_province.rds`
+:::
+
+```{r}
+#| label: setup
+#| include: false
+#| message: false
+#| warning: false
+
+suppressPackageStartupMessages({
+  library(data.table)
+  library(plotly)
+  library(crosstalk)
+  library(DT)
+  library(lubridate)
+  library(htmltools)
+})
+
+# ── Load processed data (execute-dir: project ⇒ paths from project root) ──
+agg_prov <- readRDS("data/processed/agg_province.rds")
+setDT(agg_prov)
+
+# Safety: drop any NA provinces produced by CJ expansion
+agg_prov <- agg_prov[!is.na(prov_) & prov_ != ""]
+
+latest_date <- max(agg_prov$date)
+month_start <- floor_date(latest_date, "month")
+
+# Monthly summary: province × condition
+prov_month <- agg_prov[date >= month_start, .(
+  cases          = sum(count),
+  incidence_100k = round(sum(count) / first(pop) * 1e5, 2)
+), by = .(Province = prov_, Condition = condition)]
+
+# Shared data for linked filtering
+sd <- SharedData$new(prov_month)
+```
+
+## Filters
+
+Use these controls to filter all plots and the table below.
+
+```{r}
+#| label: filters
+div(
+  style = "display:flex; gap:2rem; flex-wrap:wrap; margin-bottom:1.5rem;",
+  div(style = "min-width:220px;", filter_select("cond", "Condition", sd, ~Condition)),
+  div(style = "min-width:180px;", filter_slider("cases", "Cases ≥", sd, ~cases, min = 0))
+)
+```
+
+**Data through:** `r format(latest_date, "%d %B %Y")`
+
+---
+
+## Cases by Province {.tabset}
+
+### Stacked Bar Chart
+
+```{r}
+#| label: fig-prov-bar
+#| fig-cap: "Monthly case counts stacked by condition (current month)"
+plot_ly(sd, x = ~Province, y = ~cases, color = ~Condition,
+        type = "bar", hoverinfo = "text",
+        text = ~paste0(Condition, "<br>", Province, ": ", cases, " cases")) %>%
+  layout(barmode = "stack",
+         xaxis = list(title = "Province", categoryorder = "total descending"),
+         yaxis = list(title = "Cases"),
+         legend = list(orientation = "h", y = -0.2))
+```
+
+### Incidence Dot-plot
+
+```{r}
+#| label: fig-prov-incidence
+#| fig-cap: "Incidence per 100 000 population by province (current month)"
+plot_ly(sd, x = ~Province, y = ~incidence_100k, color = ~Condition,
+        type = "scatter", mode = "markers",
+        marker = list(size = 10, opacity = 0.8),
+        hoverinfo = "text",
+        text = ~paste0(Condition, "<br>", Province,
+                       ": ", incidence_100k, " per 100k")) %>%
+  layout(yaxis = list(title = "Incidence per 100 000"),
+         xaxis = list(title = "Province"),
+         legend = list(orientation = "h", y = -0.2))
+```
+
+### Data Table
+
+```{r}
+#| label: tbl-prov-data
+DT::datatable(
+  sd,
+  extensions = "Buttons",
+  filter   = "top",
+  rownames = FALSE,
+  options  = list(
+    dom        = "Bfrtip",
+    buttons    = c("csv", "excel", "pdf"),
+    pageLength = 20,
+    scrollX    = TRUE
+  )
+)
+```
+
+---
+
+## Province Sub-pages
+
+Individual province dashboards with district-level drilldowns:
+
+::: {layout-ncol=3}
+[Eastern Cape](ec/index.html){.btn .btn-outline-primary .btn-sm}
+[Free State](fs/index.html){.btn .btn-outline-primary .btn-sm}
+[Gauteng](gp/index.html){.btn .btn-outline-primary .btn-sm}
+[KwaZulu-Natal](kzn/index.html){.btn .btn-outline-primary .btn-sm}
+[Limpopo](lp/index.html){.btn .btn-outline-primary .btn-sm}
+[Mpumalanga](mp/index.html){.btn .btn-outline-primary .btn-sm}
+[Northern Cape](nc/index.html){.btn .btn-outline-primary .btn-sm}
+[North West](nw/index.html){.btn .btn-outline-primary .btn-sm}
+[Western Cape](wc/index.html){.btn .btn-outline-primary .btn-sm}
+:::
+
+---
+
+::: {.callout-tip}
+## Related Sections
+- [By Condition](../by-condition/index.html) — condition-first view with national trends
+- [Trending & Signals](../by-trending/index.html) — signal detection for emerging conditions
+- [Burden of Disease](../burden-of-disease/index.html) — YLL, DALYs & age-standardised rates
+- [Forecasts](../by-forecasts/index.html) — short-term predictive models
+- [Explorer](../explorer/index.html) — custom data queries and downloads
+- [Data Quality](../quality.html) — reporting completeness underpinning this data
+:::

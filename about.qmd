@@ -1,5 +1,76 @@
 ---
-title: "About"
+title: "About & Credits"
+subtitle: "Project background, partners & contribution guidelines"
+format:
+  html:
+    toc: true
+    toc-depth: 2
 ---
 
-About this site
+## Project Background
+
+The **SA NMC Epidemiological Intelligence Dashboard** aims to make Notifiable Medical Conditions (NMC) data accessible and actionable for public health officials across South Africa. It provides timely insights into disease trends, hotspots, and forecasts to support effective decision-making and resource allocation.
+
+All coding and analysis is open-source so that any epidemiologist can reproduce the work locally and contribute improvements.
+
+---
+
+## Partners & Acknowledgements
+
+| Organisation | Role |
+|---|---|
+| **South African Field Epidemiology Training Programme (SAFETP)** | Dashboard development and epidemiological analysis |
+| **South African Medical Research Council (SAMRC)** | Technical oversight and data access |
+| **National Department of Health (NDoH)** | NMC data governance and policy guidance |
+| **Africa CDC** | Regional surveillance coordination |
+| **Data for Health (D4H)** | Technical support and capacity building |
+
+---
+
+## Data Sources
+
+- **NMC Surveillance System** — case-based notifiable conditions data
+- **Statistics South Africa (Stats SA)** — mid-year population estimates, life tables, vital registration
+- **WHO** — standard population weights, disability weights (GBD 2019)
+
+All data is processed according to the methods described on the [Methods](methods.html) page.
+
+---
+
+## How to Contribute
+
+This project welcomes contributions from epidemiologists, data scientists, and public health practitioners:
+
+1. **Report issues** — flag data discrepancies, bugs, or feature requests
+2. **Improve analyses** — submit pull requests with enhanced visualisations or models
+3. **Add documentation** — help expand the [Methods](methods.html) and [Glossary](glossary.html) pages
+
+---
+
+## Software Stack
+
+| Component | Technology |
+|---|---|
+| Dashboard framework | [Quarto](https://quarto.org) |
+| Data processing | R (data.table, dplyr, tidyr) |
+| Visualisation | Plotly, Leaflet, ggplot2 |
+| Forecasting | EpiNow2 |
+| Signal detection | CUSUM, EARS |
+| Hosting | GitHub Pages / Posit Connect |
+
+---
+
+## Contact
+
+For questions or access requests, please contact the SAFETP project team.
+
+---
+
+::: {.callout-tip}
+## Quick Navigation
+- [Home](index.html) — main dashboard landing page
+- [Methods](methods.html) — technical documentation
+- [Glossary](glossary.html) — abbreviations and definitions
+- [Data Quality](quality.html) — completeness and timeliness metrics
+:::
+

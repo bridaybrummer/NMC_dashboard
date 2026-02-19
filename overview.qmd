@@ -1,5 +1,163 @@
 ---
 title: "National Overview"
+subtitle: "High-level surveillance snapshot across all notifiable conditions"
+format:
+  html:
+    page-layout: full
+    toc: true
 ---
 
-About this site
+::: {.callout-note collapse="true"}
+## Development Roadmap — National Overview
+
+| Phase | Feature | Status |
+|-------|---------|--------|
+| **v0.1** | Summary value boxes (total cases, conditions, provinces) | ✅ Done |
+| **v0.1** | Top-10 conditions bar chart (current month) | ✅ Done |
+| **v0.1** | National weekly epicurve (all conditions combined) | ✅ Done |
+| **v0.2** | Provincial choropleth map (total cases) | 🔲 Planned |
+| **v0.2** | Month-on-month change indicators (↑/↓) | 🔲 Planned |
+| **v0.3** | Age/sex pyramid (when demographic data available) | 🔲 Planned |
+| **v0.3** | Seasonal overlay / historical comparison bands | 🔲 Planned |
+| **v0.4** | EpiNow2 national Rt estimate cards | 🔲 Planned |
+
+*Data pipeline:* `R/prepare_dashboard_data.r` → `data/processed/agg_national.rds`, `agg_province.rds`
+:::
+
+```{r}
+#| label: setup
+#| include: false
+#| message: false
+#| warning: false
+
+suppressPackageStartupMessages({
+  library(data.table)
+  library(plotly)
+  library(DT)
+  library(lubridate)
+})
+
+agg_nat  <- readRDS("data/processed/agg_national.rds")
+agg_prov <- readRDS("data/processed/agg_province.rds")
+setDT(agg_nat); setDT(agg_prov)
+
+agg_prov <- agg_prov[!is.na(prov_) & prov_ != ""]
+
+latest_date <- max(agg_nat$date)
+month_start <- floor_date(latest_date, "month")
+prev_month  <- month_start - months(1)
+```
+
+## Key Figures — `r format(month_start, "%B %Y")`
+
+```{r}
+#| label: kpi-cards
+#| results: asis
+this_month <- agg_nat[date >= month_start, .(cases = sum(count))]$cases
+last_month <- agg_nat[date >= prev_month & date < month_start, .(cases = sum(count))]$cases
+n_cond     <- agg_nat[date >= month_start & count > 0, uniqueN(condition)]
+n_prov     <- agg_prov[date >= month_start & count > 0, uniqueN(prov_)]
+
+pct_change <- ifelse(last_month > 0,
+                     round((this_month - last_month) / last_month * 100, 1),
+                     NA_real_)
+arrow <- ifelse(!is.na(pct_change) & pct_change >= 0, "↑", "↓")
+
+cat(sprintf(
+'
+::: {layout-ncol=4}
+
+::: {.card .bg-primary .text-white .p-3 .text-center}
+**Total Cases**
+
+### %s
+:::
+
+::: {.card .bg-info .text-white .p-3 .text-center}
+**Month Δ**
+
+### %s %s%%
+:::
+
+::: {.card .bg-success .text-white .p-3 .text-center}
+**Conditions Reported**
+
+### %s
+:::
+
+::: {.card .bg-warning .text-dark .p-3 .text-center}
+**Provinces Reporting**
+
+### %s / 9
+:::
+
+:::
+',
+  format(this_month, big.mark = ","),
+  arrow, abs(pct_change),
+  n_cond, n_prov
+))
+```
+
+---
+
+## Top Conditions — Current Month {.tabset}
+
+### Bar Chart
+
+```{r}
+#| label: fig-top-conditions
+#| fig-cap: "Top 10 conditions by case count this month"
+top10 <- agg_nat[date >= month_start, .(cases = sum(count)), by = condition]
+setorder(top10, -cases)
+top10 <- head(top10, 10)
+
+plot_ly(top10, x = ~reorder(condition, cases), y = ~cases,
+        type = "bar", orientation = "h",
+        marker = list(color = "#1d4ed8"),
+        hoverinfo = "text",
+        text = ~paste0(condition, ": ", format(cases, big.mark = ","))) %>%
+  layout(xaxis = list(title = "Cases"),
+         yaxis = list(title = ""),
+         margin = list(l = 250))
+```
+
+### Table
+
+```{r}
+#| label: tbl-top-conditions
+all_conds <- agg_nat[date >= month_start, .(Cases = sum(count)), by = .(Condition = condition)]
+setorder(all_conds, -Cases)
+DT::datatable(all_conds, rownames = FALSE,
+              options = list(pageLength = 15, dom = "ftp"))
+```
+
+---
+
+## National Epicurve — Weekly
+
+```{r}
+#| label: fig-national-epicurve
+#| fig-cap: "All notifiable conditions combined, weekly"
+agg_nat[, week := floor_date(date, "week")]
+weekly_all <- agg_nat[, .(cases = sum(count)), by = week]
+
+plot_ly(weekly_all, x = ~week, y = ~cases, type = "bar",
+        marker = list(color = "#0b3a75"),
+        hoverinfo = "text",
+        text = ~paste0("Week of ", format(week, "%d %b %Y"),
+                       "<br>Cases: ", format(cases, big.mark = ","))) %>%
+  layout(xaxis = list(title = "Week starting"),
+         yaxis = list(title = "Weekly cases"))
+```
+
+---
+
+::: {.callout-tip}
+## Drill Down Further
+- [By Province](by-province/index.html) — detailed provincial breakdowns with district drilldown
+- [By Condition](by-condition/index.html) — condition-level national trends and hotspots
+- [Trending](by-trending/index.html) — signal detection for emerging conditions
+- [Explorer](explorer/index.html) — custom queries and data downloads
+- [Data Quality](quality.html) — reporting completeness and timeliness metrics
+:::

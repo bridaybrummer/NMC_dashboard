@@ -1,9 +1,147 @@
 ---
-title: "Trending Overview"
-format: html
+title: "Trending Conditions"
+subtitle: "Signal detection, emerging hotspots & alert log"
+format:
+  html:
+    toc: true
 ---
 
+::: {.callout-note collapse="true"}
+## Development Roadmap — Trending / Signal Detection
 
-This page will show trending conditions based on the CUSUM detection that are currently emerging or have had a signal in the last 14 days. 
+| Phase | Feature | Status |
+|-------|---------|--------|
+| **v0.1** | Recent surge table — conditions with biggest % increase (last 14 days vs prior 14) | ✅ Done |
+| **v0.1** | Interactive trend sparklines for flagged conditions | ✅ Done |
+| **v0.2** | CUSUM / EARS algorithm signal detection integration | 🔲 Planned |
+| **v0.2** | Province → district hotspot drill-down for flagged conditions | 🔲 Planned |
+| **v0.3** | Analyst notes & alert log (manual triage layer) | 🔲 Planned |
+| **v0.3** | Automated alert email / webhook on threshold breach | 🔲 Planned |
+| **v0.4** | Link to Forecasts page — auto-trigger EpiNow2 for flagged conditions | 🔲 Planned |
 
-These will then bed fed into a forecasting model to estimate potential caseloads in the next 30 days based on the conditions characteristics. 
+*Data pipeline:* `R/prepare_dashboard_data.r` → `data/processed/agg_national.rds`
+Forecasting extension: `by-forecasts/index.qmd` (uses `EpiNow2`)
+:::
+
+```{r}
+#| label: setup
+#| include: false
+#| message: false
+#| warning: false
+
+suppressPackageStartupMessages({
+  library(data.table)
+  library(plotly)
+  library(DT)
+  library(lubridate)
+})
+
+agg_nat <- readRDS("data/processed/agg_national.rds")
+setDT(agg_nat)
+agg_nat[, date := as.Date(date)]
+
+latest_date <- max(agg_nat$date)
+```
+
+**Data through:** `r format(latest_date, "%d %B %Y")`
+
+---
+
+## Emerging Signals — Last 14 Days
+
+Conditions with the largest percentage increase comparing the most recent 14-day window to the preceding 14 days.
+
+```{r}
+#| label: surge-calc
+recent_start <- latest_date - 13
+prior_start  <- latest_date - 27
+prior_end    <- latest_date - 14
+
+recent <- agg_nat[date >= recent_start, .(recent_cases = sum(count)), by = condition]
+prior  <- agg_nat[date >= prior_start & date <= prior_end, .(prior_cases = sum(count)), by = condition]
+
+surge <- merge(recent, prior, by = "condition", all = TRUE)
+surge[is.na(recent_cases), recent_cases := 0L]
+surge[is.na(prior_cases), prior_cases := 0L]
+surge[, pct_change := fifelse(
+  prior_cases > 0,
+  round((recent_cases - prior_cases) / prior_cases * 100, 1),
+  fifelse(recent_cases > 0, Inf, 0)
+)]
+surge[, abs_change := recent_cases - prior_cases]
+setorder(surge, -pct_change)
+
+# Flag conditions with material increase
+flagged <- surge[recent_cases >= 5 & pct_change > 0]
+```
+
+### Surge Table
+
+```{r}
+#| label: tbl-surge
+display <- flagged[, .(
+  Condition      = condition,
+  `Last 14 days` = recent_cases,
+  `Prior 14 days`= prior_cases,
+  `Abs Δ`        = abs_change,
+  `% Δ`          = fifelse(is.infinite(pct_change), "New", paste0(pct_change, "%"))
+)]
+
+DT::datatable(display, rownames = FALSE,
+              options = list(pageLength = 15, dom = "ftp", order = list(list(3, "desc"))))
+```
+
+---
+
+## Trend Sparklines — Flagged Conditions
+
+Weekly trends for the top flagged conditions over the last 26 weeks.
+
+```{r}
+#| label: fig-sparklines
+#| fig-height: 8
+top_flagged <- head(flagged$condition, 8)
+spark_data  <- agg_nat[condition %chin% top_flagged]
+spark_data[, week := floor_date(date, "week")]
+spark_weekly <- spark_data[week >= (latest_date - 26*7),
+                           .(cases = sum(count)), by = .(condition, week)]
+
+plot_ly() %>%
+  {
+    p <- .
+    for (cond in top_flagged) {
+      d <- spark_weekly[condition == cond]
+      p <- add_trace(p, data = d, x = ~week, y = ~cases,
+                     type = "scatter", mode = "lines+markers",
+                     name = cond, marker = list(size = 4))
+    }
+    p
+  } %>%
+  layout(xaxis = list(title = "Week"),
+         yaxis = list(title = "Weekly Cases"),
+         legend = list(orientation = "h", y = -0.15),
+         title = "26-Week Trend for Flagged Conditions")
+```
+
+---
+
+## Next Steps
+
+::: {.callout-tip}
+### Future: CUSUM / EARS Integration
+
+The trending page will integrate formal signal-detection algorithms (CUSUM, EARS C1/C2/C3) from the `surveillance` R package. Detected signals will be highlighted automatically and linked to the **Forecasts** tab for EpiNow2-based short-term projections.
+
+See [Forecasts →](../by-forecasts/index.html)
+:::
+
+---
+
+::: {.callout-tip}
+## Related Sections
+- [Forecasts & Scenarios](../by-forecasts/index.html) — short-term predictive models fed by signals
+- [Burden of Disease](../burden-of-disease/index.html) — quantified health impact of conditions
+- [By Condition](../by-condition/index.html) — condition-level national trends
+- [By Province](../by-province/index.html) — province-level surveillance detail
+- [Methods](../methods.html) — signal detection methodology documentation
+:::

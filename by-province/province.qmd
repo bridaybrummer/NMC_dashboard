@@ -1,75 +1,347 @@
 ---
-title: "Province report"
+title: "Province Report"
 params:
   province: "GP"
 format:
   html:
-    toc: false
-    theme: cosmo
-    css: styles.css
+    page-layout: full
+    toc: true
+    toc-depth: 2
+    embed-resources: true
 ---
 
-
-[🏠 Home](../index.html){.btn .btn-primary}
-
 ```{r}
-#| echo: false
+#| label: setup
 #| include: false
-library(flextable)
-library(dplyr)
-library(tibble)
-library(gtsummary)
+#| message: false
+#| warning: false
 
+suppressPackageStartupMessages({
+  library(data.table)
+  library(plotly)
+  library(crosstalk)
+  library(DT)
+  library(lubridate)
+  library(htmltools)
+  library(dplyr)
+})
 
-if (file.exists("R/tabulate_functions.r")) {
-  source("R/tabulate_functions.r")
-} else if (file.exists("../R/tabulate_functions.r")) {
-  source("../R/tabulate_functions.r")
-}
-
-if( file.exists( "R/aggregator_national.r" ) ) {
-  source( "R/aggregator_national.r" )
-} else if( file.exists( "../R/aggregator_national.r" ) ) {
-  source( "../R/aggregator_national.r" )
-}
-
-#source("../R/aggregator_national.r")
-#source("../R/tabulate_functions.r")
-
-# get the parameters from YAML
-
-#params <- yaml::read_yaml("../_variables.yml")
-
-prov <- params$province
-
-
-
-df <- tibble(
-    Province = params$province,
-    Dummy_Value = 123,
-    Note = "Hello from a parameterised page"
+# ── Province lookup ──────────────────────────────────────────────────────────
+province_names <- c(
+  EC  = "Eastern Cape",  FS = "Free State",    GP  = "Gauteng",
+  KZN = "KwaZulu-Natal", LP = "Limpopo",       MP  = "Mpumalanga",
+  NC  = "Northern Cape",  NW = "North West",   WC  = "Western Cape"
 )
 
-tbl_summary(df) -> tbl
+prov_code <- params$province[1]
+prov_name <- province_names[prov_code]
 
+# ── Load processed data (robust path: works from project root or by-province/) ──
+data_path <- if (file.exists("data/processed/agg_province.rds")) {
+  "data/processed/agg_province.rds"
+} else if (file.exists("../data/processed/agg_province.rds")) {
+  "../data/processed/agg_province.rds"
+} else {
+  stop("Cannot find agg_province.rds — run R/prepare_dashboard_data.r first")
+}
+agg_prov <- readRDS(data_path)
+setDT(agg_prov)
+agg_prov <- agg_prov[!is.na(prov_) & prov_ != ""]
+agg_prov[, date := as.Date(date)]
 
+# Filter to this province
+prov_dt <- agg_prov[prov_ == prov_code]
 
-ft <- as_flex_table(tbl) |>
-    autofit()
+latest_date <- max(prov_dt$date, na.rm = TRUE)
 
+# ── Population ───────────────────────────────────────────────────────────────
+pop_lookup <- data.table(
+  prov_ = c("EC", "FS", "GP", "KZN", "LP", "MP", "NC", "NW", "WC"),
+  pop   = c(6734001, 2928903, 16098571, 11538813, 5941439, 4743584,
+            1303047, 4141774, 7187004)
+)
+prov_pop <- pop_lookup[prov_ == prov_code, pop]
 
+# ── KPI metrics ──────────────────────────────────────────────────────────────
+month_start <- floor_date(latest_date, "month")
+prev_month  <- month_start - months(1)
+
+current_month <- prov_dt[date >= month_start]
+total_current <- sum(current_month$count, na.rm = TRUE)
+total_prev    <- sum(prov_dt[date >= prev_month & date < month_start, count], na.rm = TRUE)
+n_conditions  <- uniqueN(current_month$condition[current_month$count > 0])
+
+pct_change <- ifelse(total_prev > 0,
+                     round((total_current - total_prev) / total_prev * 100, 1),
+                     NA_real_)
+arrow <- ifelse(!is.na(pct_change) & pct_change >= 0, "\u2191", "\u2193")
+
+top_condition <- current_month[, .(n = sum(count, na.rm = TRUE)),
+                                by = condition][which.max(n), condition]
+
+# ── Monthly summary ──────────────────────────────────────────────────────────
+prov_dt[, month := floor_date(date, "month")]
+monthly <- prov_dt[, .(
+  cases = sum(count, na.rm = TRUE)
+), by = .(Month = month, Condition = condition)]
+monthly[, incidence_100k := round(cases / prov_pop * 1e5, 2)]
+
+# ── Weekly summary ───────────────────────────────────────────────────────────
+prov_dt[, week_start := floor_date(date, "week")]
+weekly <- prov_dt[, .(
+  cases = sum(count, na.rm = TRUE)
+), by = .(Week = week_start, Condition = condition)]
+weekly[, incidence_100k := round(cases / prov_pop * 1e5, 2)]
+
+# ── Annual summary for counts table ─────────────────────────────────────────
+annual <- prov_dt[, .(
+  Cases = sum(count, na.rm = TRUE)
+), by = .(Year = year(date), Condition = condition)]
+
+annual_wide <- dcast(annual, Condition ~ Year, value.var = "Cases", fill = 0)
+annual_wide[, Total := rowSums(.SD, na.rm = TRUE),
+            .SDcols = setdiff(names(annual_wide), "Condition")]
+setorder(annual_wide, -Total)
+
+# ── Annual incidence table ───────────────────────────────────────────────────
+annual_inci <- copy(annual)
+annual_inci[, Incidence_100k := round(Cases / prov_pop * 1e5, 2)]
+inci_wide <- dcast(annual_inci, Condition ~ Year, value.var = "Incidence_100k", fill = 0)
+
+# ── SharedData for linked filtering ──────────────────────────────────────────
+sd_monthly <- SharedData$new(monthly)
 ```
 
 ```{r}
-#| label: tbl-tabulate-condition
-#| tbl-cap: Counts of notifications by condition in `r params$province[1]`
-
-tabulate_condition(
-    province = params$province[1]
-) -> ft
-
-ft
-
-
+#| label: dynamic-title
+#| results: asis
+#| echo: false
+cat(sprintf(
+  '::: {.hero-intro}\n\n**%s (%s)** — Provincial surveillance report: notification counts, incidence rates, epidemic curves, and condition breakdowns.\n\n**Data through:** %s &nbsp;|&nbsp; **Population:** %s\n\n[Home](../../index.html){.btn .btn-sm .btn-primary style="margin-right:0.5rem;"} [All Provinces](../index.html){.btn .btn-sm .btn-outline-primary}\n\n:::\n',
+  prov_name, prov_code,
+  format(latest_date, "%d %B %Y"),
+  format(prov_pop, big.mark = ",")
+))
 ```
+
+```{r}
+#| label: kpi-cards
+#| results: asis
+#| echo: false
+cat(sprintf(
+'
+::: {layout-ncol=4}
+
+::: {.card .bg-primary .text-white .p-3 .text-center}
+**Total Cases**
+
+### %s
+<span style="font-size:0.8rem;">%s</span>
+:::
+
+::: {.card .bg-info .text-white .p-3 .text-center}
+**Month \u0394**
+
+### %s %s%%%%
+<span style="font-size:0.8rem;">vs previous month</span>
+:::
+
+::: {.card .bg-success .text-white .p-3 .text-center}
+**Conditions**
+
+### %s
+<span style="font-size:0.8rem;">reporting this month</span>
+:::
+
+::: {.card .bg-warning .text-dark .p-3 .text-center}
+**Top Condition**
+
+### %s
+<span style="font-size:0.8rem;">highest case count</span>
+:::
+
+:::
+',
+  format(total_current, big.mark = ","),
+  format(month_start, "%%B %%Y"),
+  arrow, abs(pct_change),
+  n_conditions,
+  top_condition
+))
+```
+
+---
+
+## Filter
+
+Use these controls to filter the monthly charts and data table below.
+
+```{r}
+#| label: filters
+div(
+  style = "display:flex; gap:2rem; flex-wrap:wrap; margin-bottom:1.5rem;",
+  div(style = "min-width:260px;", filter_select("cond", "Condition", sd_monthly, ~Condition)),
+  div(style = "min-width:180px;", filter_slider("cases", "Cases \u2265", sd_monthly, ~cases, min = 0))
+)
+```
+
+---
+
+## Epidemic Curves {.tabset}
+
+### Weekly Cases
+
+```{r}
+#| label: fig-weekly-epicurve
+#| fig-cap: !expr paste0("Weekly case counts in ", prov_name, " stacked by condition")
+plot_ly(weekly, x = ~Week, y = ~cases, color = ~Condition,
+        type = "bar",
+        hoverinfo = "text",
+        text = ~paste0(Condition, "<br>Week: ", format(Week, "%d %b %Y"),
+                       "<br>Cases: ", cases)) %>%
+  layout(barmode = "stack",
+         xaxis = list(title = "Week starting"),
+         yaxis = list(title = "Weekly cases"),
+         legend = list(orientation = "h", y = -0.15))
+```
+
+### Monthly Cases
+
+```{r}
+#| label: fig-monthly-bars
+#| fig-cap: !expr paste0("Monthly case counts in ", prov_name, " — linked to filter above")
+plot_ly(sd_monthly, x = ~Month, y = ~cases, color = ~Condition,
+        type = "bar",
+        hoverinfo = "text",
+        text = ~paste0(Condition, "<br>", format(Month, "%b %Y"),
+                       "<br>Cases: ", cases)) %>%
+  layout(barmode = "stack",
+         xaxis = list(title = "Month"),
+         yaxis = list(title = "Monthly cases"),
+         legend = list(orientation = "h", y = -0.15))
+```
+
+### Incidence Trends
+
+```{r}
+#| label: fig-weekly-incidence
+#| fig-cap: !expr paste0("Weekly incidence per 100 000 in ", prov_name)
+plot_ly(weekly, x = ~Week, y = ~incidence_100k, color = ~Condition,
+        type = "scatter", mode = "lines",
+        hoverinfo = "text",
+        text = ~paste0(Condition, "<br>Week: ", format(Week, "%d %b %Y"),
+                       "<br>Inc: ", incidence_100k, " /100k")) %>%
+  layout(xaxis = list(title = "Week starting"),
+         yaxis = list(title = "Incidence per 100 000"),
+         legend = list(orientation = "h", y = -0.15))
+```
+
+### Monthly Incidence
+
+```{r}
+#| label: fig-monthly-incidence
+#| fig-cap: !expr paste0("Monthly incidence per 100 000 in ", prov_name, " — linked to filter above")
+plot_ly(sd_monthly, x = ~Month, y = ~incidence_100k, color = ~Condition,
+        type = "scatter", mode = "lines+markers",
+        marker = list(size = 6, opacity = 0.8),
+        hoverinfo = "text",
+        text = ~paste0(Condition, "<br>", format(Month, "%b %Y"),
+                       "<br>Inc: ", incidence_100k, " /100k")) %>%
+  layout(xaxis = list(title = "Month"),
+         yaxis = list(title = "Incidence per 100 000"),
+         legend = list(orientation = "h", y = -0.15))
+```
+
+---
+
+## Data Tables {.tabset}
+
+### Annual Counts
+
+```{r}
+#| label: tbl-annual-counts
+DT::datatable(
+  annual_wide,
+  caption = paste0("Annual notification counts — ", prov_name),
+  extensions = "Buttons",
+  filter   = "top",
+  rownames = FALSE,
+  options  = list(
+    dom        = "Bfrtip",
+    buttons    = c("csv", "excel", "pdf"),
+    pageLength = 25,
+    scrollX    = TRUE,
+    order      = list(list(ncol(annual_wide) - 1, "desc"))
+  )
+)
+```
+
+### Annual Incidence
+
+```{r}
+#| label: tbl-annual-incidence
+DT::datatable(
+  inci_wide,
+  caption = paste0("Annual incidence per 100 000 — ", prov_name,
+                   " (pop: ", format(prov_pop, big.mark = ","), ")"),
+  extensions = "Buttons",
+  filter   = "top",
+  rownames = FALSE,
+  options  = list(
+    dom        = "Bfrtip",
+    buttons    = c("csv", "excel", "pdf"),
+    pageLength = 25,
+    scrollX    = TRUE
+  )
+)
+```
+
+### Monthly Detail
+
+```{r}
+#| label: tbl-monthly-detail
+DT::datatable(
+  sd_monthly,
+  caption = paste0("Monthly data — ", prov_name, " (linked to filter above)"),
+  extensions = "Buttons",
+  filter   = "top",
+  rownames = FALSE,
+  options  = list(
+    dom        = "Bfrtip",
+    buttons    = c("csv", "excel"),
+    pageLength = 20,
+    scrollX    = TRUE
+  )
+)
+```
+
+---
+
+## Province Navigation
+
+::: {.prov-nav-grid}
+[Eastern Cape](../ec/index.html){.btn .btn-outline-primary .btn-sm}
+[Free State](../fs/index.html){.btn .btn-outline-primary .btn-sm}
+[Gauteng](../gp/index.html){.btn .btn-outline-primary .btn-sm}
+[KwaZulu-Natal](../kzn/index.html){.btn .btn-outline-primary .btn-sm}
+[Limpopo](../lp/index.html){.btn .btn-outline-primary .btn-sm}
+[Mpumalanga](../mp/index.html){.btn .btn-outline-primary .btn-sm}
+[Northern Cape](../nc/index.html){.btn .btn-outline-primary .btn-sm}
+[North West](../nw/index.html){.btn .btn-outline-primary .btn-sm}
+[Western Cape](../wc/index.html){.btn .btn-outline-primary .btn-sm}
+:::
+
+---
+
+::: {.callout-tip}
+## Related Sections
+- [By Province — Overview](../index.html) — cross-province comparison with linked filters
+- [By Condition](../../by-condition/index.html) — condition-first view with national trends
+- [Trending & Signals](../../by-trending/index.html) — signal detection for emerging conditions
+- [Burden of Disease](../../burden-of-disease/index.html) — YLL, DALYs & age-standardised rates
+- [Forecasts](../../by-forecasts/index.html) — short-term predictive models
+- [Explorer](../../explorer/index.html) — custom data queries and downloads
+- [Data Quality](../../quality.html) — reporting completeness underpinning this data
+:::
+
 
