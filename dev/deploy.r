@@ -28,7 +28,20 @@ if (!("origin" %in% remotes)) {
     cat("Remote 'origin' already exists.\n")
 }
 
-# 3. Render your Quarto site.
+# 3. Refresh data before rendering.
+cat("Running data preparation pipeline...\n")
+prep_result <- system("Rscript R/prepare_dashboard_data.r")
+if (prep_result != 0) {
+    stop("Data preparation failed. Aborting deploy.")
+}
+if (!file.exists("data/processed/agg_national.rds") ||
+    !file.exists("data/processed/agg_province.rds") ||
+    !file.exists("data/processed/agg_district.rds")) {
+    stop("Data preparation did not produce expected .rds files. Aborting deploy.")
+}
+cat("✓ Data preparation complete.\n")
+
+# 4. Render your Quarto site.
 cat("Rendering Quarto site...\n")
 system("quarto render")
 
