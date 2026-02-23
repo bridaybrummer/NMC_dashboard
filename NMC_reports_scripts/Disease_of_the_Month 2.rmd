@@ -1,0 +1,912 @@
+---
+#html_document:
+#  code_folding: hide
+#  highlight: espresso
+#  number_sections: yes
+#  theme: journal
+#  fig_caption: yes
+#  fig_height: 3.5
+#  fig_width: 4
+#  self_contained: no
+#date: ""
+author: the National Institute for Communicable Diseases
+output:
+  bookdown::word_document2:
+    pandoc_args:
+#    - "--filter=pandoc-crossref"
+#    - "--reference-doc=Extras/June-report_working_reference.docx"
+    - "--reference-doc=Extras/matimba_template.docx"
+#    - "--lua-filter=extras/scholarly-metadata.lua"
+#    - "--lua-filter=extras/author-info-blocks.lua"
+#   - "--variable=geometry:\"[portrait,landscape]\""
+    fig_caption: true
+    number_sections: true
+    toc: true
+    toc_depth: 3
+    date:
+      format: '%Y%m%d'
+title: "NOTIFIABLE MEDICAL CONDITIONS SURVEILLANCE SYSTEM"
+always_allow_html: true
+---
+
+
+```{r setup, include =FALSE}
+
+load("disease_of_the_month.rda")
+
+
+# Some installation notes
+#If on MacOS you will need to install brew @ https://brew.sh/
+## you will need to install "Xquarts" if you are running on MacOS A https://www.xquartz.org/
+#"brew install pandoc"
+
+## You will also need to install pandoc from the system terminal https://pandoc.org/installing.html
+
+# Install pacman if not already installed
+if (!requireNamespace("pacman", quietly = TRUE)) {
+  install.packages("pacman")
+}
+
+
+
+
+# Load pacman
+
+# Load pacman
+library(pacman)
+
+# Use pacman to install and load packages
+p_load(
+  tidyverse,
+  dplyr,
+  ggplot2,
+  knitr,
+  tinytex,
+  haven,
+  janitor,
+#  summarytools,
+  lubridate,
+  grates,
+  forcats,
+  flextable,
+  magrittr,
+  gtsummary, 
+  flextable,
+  #RecorLinkage,
+ openai,
+  DescTools,
+  tidyverse, dplyr, ggplot2, knitr, tinytex, haven, janitor,
+  lubridate, grates, forcats, flextable, magrittr, gtsummary,
+  readxl, officer, openxlsx,
+conflicted
+)
+
+conflicts_prefer(magrittr::extract)
+conflicts_prefer(dplyr::stats)
+
+library(NMCleaner)
+
+
+# make a function for the gtsummary and flextable settings.
+#rm(list = ls())
+#gc()
+
+flextable::set_flextable_defaults(
+  font.family = "Century Gothic", 
+  font.size = 8, 
+  header.font.size = 8,
+  border.color = "black", 
+  padding = 0.1)
+
+
+gtsummary::theme_gtsummary_language(language = "en",big.mark = " ", decimal.mark = ".")
+
+
+knitr::opts_chunk$set(ft.align = "left",
+  echo = FALSE, warning = FALSE, message = FALSE, out.width = "100%", dpi =200)
+
+trim_tbl <- function(gt_summary_object) {
+  length_table_body <- gt_summary_object$table_body %>% nrow()
+  gt_summary_object$table_body <- gt_summary_object$table_body[2:length_table_body, ]
+  return(gt_summary_object)
+}
+
+# Make the provincial specific datasets. 
+
+arrow::read_feather("~/Desktop/SAFETP/CLA/NMC_database/master/new_master.feather")-> new_master
+
+# the date that the data is up to date for
+exported_date<- new_master$export_date%>%as_date%>%max() 
+new_master$export_date%>%as_date%>%unique
+
+load("reporting_month.rda")
+
+# the specific month of interest for the report
+reporting_date <- reporting_month %>%as_date()
+
+last_dat_reporting_month<- ceiling_date(as_date(reporting_date), "month")-days(1)
+
+
+gg2word_cond <- function( plot, directory_name, dims =  c(10, 6.5)) {
+  
+  #dims<- c(10, 6.5)
+  #dims[1]
+  
+  plot_name <- deparse(substitute(plot))
+  
+  ggsave(
+    paste0(as.character(directory_name),"/",as.character(plot_name),".png"),
+    suppressWarnings(plot + theme(plot.background = element_rect(fill = "white", color = "black", linewidth = 0.5))),
+    width = dims[1],
+    height = dims[2],
+    dpi = 200
+  )
+  
+  #Include the plot in the Quarto document
+  knitr::include_graphics(paste0(as.character(directory_name),"/",as.character(plot_name),".png"))
+  
+}
+
+```
+
+```{r load packages,message= FALSE, include= FALSE}
+
+####
+# set reporting date
+####
+# see reporitng date in the setup 
+  
+reporting_date_day_month_year  <- format( #this is to say that the date the data is from is one day before the report was
+  as.Date(as_date(reporting_date), format = "%d%B%Y") - days(0)
+  , "%d %B %Y")
+
+reporting_date_month_year <- format( #this is to say that the date the data is from is one day before the report was
+  as.Date(as_date(reporting_date), format = "%d%B%Y") - days(0)
+  , "%B, %Y")
+
+
+reporting_date_month <- format( #this is to say that the date the data is from is one day before the report was
+  as.Date(as_date(reporting_date), format = "%d%B%Y") - days(0)
+  , "%B")
+
+last_month_date <- as_yearmonth(Sys.Date()) - lubridate::month(1) # keep THIS
+
+last_month_date <- grates::as_yearmonth(Sys.Date()) - lubridate::month(1) 
+
+
+```
+
+```{r, include = FALSE}
+# load up the excels
+
+
+conflicted::conflicts_prefer(dplyr::filter)
+
+new_master1 <- new_master%>%dplyr::filter( notification_date <as_date( last_dat_reporting_month))
+
+reporting_yearmonth_grates<- last_dat_reporting_month%>%grates::as_yearmonth()
+
+source( "scripts_and_functions/make_fever_rash.R")
+
+if(disease_of_the_month %in% "Fever-Rash"){
+  new_master %>% make_fever_rash()-> 
+  new_master 
+}else{new_master}
+
+if(disease_of_the_month %in% "Leprosy"){
+  new_master %>% 
+  mutate( 
+    notification_date = diagnosis_date)-> 
+  new_master 
+}else{new_master}
+
+
+
+
+
+df<- new_master%>%
+  dplyr::filter( !is.na(prov_), 
+                 condition %in% disease_of_the_month,
+                 #case_definition == "Confirmed", 
+                 year %in% 2019:2025
+                 )%>%
+  ungroup()
+
+tabyl(Month_notification, dat = new_master%>%dplyr::filter(condition %in% "Covid-19"))
+
+df$diagnosis_method%>%tabyl()
+df$case_definition
+
+df %>%
+  mutate( 
+    case_definition = if_else( diagnosis_method == "Laboratory confirmed",
+                                "Confirmed",
+                                case_definition
+    )
+  )-> df
+
+
+  df1 <- df %>% dplyr::filter(back_capture_new %in% c("Current", "Delayed", "unknown"))
+  df2 <- df %>% dplyr::filter(!back_capture_new %in% c("Current", "Delayed", "unknown"))
+
+df %>%
+select( 
+  case_id, 
+  notification_date, 
+  diagnosis_date,
+  year, month, epiweek, day, 
+  diagnosis_method,
+  epidemiological_classification, 
+  case_definition, 
+  patient_age, 
+  patient_gender, 
+  prov_, 
+  district, 
+)%>%
+openxlsx::write.xlsx(paste0("Disease_of_the_month/Disease_of_the_Month_", disease_of_the_month, "_", reporting_date_month, ".xlsx"),
+  rowNames = FALSE
+)
+
+```
+
+
+```{r}
+library(kableExtra)
+# Replace the URL with your desired hyperlink
+url <- "https://www.nicd.ac.za/wp-content/uploads/2022/09/NMCSS-Data-Interpretation-Infographic-final2.pdf"
+
+# Create a clickable hyperlink
+link_text <- paste0("[NMCSS Interpretation](", url, ")")
+
+# Display the hyperlink using kableExtra
+#kable(data.frame(Download_Link = link_text), escape = FALSE) %>%
+#  kable_styling()
+surveillance_url <- "https://www.nicd.ac.za/nmc-overview/nmc-monthly-surveillance-report/"
+
+# Get min and max notification dates
+
+min_date <- df$notification_date %>% min() %>%as_date()%>% format("%B %Y")
+max_date <- df$notification_date %>% max() %>% as_date()%>%format("%B %Y")
+
+# Get unique case definitions
+case_definitions_included <- df$case_definition %>% unique()
+
+# Determine whether "Confirmed", "Suspected" or both are included
+if ("Confirmed" %in% case_definitions_included & "Suspected" %in% case_definitions_included) {
+  blurb_case_def <- "confirmed and suspected"
+} else if ("Confirmed" %in% case_definitions_included) {
+  blurb_case_def <- "confirmed"
+} else if ("Suspected" %in% case_definitions_included) {
+  blurb_case_def <- "suspected"
+} else {
+  blurb_case_def <- paste(case_definitions_included, collapse = ", ")
+}
+
+# Create the final blurb
+blurb <- paste0(
+  "This report contains ", blurb_case_def, " cases of ", disease_of_the_month,
+  " notified to NMC in South Africa",
+  " between ", min_date, " and ", max_date, "."
+)
+
+# Print the blurb
+
+```
+# Disease intro 
+`r blurb`
+
+# Table 1 demographics
+```{r}
+
+ df %>%
+  mutate( Age = as.numeric(Age_years))%>%
+  mutate( time_period = as.factor(if_else( year %in% 2025,
+                                            "Notifications in 2025",
+                                 "Notifications before 2025",
+                                )))%>%
+  select( Age, patient_gender, prov_, case_definition, time_period
+   )%>%
+  tbl_summary(by = time_period , 
+              label = list( patient_gender ~ "Sex", 
+                            prov_ ~ "Province",
+                            case_definition ~ "Case Definition"))%>%
+  add_p()%>%
+  bold_labels()%>%
+  modify_header(label = "")%>%
+    modify_spanning_header(all_stat_cols() ~ "**Time Period**")%>%
+    as_flex_table()->old_table
+
+
+
+
+
+if(df$nmccategories %>%unique %in% "1"){
+  
+df %>%
+  NMCleaner::mutate_dates(date_index = "notification_date") %>%
+  mutate(Age = as.numeric(Age_years)) %>%
+  mutate(time_period = factor(
+    if_else(
+      year %in% 2025,
+      "Notifications in 2025",
+      "Notifications before 2025"
+    ),
+    levels = c("Notifications before 2025", "Notifications in 2025")
+  )) %>%
+  mutate(
+    case_definition = factor(
+      case_definition,
+      levels = c("Confirmed", "Suspected")
+    )
+  )%>%
+
+  select( Age, patient_gender, prov_, case_definition, time_period, patient_vital_status
+  )%>%
+  tbl_strata( 
+    strata= time_period,
+    .tbl_fun = 
+      ~ .x %>%
+      tbl_summary(by = case_definition , 
+              label = list( patient_gender ~ "Sex", 
+                            prov_ ~ "Province",
+                            patient_vital_status ~ "Vital Status", 
+                            case_definition ~ "Case Definition"
+                            ),
+              type =  Age ~ "continuous2",
+
+      )
+  )%>%
+
+  bold_labels()%>%
+  modify_header(label = "")%>%
+    #modify_spanning_header(all_stat_cols() ~ "**Time Period**")%>%
+    as_flex_table()
+  }else{
+
+  df %>%
+  NMCleaner::mutate_dates(date_index = "notification_date") %>%
+  mutate(Age = as.numeric(Age_years)) %>%
+  mutate(time_period = factor(
+    if_else(
+      year %in% 2025,
+      "Notifications in 2025",
+      "Notifications before 2025"
+    ),
+    levels = c("Notifications before 2025", "Notifications in 2025")
+  )) %>%
+  mutate(
+    case_definition = factor(
+      case_definition,
+      levels = c("Confirmed", "Suspected")
+    )
+  )%>%
+
+  select( Age, patient_gender, prov_, case_definition, time_period, patient_vital_status
+  )%>%
+
+      tbl_summary(by = time_period , 
+              label = list( patient_gender ~ "Sex", 
+                            prov_ ~ "Province",
+                            patient_vital_status ~ "Vital Status", 
+                            case_definition ~ "Case Definition"
+                            ),
+              type =  Age ~ "continuous2",
+
+  )%>%
+
+  bold_labels()%>%
+  modify_header(label = "")%>%
+    #modify_spanning_header(all_stat_cols() ~ "**Time Period**")%>%
+    as_flex_table()
+}
+
+```
+
+
+# Age Sex pyramid
+
+```{r, fig.cap = paste0(disease_of_the_month," cases by age category and sex") }
+
+
+color_pallette_case_type <- c("darkkhaki", "lightsalmon", "darkcyan", "grey5", "grey65")
+
+
+df %>%
+filter( patient_gender %in% c("Female", "Male"))%>%
+  group_by(
+    #case_definition, 
+    agecategory_unit,
+    patient_gender) %>%
+  summarise(n = n()) %>%
+  ungroup%>%
+  #dplyr::filter( case_definition%in% "Confirmed")%>%
+  #complete all categories 
+  complete( agecategory_unit, patient_gender,
+            #case_definition, 
+            fill = list(n = 0))%>%
+  mutate( n = if_else( patient_gender %in% "Male", n, -n),
+    agecategory_unit = factor(agecategory_unit, levels = c(
+      "0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34", 
+      "35-39", "40-44", "45-49", "50-54", "55-59", "60-64", "65+"
+    ))
+  )%>%
+  na.omit()-> pyarmid_df 
+
+#pyarmid_df %>% filter (case_definition %in% "Confirmed", 
+#                    patient_gender %in% "Male" & 
+#                      agecategory_unit %in% c("35-39", "30-34", "25-29", "20-24") )%>%
+#  group_by(agecategory_unit)%>%
+#  mutate( n= if_else(case_definition %in% "Confirmed" , min(n)+2, min(n)-2))
+
+max_n <- max(abs(pyarmid_df$n))
+
+ggplot() + 
+  geom_col(data = pyarmid_df, aes(x = n, y = agecategory_unit, fill = patient_gender), position = "stack", alpha = 0.9) +
+  #geom_col(data = pyarmid_df %>% filter(case_definition %in% "Confirmed"), aes(x = n, y = agecategory_unit, fill = patient_gender), alpha = 1) +
+  scale_fill_manual(values = color_pallette_case_type)  +
+  # add in some text on the y = 5 axis for the sespected and confirmed sections 
+  #geom_text(
+  #  data = pyarmid_df %>% filter (#case_definition %in% "Confirmed", 
+  #                             patient_gender %in% "Male" & 
+  #                              agecategory_unit %in% c("35-39", "30-34", "25-29") )%>%
+  #    group_by(agecategory_unit)%>%
+  #    mutate( n= if_else(case_definition %in% "Confirmed" , -min(abs(n)) -1.9, -min(abs(n))))%>%ungroup(),
+  #  aes(label = case_definition, y = agecategory_unit , x = n,
+  #  ), hjust = -0, size = 3, color = "grey5", family = "Century Gothic"
+  #) +
+  theme(axis.text.x = element_text(margin = margin(t = 10))) +
+  scale_x_continuous(
+    labels = scales::number( abs(pretty(-max_n:max_n, n = 8))),
+    breaks = pretty(-max_n:max_n, n = 8)
+  ) +
+  coord_cartesian(xlim = c(-max_n, max_n)) +
+  geom_vline(xintercept = 0, linetype = "solid", color = "black", size = 0.1) +
+  labs(
+    x = "Number of Cases",
+    y = "Age Category",
+    fill = "Sex",
+    #title = paste0(disease_of_the_month," cases by age category and sex")
+  ) +
+  theme_minimal() +
+  theme(
+    text = element_text(family = "Century Gothic", size = 7, color = "#333333"),
+    panel.background = element_rect(fill = "#F8F8F8"),
+    plot.background = element_rect(fill = "#F8F8F8"),
+    panel.grid = element_line(color = "#DDDDDD"),
+    legend.background = element_rect(fill = "#F8F8F8"),
+    legend.text = element_text(color = "#333333"),
+    legend.title = element_text(color = "#333333", size = 7),
+    plot.title = element_text(size = 16, color = "#666666"),
+    plot.subtitle = element_text(size = 12, color = "#666666"),
+    plot.caption = element_text(size = 7, color = "#666666"),
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.key = element_blank(),
+    strip.background.y = element_blank(),
+    strip.background.x = element_blank(),
+    strip.text.y = element_text(size = 16, color = "#666666", angle = 0),
+    panel.grid.minor.x = element_blank(),
+    panel.spacing = unit(2, "lines")
+    #the legend should be horizontal with two rows, use guides 
+  )->
+  age_pyramid_plot
+
+  gg2word_cond(age_pyramid_plot, "plots", dims = c(4,4))
+
+```
+
+# Epicurve
+
+## National 
+```{r, include= FALSE}
+ 
+  df_to_plot_nat<- epicurve_df(df, date_index = "notification_date", grouping_vars = "") %>%
+    dplyr::filter( 
+    #as_date(date) > as_date("2023-01-01")
+    )
+
+  
+  plot_nat<- plot_epicurve_df(df_to_plot_nat, x_axis_option = "month_years")
+
+  nat_epicurve<- plot_nat$plot 
+
+  nat_epicurve + 
+  geom_bar( 
+    aes( #y = n, 
+    alpha = 0.1), 
+    #alpha = 0.1, 
+    fill = "red"
+  )
+
+df$case_definition%>%unique
+   
+   df_to_plot_nat_confirmed <- epicurve_df(df%>%filter( case_definition == "Confirmed"), date_index = "notification_date") %>%
+     dplyr::filter(
+       # as_date(date) > as_date("2023-01-01")
+     )
+
+
+#df_to_plot_nat_confirmed %>% mutate(case_definition == "Confirmed") -> df_to_plot_nat_confirmed
+
+#df_to_plot_nat %>% mutate(case_defintiion == "All ") -> df_to_plot_nat
+
+
+
+
+```
+
+```{r, fig.cap = paste0("Trend of weekly number of ", disease_of_the_month, " notified to the NMC, in South Africa") }
+source("scripts_and_functions/gg2word.R")
+gg2word_cond(nat_epicurve, "plots", dims = c(17, 10))
+
+#gg2word_cond(nat_epicurve, "plots", dims = c(5, 3))
+
+```
+
+## Provincial
+```{r, include= FALSE}
+df1
+
+df  
+  
+  df_to_plot<- epicurve_df(df1, date_index = "diagnosis_date", grouping_vars = "prov_") %>%
+    dplyr::filter( 
+    #as_date(date) > as_date("2023-01-01")
+    )
+
+
+  
+  plot<- plot_epicurve_df(df_to_plot, x_axis_option = "monthyear", grouping_vars = "prov_")
+
+plot$plot +
+    geom_col(aes(y = n, fill = prov_, alpha = 0.01))+
+      # add palette with 3 values
+      scale_fill_manual(
+       values = c( 
+        "EC" = "darkred",
+        "WC" = "#00ace6",
+        "KZN" = "lightgreen",
+        "FS" = "darkgreen",
+        "GP" = "darkblue",
+        "NW" = "darkorange",
+        "NC" = "#8e44ad",
+        "LP" = "#ff3654",
+        "MP" = "#d95f02"
+
+       )
+      )-> conditions_epicurve
+
+
+conditions_epicurve
+```
+
+```{r, fig.cap = paste0("Trend of weekly number of ", disease_of_the_month, " by province notified to the NMC, in South Africa") }
+source("scripts_and_functions/gg2word.R")
+gg2word_cond(conditions_epicurve, "plots", dims = c(17, 10))
+
+#gg2word_cond(conditions_epicurve, "plots", dims = c(5, 3))
+
+```
+
+# Confirmed notifications per year and province
+```{r}
+
+tryCatch({
+  df %>% 
+  filter(case_definition %in% "Confirmed") %>%
+  select(prov_, Year_notification) %>%
+  tbl_summary(by = Year_notification, 
+  label = list( prov_ = "Province")) %>%
+  bold_labels() %>%
+  add_overall(last = FALSE)%>%
+  modify_header(label = "") %>%
+  as_flex_table()%>%
+  #add caption
+  set_caption("Confirmed notifications per year and province. Confirmed notification takes into account the epidemiological classification and the reported diagnosis method")
+}, error = function(e) {
+  message("An error occurred: ", conditionMessage(e), " likley using a condition without data as a suspected case")
+})
+
+```
+
+
+
+# All notifications (confirmed and suspected) per year and province
+```{r}
+tryCatch({
+
+df %>% 
+filter( 
+#  case_definition %in% "Suspected"
+  )%>%
+select( prov_ , Year_notification)%>%
+tbl_summary( by  = Year_notification) %>% 
+ bold_labels()%>%
+   add_overall(last = FALSE)%>%
+  modify_header(label = "")%>%
+  as_flex_table()%>%
+    set_caption("All notifications per year and province.")
+
+}, error = function(e) {
+  message("An error occurred: ", conditionMessage(e), " likley using a condition without data as a suspected case")
+})
+
+
+```
+
+# Map 
+## Case counts
+```{r}
+
+
+map_n <- function(data, condition_select) {
+
+# if the condition_select has brakcet in it, handle them
+gsub("\\)", "\\\\)", condition_select) %>% gsub("\\(", "\\\\(", .) -> condition_select
+
+    data %>%
+        # if condition_select == "Fever-Rash" then apply fucntion make_fever_rash
+        {
+            if (condition_select == "Fever-Rash") make_fever_rash(.) else .
+        } %>%
+        dplyr::filter(!district %in% c("Unknown", "Isazi Import", "Not Applicable")) %>%
+        dplyr::filter(
+            !condition %in% "Covid-19",
+            # nmccategories ==1 ,
+            grepl(condition_select, condition, ignore.case = TRUE),
+            # year %in% 2025
+        ) %>%
+        group_by(district) %>%
+        summarise(n = n()) %>%
+        mutate_district_name(., "district") ->
+    notifications_df
+
+    # standardise pop data
+    # NMCleaner::pop$Name
+    NMCleaner::pop %>%
+        mutate(district = gsub(".*- ", "", Name)) %>%
+        mutate_district_name(., "district") ->
+    pop
+
+    #pop$district_standard %>% unique()
+
+    pop %>%
+        mutate(district = district_standard) ->
+    pop
+
+
+
+    NMCleaner::pop %>%
+        dplyr::filter(
+            Year %in% 2025
+        ) %>%
+        mutate(district = gsub(".*- ", "", Name)) %>%
+        select(-Name) %>%
+        group_by(district) %>%
+        summarise(pop = sum(Population)) %>%
+        mutate_district_name(., "district") ->
+    pop_df
+
+
+    shape_files[["districts"]]$district %>% unique()
+    shape_files[["sub_districts"]]$district %>% unique()
+
+    # standardsie the district names in these two datasets.
+    shape_files[c("districts", "sub_districts")] <-
+        map(
+            c("districts", "sub_districts"), ~
+                shape_files[[.x]] %>%
+                    as_tibble() %>%
+                    mutate_district_name("district") %>%
+                    st_as_sf() # %>%
+            # rmapshaper::ms_simplify(, keep  = 0.01)
+        )
+
+
+    shape_files$districts %>%
+        as_tibble() %>%
+        mutate_district_name(., "district") %>%
+        st_as_sf() ->
+    shape_df
+
+    shape_df %>%
+        left_join(pop_df, by = "district_standard") %>%
+        left_join(notifications_df, by = "district_standard") %>%
+        mutate(
+            #  incidence = n/pop*100000
+        ) ->
+    final_df
+
+    ###########
+
+    # Case counts
+
+    ###########
+
+    final_df %>%
+        # maybe in the last 5 weeks?
+        arrange(-n) %>%
+        slice(1:10) %>%
+        group_by(district) %>%
+        filter(n == max(n)) ->
+    peaks_df
+
+
+    # GGrepel
+    geom_sf_label_variants <- function(mapping = NULL,
+                                       data = NULL,
+                                       fun.geometry,
+                                       geom_fun,
+                                       ...) {
+        if (is.null(mapping$geometry)) {
+            geometry_col <- attr(data, "sf_column") %||% "geometry"
+            mapping$geometry <- as.name(geometry_col)
+        }
+
+        geom_fun(
+            mapping = mapping,
+            data = data,
+            stat = StatSfCoordinates,
+            fun.geometry = fun.geometry,
+            ...
+        )
+    }
+
+    pacman::p_load(ggpattern)
+    ?geom_sf_pattern
+
+    final_df %>%
+        ggplot() +
+        ggpattern::geom_sf_pattern(
+            data = . %>% filter(is.na(n)),
+            pattern = "stripe",
+            pattern_fill = "grey75",
+            pattern_colour = NA,
+            pattern_spacing = 0.02,
+            fill = "white"
+        ) +
+        geom_sf(aes(fill = n, group = district)) +
+        scale_fill_viridis_c(
+            na.value = "transparent"
+        ) +
+        ggrepel::geom_label_repel(
+            data = peaks_df,
+            aes(
+                label = district_standard,
+                geometry = geometry
+            ),
+            label.size = 0.1,
+            size = 2,
+            stat = "sf_coordinates",
+            nudge_x = 1
+            # min.segment.length = 0,
+            # direction = c( "y"),
+            # arrow = arrow(length = unit(0.1, "npc"))
+        ) +
+        # geom_sf_label(data = peaks_df,
+        #  aes(label = district_standard), size = 2.5)+
+        theme_classic() +
+        labs(
+            x = "",
+            y = ""
+        ) +
+        coord_sf(expand = FALSE) +
+        theme(
+            axis.line.x = element_blank(),
+            axis.ticks.x = element_blank(),
+            axis.text.x = element_blank(),
+            axis.line.y = element_blank(),
+            axis.ticks.y = element_blank(),
+            axis.text.y = element_blank(),
+            plot.margin = margin(5, 5, 5, 5),
+            legend.position = "bottom"
+        ) +
+        theme(
+            panel.spacing = unit(0.17, "lines"),
+            strip.background = element_rect(color = NA, fill = NA),
+            strip.placement = "outside",
+            text = element_text(family = "Century Gothic", size = 15, color = "#333333"),
+            panel.background = element_rect(fill = "#F8F8F8"),
+            plot.background = element_rect(fill = "#F8F8F8"),
+            panel.grid = element_line(color = "#DDDDDD"), legend.text = element_text(
+                color = "#333333",
+                size = 8
+            ), legend.title = element_text(
+                color = "#333333",
+                size = 10
+            ), plot.title = element_text(
+                size = 15,
+                color = "#666666"
+            ), plot.subtitle = element_text(
+                size = 8,
+                color = "#666666"
+            ), plot.caption = element_text(
+                size = 8,
+                color = "#666666"
+            ), legend.position = "bottom",
+            legend.direction = "horizontal", legend.key = element_blank(),
+            legend.title.align = 0.5, panel.grid.major = element_blank(),
+            axis.title = element_text(size = 15, color = "#666666"),
+            panel.grid.minor.x = element_blank(), panel.grid.minor.y = element_blank(),
+            axis.ticks = element_line(size = 0.15, color = "grey20"),
+            legend.background = element_rect(
+                fill = "#F8F8F8",
+                size = 0.25, linetype = "solid", colour = "grey50"
+            ),
+            strip.text.y.right = element_text(angle = 0)
+        ) ->
+    notifications_map_n
+
+
+    # plotly::ggplotly(notifications_map_n)
+    notifications_map_n
+}
+
+```
+
+# Map
+
+```{r}
+# last full epiweek
+
+map_n(
+  data =
+    df %>%
+      filter(
+        condition %in% disease_of_the_month
+      ), condition_select = disease_of_the_month
+) ->
+map_cases
+
+map_cases+ 
+ scale_fill_gradient(
+        low = "blanchedalmond",
+        high = "darkred",
+        na.value = "transparent",
+        name = "Number of notifications",
+        limits = c(0, max(map_cases$data$n, na.rm = TRUE)) # adjust as needed
+ ) -> map_cases
+
+```
+
+```{r, fig.cap = paste0("Map of ", disease_of_the_month, " notificaiton incidence by district notified to the NMC, in South Africa") }
+source("scripts_and_functions/gg2word.R")
+gg2word_cond(map_cases, "plots", dims = c(8, 5))
+```
+
+
+**END**
+
+```{r, include= FALSE}
+
+df %>%
+  mutate( 
+    year = as_year( diagnosis_date)
+  )%>%
+  group_by( 
+    year 
+  )%>%
+  reframe( n  = n() )%>%
+  ggplot(
+    aes( 
+      x = year, 
+      y = n
+    )
+  )+ 
+  geom_col() + 
+  scale_fill_manual(
+    values = c("darkkhaki", "lightsalmon", "darkcyan", "grey5", "grey65")
+  )+
+  theme_minimal() +
+  labs( 
+    x = "Year of Diagnosis",
+    y = "Number of Notifications"
+  )-> leprosy_epicurve
+
+
+ggsave( 
+  leprosy_epicurve, 
+  file = "figures/leprsoy_epicurve.png",
+  width = 6, height = 4, dpi = 300
+
+)

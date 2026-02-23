@@ -32,15 +32,15 @@ if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
 agg_national <- readRDS(file.path(out_dir, "agg_national.rds"))
 setDT(agg_national)
 
-# ── Combine Measles + Rubella → Fever-Rash ───────────────────────────────────
-agg_vp <- filter_vp_conditions(agg_national, include_fever_rash = TRUE)
+# ── Combine Measles + Rubella → Fever-Rash and expand to all NMC forecast conditions
+agg_fc <- filter_forecast_conditions(agg_national, include_fever_rash = TRUE)
 
 # Which conditions actually have data?
-available <- unique(agg_vp$condition)
+available <- unique(agg_fc$condition)
 cat("Conditions with data:", paste(available, collapse = ", "), "\n")
 
 # ── Configure run ────────────────────────────────────────────────────────────
-HORIZON       <- 21L    # forecast days ahead
+HORIZON       <- 28L    # forecast days ahead (4 weeks)
 LOOKBACK      <- 360L   # history window
 N_REWINDS     <- 8L     # rolling snapshots for animation
 REWIND_STEP   <- 7L     # days between snapshots
@@ -51,7 +51,7 @@ cat("\n──── Running single-point forecasts ────\n")
 walk(available, function(cond) {
   cat("  ▸ ", cond, " ... ")
 
-  ts <- prepare_condition_ts(agg_vp, cond)
+  ts <- prepare_condition_ts(agg_fc, cond)
 
   if (nrow(ts) < 60) {
     cat("skipped (< 60 days of data)\n")
@@ -65,10 +65,15 @@ walk(available, function(cond) {
       horizon       = HORIZON,
       lookback_days = LOOKBACK
     )
+    # Save the full EpiNow2 result object (for standard plot() method)
+    obj_fname <- file.path(out_dir, paste0("forecasts_obj_", gsub("[- ]", "_", tolower(cond)), ".rds"))
+    saveRDS(est, obj_fname)
+    cat("object →", basename(obj_fname), " ")
+
     summ <- extract_forecast_summary(est, cond)
     fname <- file.path(out_dir, paste0("forecasts_", gsub("[- ]", "_", tolower(cond)), ".rds"))
     saveRDS(summ, fname)
-    cat("saved →", basename(fname), "\n")
+    cat("summary →", basename(fname), "\n")
   }, error = function(e) {
     cat("FAILED:", e$message, "\n")
   })
@@ -80,7 +85,7 @@ cat("\n──── Running rolling forecasts (animation data) ────\n")
 walk(available, function(cond) {
   cat("  ▸ ", cond, " ... ")
 
-  ts <- prepare_condition_ts(agg_vp, cond)
+  ts <- prepare_condition_ts(agg_fc, cond)
 
   if (nrow(ts) < 60) {
     cat("skipped\n")

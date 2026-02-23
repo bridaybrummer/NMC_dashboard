@@ -1,0 +1,117 @@
+---
+title: "Data Quality"
+subtitle: "Completeness, timeliness & validation checks on NMC surveillance data"
+format:
+  html:
+    toc: true
+---
+
+::: {.callout-note collapse="true"}
+## Development Roadmap — Data Quality
+
+| Phase | Feature | Status |
+|-------|---------|--------|
+| **v0.1** | Reporting completeness by province (% days with ≥ 1 case) | ✅ Done |
+| **v0.1** | Weekly submission heatmap | ✅ Done |
+| **v0.2** | Timeliness metrics (median days from onset to notification) | 🔲 Planned |
+| **v0.2** | Duplicate detection summary | 🔲 Planned |
+| **v0.3** | Missing-field rates by condition (name, age, sex, district) | 🔲 Planned |
+| **v0.3** | Facility-level reporting participation rates | 🔲 Planned |
+| **v0.4** | Automated data-quality score card (red/amber/green) | 🔲 Planned |
+| **v0.5** | Historic trend of completeness to track improvement | 🔲 Planned |
+
+*Data pipeline:* `R/prepare_dashboard_data.r` → `data/processed/agg_province.rds`
+:::
+
+```{r}
+#| label: setup
+#| include: false
+#| message: false
+#| warning: false
+
+suppressPackageStartupMessages({
+  library(data.table)
+  library(plotly)
+  library(DT)
+  library(lubridate)
+})
+
+agg_prov <- readRDS("data/processed/agg_province.rds")
+setDT(agg_prov)
+agg_prov <- agg_prov[!is.na(prov_) & prov_ != ""]
+agg_prov[, date := as.Date(date)]
+
+latest_date <- max(agg_prov$date)
+```
+
+**Data through:** `r format(latest_date, "%d %B %Y")`
+
+---
+
+## Reporting Completeness by Province
+
+Proportion of days in the last 90 days where at least one case was notified, aggregated across all conditions.
+
+```{r}
+#| label: fig-completeness
+#| fig-cap: "Reporting completeness (last 90 days)"
+last90 <- agg_prov[date >= (latest_date - 90)]
+total_days <- as.integer(difftime(latest_date, latest_date - 90, units = "days"))
+
+completeness <- last90[count > 0, .(
+  days_reported = uniqueN(date)
+), by = .(Province = prov_)]
+completeness[, pct := round(days_reported / total_days * 100, 1)]
+
+plot_ly(completeness, x = ~Province, y = ~pct,
+        type = "bar",
+        marker = list(color = ~ifelse(pct >= 80, "#065f46", ifelse(pct >= 50, "#b45309", "#b91c1c"))),
+        hoverinfo = "text",
+        text = ~paste0(Province, ": ", pct, "% (", days_reported, "/", total_days, " days)")) %>%
+  layout(yaxis = list(title = "% Days Reporting", range = c(0, 100)),
+         xaxis = list(title = "Province"),
+         shapes = list(
+           list(type = "line", x0 = -0.5, x1 = 8.5,
+                y0 = 80, y1 = 80, line = list(dash = "dash", color = "#065f46"))))
+```
+
+---
+
+## Weekly Submission Volume
+
+```{r}
+#| label: fig-heatmap
+#| fig-cap: "Weekly case volume by province (last 52 weeks)"
+last_year <- agg_prov[date >= (latest_date - 365)]
+last_year[, week := floor_date(date, "week")]
+heat_dt <- last_year[, .(cases = sum(count)), by = .(week, Province = prov_)]
+
+plot_ly(heat_dt, x = ~week, y = ~Province, z = ~cases,
+        type = "heatmap",
+        colorscale = list(c(0, "#e6f2ff"), c(1, "#1d4ed8")),
+        hoverinfo = "text",
+        text = ~paste0(Province, " — wk ", format(week, "%d %b %Y"),
+                       "<br>Cases: ", format(cases, big.mark = ","))) %>%
+  layout(xaxis = list(title = "Week"),
+         yaxis = list(title = ""))
+```
+
+---
+
+## Completeness Table
+
+```{r}
+#| label: tbl-completeness
+DT::datatable(completeness, rownames = FALSE,
+              options = list(pageLength = 10, dom = "t"))
+```
+
+---
+
+::: {.callout-tip}
+## Related Pages
+- [Methods](methods.html) — full technical documentation of quality checks and indicator definitions
+- [Overview](overview.html) — national-level surveillance summary
+- [By Province](by-province/index.html) — province-level data that depends on reporting quality
+- [Glossary](glossary.html) — abbreviations and term definitions
+:::

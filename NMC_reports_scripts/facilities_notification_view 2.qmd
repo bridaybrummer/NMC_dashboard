@@ -1,0 +1,15 @@
+---
+title: "Facilities Notifications viewer"
+format: html
+---
+
+
+```{r}
+# i have a saved flextable that has ggplot in one of its cells. I want to display it in a shiny app. It has two columns, the facility name and the plot 
+library(flextable)
+library(ggplot2)
+library(magrittr)
+
+load(  "dashboard/facility_flextable_with_graphs.RData")
+facility_flextable_with_graphs
+```

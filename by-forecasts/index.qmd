@@ -1,6 +1,6 @@
 ---
-title: "Predictive Modelling – Vaccine-Preventable Conditions"
-subtitle: "Short-term outbreak forecasts using EpiNow2"
+title: "Predictive Modelling – NMC Conditions"
+subtitle: "Nowcasting and short-term forecasts for notifiable conditions using EpiNow2"
 format:
   html:
     toc: true
@@ -14,7 +14,7 @@ execute:
   echo: false
   warning: false
   message: false
-  cache: true
+  cache: false
 ---
 
 ```{r}
@@ -26,7 +26,7 @@ if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(
   data.table, dplyr, tidyr, lubridate, purrr, stringr, ggplot2,
   plotly, gganimate, gifski, DT, flextable, scales, here,
-  EpiNow2
+  EpiNow2, patchwork
 )
 
 # ── Source shared forecasting functions ──────────────────────────────────────
@@ -39,11 +39,12 @@ data_dir <- here::here("data", "processed")
 agg_national <- readRDS(file.path(data_dir, "agg_national.rds"))
 setDT(agg_national)
 
-# Combine Measles + Rubella → Fever-Rash and filter to VP conditions
+# Combine Measles + Rubella → Fever-Rash and filter to forecast-eligible conditions
 agg_vp <- filter_vp_conditions(agg_national, include_fever_rash = TRUE)
+agg_fc <- filter_forecast_conditions(agg_national, include_fever_rash = TRUE)
 
 # Available conditions in data
-avail_conditions <- unique(agg_vp$condition)
+avail_conditions <- unique(agg_fc$condition)
 
 # ── Try to load pre-computed forecasts (from R/run_forecasts.r) ──────────────
 # If forecast files exist we use them; otherwise we run EpiNow2 live (slower).
@@ -63,7 +64,7 @@ load_forecast_rds <- function(pattern, exclude_patterns = NULL) {
 
 forecast_single  <- load_forecast_rds(
   "^forecasts_.*\\.rds$",
-  exclude_patterns = c("^forecasts_rolling_", "^forecasts_meta")
+  exclude_patterns = c("^forecasts_rolling_", "^forecasts_meta", "^forecasts_obj_")
 )
 forecast_rolling <- load_forecast_rds("^forecasts_rolling_.*\\.rds$")
 
@@ -73,12 +74,38 @@ meta <- if (file.exists(meta_path)) readRDS(meta_path) else NULL
 
 # ── Colour palette ───────────────────────────────────────────────────────────
 condition_colours <- c(
-  "Fever-Rash"  = "#7b2cbf",
-  "Measles"     = "#9d4edd",
-  "Rubella"     = "#c77dff",
-  "Pertussis"   = "#e07a5f",
-  "Diphtheria"  = "#3d85c6"
+  # Vaccine-preventable
+  "Fever-Rash"    = "#7b2cbf",
+  "Measles"       = "#9d4edd",
+  "Rubella"       = "#c77dff",
+  "Pertussis"     = "#e07a5f",
+  "Diphtheria"    = "#3d85c6",
+  "Tetanus"       = "#8338ec",
+  "Hepatitis B"   = "#ff006e",
+  "Haemophilus influenzae type B" = "#fb5607",
+  "Congenital rubella syndrome"   = "#e0aaff",
+  "Poliomyelitis" = "#3a86ff",
+  "Acute flaccid paralysis"       = "#457b9d",
+  "Yellow fever"  = "#ffbe0b",
+  # Category 1 – high priority (non-VPD)
+  "Cholera"       = "#0077b6",
+  "Malaria"       = "#2d6a4f",
+  "Covid-19"      = "#d90429",
+  "Enteric fever (typhoid or paratyphoid fever)" = "#f4a261",
+  "Meningococcal disease" = "#264653",
+  "Listeriosis"   = "#e76f51",
+  "Mpox"          = "#606c38",
+  # Category 2
+  "Hepatitis A"   = "#bc6c25"
 )
+
+# ── 7-day rolling average helper (smooths weekend reporting artefact) ────────
+roll7 <- function(x) {
+  n <- length(x)
+  out <- rep(NA_real_, n)
+  for (i in 7:n) out[i] <- mean(x[(i - 6):i], na.rm = TRUE)
+  out
+}
 
 # ── Theme ────────────────────────────────────────────────────────────────────
 theme_nmc <- theme_minimal(base_size = 13) +
@@ -92,7 +119,7 @@ theme_nmc <- theme_minimal(base_size = 13) +
 
 ## Overview
 
-This section showcases **short-term outbreak forecasting** for vaccine-preventable and respiratory conditions reported through the NMC surveillance system.
+This section showcases **nowcasting and short-term outbreak forecasting** for key notifiable medical conditions (NMC) reported through the national surveillance system.
 The models use the **EpiNow2** R package, which combines:
  
 - **Nowcasting** – adjusting for reporting delays  
@@ -101,10 +128,13 @@ The models use the **EpiNow2** R package, which combines:
 
 ::: {.callout-note}
 ### Conditions covered
-| Category | Conditions |
+| NMC Category | Conditions |
 |---|---|
-| Fever-Rash surveillance | Measles, Rubella (combined as *Fever-Rash*) |
-| Vaccine-preventable | Pertussis, Diphtheria |
+| **Vaccine-preventable** | Fever-Rash (Measles + Rubella), Pertussis, Diphtheria, Tetanus, Hepatitis B, Haemophilus influenzae type B, Congenital rubella syndrome, Poliomyelitis / AFP, Yellow fever |
+| **Category 1** — Immediate notification (non-VPD) | Cholera, Malaria, Covid-19, Enteric fever, Meningococcal disease, Listeriosis, Mpox |
+| **Category 2** — Routine notification | Hepatitis A |
+
+*Forecasts are only generated for conditions with ≥ 60 days of data.*
 :::
 
 ```{r}
@@ -126,15 +156,15 @@ if (!is.null(meta)) {
 
 ## Surveillance Epicurves {#epicurves}
 
-An epidemic curve of reported cases for each vaccine-preventable condition, aggregated weekly at the national level.
+An epidemic curve of reported cases for each forecasted NMC condition, aggregated weekly at the national level.
 
 ```{r}
 #| label: fig-epicurves
-#| fig-cap: "Weekly reported cases for vaccine-preventable conditions"
-#| fig-height: 7
+#| fig-cap: "Weekly reported cases for forecasted NMC conditions"
+#| fig-height: 10
 
 # Aggregate to weekly
-agg_weekly <- agg_vp[, .(
+agg_weekly <- agg_fc[, .(
   cases = sum(confirm, na.rm = TRUE)
 ), by = .(condition, week_start = floor_date(date, "week"))]
 
@@ -158,8 +188,8 @@ ggplotly(p_epi, tooltip = c("x", "y")) %>%
 
 ## EpiNow2 Forecasts {#forecasts}
 
-Each panel shows the **median estimate** (solid line), **50 % credible interval** (dark ribbon) and **90 % credible interval** (light ribbon).
-The shaded forecast horizon extends **`r if (!is.null(meta)) meta$horizon else 21` days** beyond the last data point.
+Each panel shows the **median estimate** (solid line), **50 % credible interval** (dark ribbon) and **90 % credible interval** (light ribbon), all smoothed with a **7-day rolling average** to remove weekend reporting artefacts.
+The shaded forecast horizon extends **`r if (!is.null(meta)) meta$horizon else 28` days** (4 weeks) beyond the last data point.
 
 ::: {.panel-tabset}
 
@@ -177,28 +207,45 @@ if (!is.null(forecast_single) && nrow(forecast_single) > 0) {
 
     df_cond <- forecast_single %>% filter(condition == cond)
 
-    # Grab matching surveillance time series for backdrop
-    ts_raw <- prepare_condition_ts(agg_vp, cond)
-    ts_raw <- ts_raw %>% filter(date >= max(date) - days(180))
+    # Grab matching surveillance time series for backdrop (7-day smoothed)
+    ts_raw <- prepare_condition_ts(agg_fc, cond)
+    ts_raw <- ts_raw %>%
+      filter(date >= max(date) - days(180)) %>%
+      arrange(date) %>%
+      mutate(confirm_smooth = roll7(confirm))
 
     # Determine forecast start (where type changes)
     forecast_start <- df_cond %>%
       filter(variable == "reported_cases", grepl("forecast", type)) %>%
       pull(date) %>% min(na.rm = TRUE)
 
-    df_inf <- df_cond %>% filter(variable == "reported_cases")
+    # Smooth the EpiNow2 median & CI with 7-day rolling average
+    df_inf <- df_cond %>%
+      filter(variable == "reported_cases") %>%
+      arrange(date) %>%
+      mutate(
+        median   = roll7(median),
+        lower_50 = roll7(lower_50),
+        upper_50 = roll7(upper_50),
+        lower_90 = roll7(lower_90),
+        upper_90 = roll7(upper_90)
+      ) %>%
+      filter(!is.na(median))
 
     p <- ggplot() +
-      # Surveillance bars
+      # Surveillance: light bars (raw) + smoothed line overlay
       geom_col(data = ts_raw, aes(x = date, y = confirm),
-               fill = condition_colours[cond] %||% "grey60", alpha = 0.3, width = 1) +
+               fill = condition_colours[cond] %||% "grey60", alpha = 0.15, width = 1) +
+      geom_line(data = ts_raw %>% filter(!is.na(confirm_smooth)),
+                aes(x = date, y = confirm_smooth),
+                colour = condition_colours[cond] %||% "grey60", alpha = 0.5, linewidth = 0.4) +
       # 90% CI ribbon
       geom_ribbon(data = df_inf, aes(x = date, ymin = lower_90, ymax = upper_90),
                   fill = condition_colours[cond] %||% "grey60", alpha = 0.15) +
       # 50% CI ribbon
       geom_ribbon(data = df_inf, aes(x = date, ymin = lower_50, ymax = upper_50),
                   fill = condition_colours[cond] %||% "grey60", alpha = 0.3) +
-      # Median line
+      # Median line (smoothed)
       geom_line(data = df_inf, aes(x = date, y = median), colour = condition_colours[cond] %||% "black",
                 linewidth = 0.8) +
       # Forecast boundary
@@ -208,9 +255,9 @@ if (!is.null(forecast_single) && nrow(forecast_single) > 0) {
       scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
       scale_x_date(date_breaks = "1 month", date_labels = "%b %Y") +
       labs(
-        title    = paste(cond, "— EpiNow2 Forecast"),
-        subtitle = "Median with 50% and 90% credible intervals",
-        x = NULL, y = "Daily reported cases"
+        title    = paste(cond, "— EpiNow2 Forecast (7-day smoothed)"),
+        subtitle = "Median with 50% and 90% credible intervals · 4-week horizon",
+        x = NULL, y = "Daily reported cases (7-day avg)"
       ) +
       theme_nmc
 
@@ -222,6 +269,65 @@ if (!is.null(forecast_single) && nrow(forecast_single) > 0) {
 } else {
   cat("\n### No forecasts available\n\n")
   cat("Run `Rscript R/run_forecasts.r` from the project root to generate cached forecast data.\n\n")
+}
+```
+
+:::
+
+---
+
+## Standard EpiNow2 Diagnostic Plots {#epinow2-diagnostics}
+
+The panels below show the **native EpiNow2 diagnostic output** for each condition.
+Each plot combines three key elements in a single view:
+
+1. **Reported cases** — observed data with nowcast / forecast and credible intervals
+2. **Estimated infections** — latent infection trajectory inferred by the model
+3. **Effective reproduction number ($R_t$)** — with threshold line at $R_t = 1$
+
+These are produced directly by `EpiNow2::plot()` and provide a comprehensive snapshot
+of the epidemic state without any post-processing.
+
+::: {.panel-tabset}
+
+```{r}
+#| label: epinow2-standard-plots
+#| results: asis
+#| fig-height: 9
+#| fig-width: 10
+
+# Load full EpiNow2 result objects saved by R/run_forecasts.r
+obj_files <- list.files(data_dir, pattern = "^forecasts_obj_.*\\.rds$", full.names = TRUE)
+
+if (length(obj_files) > 0) {
+
+  for (of in sort(obj_files)) {
+    # Extract condition name from filename
+    cond_slug  <- gsub("^forecasts_obj_|\\.rds$", "", basename(of))
+    cond_label <- gsub("_", " ", cond_slug) |> tools::toTitleCase()
+
+    cat(sprintf("\n### %s\n\n", cond_label))
+
+    tryCatch({
+      obj <- readRDS(of)
+      p   <- plot(obj)
+      print(p + patchwork::plot_annotation(
+        title    = paste0(cond_label, " \u2014 EpiNow2 Diagnostic Summary"),
+        subtitle = "Nowcast / forecast \u00b7 estimated infections \u00b7 Rt",
+        theme    = theme(
+          plot.title    = element_text(face = "bold", size = 15),
+          plot.subtitle = element_text(colour = "grey40", size = 11)
+        )
+      ))
+      cat("\n\n")
+    }, error = function(e) {
+      cat(sprintf("*Plot could not be rendered for %s: %s*\n\n", cond_label, e$message))
+    })
+  }
+
+} else {
+  cat("\n### No EpiNow2 result objects found\n\n")
+  cat("Run `Rscript R/run_forecasts.r` to generate full result objects for standard diagnostic plots.\n\n")
 }
 ```
 
@@ -259,7 +365,7 @@ if (!is.null(forecast_rolling) && nrow(forecast_rolling) > 0) {
     filter(condition == showcase_cond, variable == "reported_cases") %>%
     mutate(median = ifelse(median > quantile(median, 0.99, na.rm = TRUE), NA, median))
 
-  ts_raw <- prepare_condition_ts(agg_vp, showcase_cond)
+  ts_raw <- prepare_condition_ts(agg_fc, showcase_cond)
   ts_raw <- ts_raw %>% filter(date >= min(roll_df$date, na.rm = TRUE))
 
   # Static version with all snapshots
@@ -290,50 +396,71 @@ if (!is.null(forecast_rolling) && nrow(forecast_rolling) > 0) {
 ```{r}
 #| label: fig-animated-gif
 #| fig-cap: "Animated forecast evolution — each frame adds a new weekly snapshot"
-#| eval: !expr '!is.null(forecast_rolling) && nrow(forecast_rolling) > 0'
-#| fig-height: 6
+#| dev: "png"
+#| fig-width: 9
+#| fig-height: 5
+#| eval: false
 
 # Build a gganimate version (rendered as GIF in the HTML page)
-if (!is.null(forecast_rolling) && nrow(forecast_rolling) > 0) {
+has_rolling <- !is.null(forecast_rolling) && NROW(forecast_rolling) > 0
 
-  # Use the same showcase condition
+if (has_rolling) {
+
+  # Use the same showcase condition — aggregate to WEEKLY to keep memory low
   anim_df <- forecast_rolling %>%
     filter(condition == showcase_cond, variable == "reported_cases") %>%
     mutate(
-      median = ifelse(median > quantile(median, 0.99, na.rm = TRUE), NA, median),
+      week = floor_date(date, "week"),
       snapshot_id = as.integer(factor(snapshot_date))
-    )
+    ) %>%
+    group_by(snapshot_date, snapshot_label, snapshot_id, week) %>%
+    summarise(median = mean(median, na.rm = TRUE), .groups = "drop") %>%
+    filter(!is.na(median)) %>%
+    mutate(median = ifelse(median > quantile(median, 0.99, na.rm = TRUE), NA, median))
 
-  ts_bg <- prepare_condition_ts(agg_vp, showcase_cond) %>%
-    filter(date >= min(anim_df$date, na.rm = TRUE))
+  ts_bg <- prepare_condition_ts(agg_fc, showcase_cond) %>%
+    filter(date >= min(anim_df$week, na.rm = TRUE)) %>%
+    mutate(week = floor_date(date, "week")) %>%
+    group_by(week) %>%
+    summarise(confirm = sum(confirm, na.rm = TRUE), .groups = "drop")
+
+  n_snapshots <- length(unique(anim_df$snapshot_id))
 
   p_anim <- ggplot() +
-    geom_col(data = ts_bg, aes(x = date, y = confirm),
-             fill = "grey75", alpha = 0.4, width = 1) +
+    geom_col(data = ts_bg, aes(x = week, y = confirm),
+             fill = "grey75", alpha = 0.4, width = 6) +
     geom_line(data = anim_df,
-              aes(x = date, y = median, group = snapshot_label, colour = snapshot_label),
+              aes(x = week, y = median, group = snapshot_label, colour = snapshot_label),
               linewidth = 0.7) +
-    geom_vline(data = anim_df %>% distinct(snapshot_date, snapshot_label),
-               aes(xintercept = snapshot_date), linetype = "dashed",
-               colour = "firebrick", alpha = 0.5) +
     scale_colour_viridis_d(option = "plasma", name = "Snapshot") +
     scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
     scale_x_date(date_breaks = "1 month", date_labels = "%b %Y") +
     labs(
       title    = paste(showcase_cond, "forecast as of: {closest_state}"),
       subtitle = "Cumulative forecast snapshots – watch the outlook evolve",
-      x = NULL, y = "Daily reported cases"
+      x = NULL, y = "Weekly reported cases"
     ) +
     theme_nmc +
-    # gganimate: reveal one snapshot at a time
-    transition_states(snapshot_label, transition_length = 2, state_length = 3) +
-    shadow_mark(alpha = 0.3, size = 0.3) +
+    transition_states(snapshot_label, transition_length = 1, state_length = 2) +
     enter_fade() +
     exit_fade()
 
-  animate(p_anim, nframes = 80, fps = 8, width = 900, height = 500,
-          renderer = gifski_renderer())
+  tryCatch({
+    animate(p_anim,
+            nframes = n_snapshots * 4,
+            fps     = 4,
+            width   = 700,
+            height  = 400,
+            res     = 96,
+            renderer = gifski_renderer())
+  }, error = function(e) {
+    cat("Animation could not be rendered:", conditionMessage(e), "\n")
+  })
+
+} else {
+  cat("No rolling forecast data available — animation skipped.\n")
 }
+
 ```
 
 ---
@@ -465,8 +592,8 @@ if (!is.null(forecast_single) && nrow(forecast_single) > 0) {
 
 ```{r}
 #| label: fig-provincial
-#| fig-cap: "Weekly cases by province for vaccine-preventable conditions"
-#| fig-height: 8
+#| fig-cap: "Weekly cases by province for forecasted NMC conditions"
+#| fig-height: 10
 
 # Use raw aggregated data (province level)
 agg_prov_path <- file.path(data_dir, "agg_province.rds")
@@ -475,21 +602,21 @@ if (file.exists(agg_prov_path)) {
   agg_prov <- readRDS(agg_prov_path)
   setDT(agg_prov)
 
-  agg_prov_vp <- filter_vp_conditions(agg_prov, include_fever_rash = TRUE)
-  agg_prov_vp[, week_start := floor_date(date, "week")]
+  agg_prov_fc <- filter_forecast_conditions(agg_prov, include_fever_rash = TRUE)
+  agg_prov_fc[, week_start := floor_date(date, "week")]
 
-  prov_weekly <- agg_prov_vp[, .(cases = sum(confirm, na.rm = TRUE)),
+  prov_weekly <- agg_prov_fc[, .(cases = sum(confirm, na.rm = TRUE)),
                               by = .(condition, prov_, week_start)]
   prov_weekly <- prov_weekly[cases > 0]
 
   if (nrow(prov_weekly) > 0) {
     p_prov <- ggplot(prov_weekly, aes(x = week_start, y = cases, fill = prov_)) +
       geom_col(alpha = 0.8, width = 6) +
-      facet_wrap(~ condition, scales = "free_y", ncol = 1) +
+      facet_wrap(~ condition, scales = "free_y", ncol = 2) +
       scale_x_date(date_breaks = "3 months", date_labels = "%b %Y") +
       scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
       labs(
-        title = "Provincial distribution of vaccine-preventable conditions",
+        title = "Provincial distribution of forecasted NMC conditions",
         x = NULL, y = "Weekly cases", fill = "Province"
       ) +
       theme_nmc
@@ -497,7 +624,7 @@ if (file.exists(agg_prov_path)) {
     ggplotly(p_prov, tooltip = c("x", "y", "fill")) %>%
       layout(legend = list(orientation = "h", y = -0.1))
   } else {
-    cat("No provincial data available for the selected VP conditions.\n")
+    cat("No provincial data available for the selected conditions.\n")
   }
 } else {
   cat("Provincial aggregated data not found. Run `Rscript R/prepare_dashboard_data.r` first.\n")
@@ -600,6 +727,7 @@ This produces for each vaccine-preventable condition:
 | File | Contents |
 |---|---|
 | `forecasts_<condition>.rds` | Single-point EpiNow2 summary (Rt, cases, infections) |
+| `forecasts_obj_<condition>.rds` | Full EpiNow2 result object (for native `plot()` diagnostics) |
 | `forecasts_rolling_<condition>.rds` | Rolling snapshots for animated outlook |
 | `forecasts_meta.rds` | Run timestamp and parameters |
 
@@ -617,7 +745,7 @@ Edit the constants at the top of `R/run_forecasts.r` to adjust:
 
 | Parameter | Default | Description |
 |---|---|---|
-| `HORIZON` | 21 | Days to forecast ahead |
+| `HORIZON` | 28 | Days to forecast ahead (4 weeks) |
 | `LOOKBACK` | 360 | Days of history for each model run |
 | `N_REWINDS` | 8 | Number of rolling snapshots |
 | `REWIND_STEP` | 7 | Days between snapshots |
@@ -626,27 +754,110 @@ Edit the constants at the top of `R/run_forecasts.r` to adjust:
 
 1. Ensure the condition appears in `agg_national.rds` (via `prepare_dashboard_data.r`)
 2. Add disease parameters in `R/epinow2_functions.r` → `disease_params()` function
-3. Add the condition name to `vp_conditions()` in the same file
+3. Add the condition name to `forecast_conditions()` in the same file
 4. Re-run `Rscript R/run_forecasts.r`
 
 ---
 
-## Methods & Assumptions {#methods}
+## Model Assumptions & Parameters {#assumptions}
+
+The table below shows the **disease-specific parameters** fed into each EpiNow2 forecast.
+These are defined in `R/epinow2_functions.r` → `disease_params()` and sourced from
+peer-reviewed epidemiological literature.
+The **Reference** column cites the primary source for each parameter set — check these
+when validating or updating assumptions.
+
+```{r}
+#| label: tbl-assumptions
+#| tbl-cap: "EpiNow2 model parameters by condition (with literature references)"
+#| cache: false
+
+# Build the assumptions table from the helper function
+assumptions_df <- disease_params_table()
+
+flextable(assumptions_df) %>%
+  set_header_labels(
+    Condition          = "Condition",
+    Generation_Time    = "Generation Time",
+    Incubation_Period  = "Incubation Period",
+    Rt_Prior           = "Rt Prior",
+    Reporting_Delay    = "Reporting Delay",
+    In_Plain_Language  = "What This Means",
+    Reference          = "Reference"
+  ) %>%
+  theme_vanilla() %>%
+  autofit() %>%
+  fontsize(size = 9, part = "all") %>%
+  fontsize(size = 8, j = "Reference", part = "body") %>%
+  fontsize(size = 8, j = "In_Plain_Language", part = "body") %>%
+  bold(part = "header") %>%
+  width(j = "In_Plain_Language", width = 3.5) %>%
+  width(j = "Reference", width = 2.5) %>%
+  add_footer_lines("Generation time ≈ serial interval where direct measurement is unavailable. Incubation period = time from exposure to symptom onset. All distributions are Gamma. Reporting delay: default LogNormal(mean=3, sd=2, max=15) when empirical delay data is unavailable.")
+```
+
+::: {.callout-tip}
+### Reading the parameters
+
+| Parameter | What it controls | Why it matters |
+|---|---|---|
+| **Generation time** | Average time between successive infections in a chain (≈ serial interval) | Determines how fast $R_t$ changes translate into case-count changes |
+| **Incubation period** | Time from infection/exposure to symptom onset | Affects the delay between infection dynamics and observed cases |
+| **$R_t$ prior** | Starting assumption for reproduction number | Weakly informative — the model quickly learns from data |
+| **Reporting delay** | Time from symptom onset to NMC notification | Accounts for the surveillance lag between illness and official capture |
+| **What This Means** | Plain-language summary of all parameters for this condition | Helps non-technical readers understand what the model assumes |
+| **Reference** | Primary literature source | Used for validation — update if newer estimates become available |
+:::
+
+::: {.callout-important}
+### How to adjust parameters
+
+To update parameter values for a condition:
+
+1. Open `R/epinow2_functions.r`
+2. Find the condition in `disease_params()` (search for the condition name in lowercase)
+3. Change `mean`, `sd`, `max` values to match your preferred literature source
+4. Update the `reference` string to cite the new source
+5. Re-run: `Rscript R/run_forecasts.r`
+6. Re-render: `quarto render by-forecasts/index.qmd`
+
+Example — changing measles generation time to use a new study:
+
+```r
+"fever-rash" = , "measles" = list(
+  generation_time   = EpiNow2::Gamma(mean = 11.0, sd = 2.5, max = 20),
+  # ↑ changed from 11.7 to 11.0 based on New Study (2026)
+  incubation_period = EpiNow2::Gamma(mean = 12.5, sd = 2.3, max = 21),
+  rt_prior          = list(mean = 2, sd = 1),
+  reference         = "New Study (2026) Journal Name DOI:..."
+),
+```
+:::
+
+---
+
+## Methods & Technical Details {#methods}
 
 ::: {.callout-note collapse="true"}
 ### Technical details (click to expand)
 
-**Model:** EpiNow2 v2.x – a Bayesian semi-mechanistic model that jointly estimates the effective reproduction number ($R_t$), infection incidence, and reporting patterns.
+**Model:** EpiNow2 v`r as.character(packageVersion("EpiNow2"))` – a Bayesian semi-mechanistic model that jointly estimates the effective reproduction number ($R_t$), infection incidence, and reporting patterns. The model is fitted using Hamiltonian Monte Carlo via CmdStan. A **day-of-week effect** is enabled (`obs_opts(week_effect = TRUE)`) to account for lower weekend reporting.
 
-**Reporting delay:** Estimated from the empirical distribution of `symptom_date → notification_date` in the NMC data (capped at 15 days, fitted via `EpiNow2::estimate_delay()`). When insufficient data is available, a `LogNormal(mean=3, sd=2)` prior is used.
+**Display smoothing:** All custom forecast plots apply a **7-day rolling average** to both the observed surveillance series and the EpiNow2 median / credible-interval outputs. This removes residual day-of-week jaggedness and highlights the underlying epidemic trend.
 
-**Generation time & incubation period:** Condition-specific Gamma distributions from published literature. See `R/epinow2_functions.r` → `disease_params()` for exact parameters.
+**Reporting delay:** When empirical symptom→notification dates are available in the NMC data, the delay distribution is estimated via `EpiNow2::estimate_delay()` (capped at 15 days, max 100 observations). Otherwise a default `LogNormal(mean=3, sd=2, max=15)` prior is used.
 
-**Priors:** $R_t$ prior is set at `Normal(mean=2, sd=1)` for all vaccine-preventable conditions.
+**Generation time & incubation period:** Condition-specific Gamma distributions from published peer-reviewed literature. Key sources: Lessler et al. (2009) for measles/rubella; Vink et al. (2014) for serial intervals; Azman et al. (2013) for cholera; Park et al. (2023) for COVID-19 Omicron estimates. See the parameter table above for full citations. These are fixed inputs — not estimated from the data.
+
+**Priors:** $R_t$ priors are weakly informative: `Normal(2, 1)` for directly-transmitted pathogens, `Normal(1.5, 0.5)` for vector-borne / lower-Rt conditions. The model quickly learns from data.
+
+**Forecast horizon:** `r if (!is.null(meta)) meta$horizon else 28` days (4 weeks) ahead from the last observation date.
+
+**History window:** `r if (!is.null(meta)) meta$lookback else 360` days of surveillance data fed to each model run.
 
 **Completeness / Timeliness:** The NMC is a passive surveillance system; under-reporting varies by condition and province. Forecasts represent **reported** cases, not true incidence.
 
-**Rolling forecast animation:** Re-runs the model 8 times (weekly snapshots), each using data up to that snapshot date, to visualise how the forecast evolves as new data arrives.
+**Rolling forecast animation:** Re-runs the model `r if (!is.null(meta)) meta$n_rewinds else 8` times (weekly snapshots), each using data up to that snapshot date, to visualise how the forecast outlook evolved over time.
 :::
 
 ---

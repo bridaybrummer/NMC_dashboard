@@ -1,75 +1,521 @@
 ---
 title: "Data Explorer"
-subtitle: "Interactive condition, date & location selector with visualisations and data downloads"
+subtitle: "Interactive surveillance explorer organised by NMC notification category"
 format:
   html:
     page-layout: full
     toc: true
-    toc-depth: 2
+    toc-depth: 3
 ---
 
-::: {.callout-note collapse="true"}
-## Development Roadmap — Explorer
+```{r}
+#| label: setup
+#| include: false
+#| message: false
+#| warning: false
 
-| Phase | Feature | Status |
-|-------|---------|--------|
-| **v0.1** | Condition / date-range / province multi-selector | 🔲 Planned |
-| **v0.1** | Epicurve visualisation (weekly / monthly toggle) | 🔲 Planned |
-| **v0.2** | Interactive map visualisation (Leaflet choropleth) | 🔲 Planned |
-| **v0.2** | Descriptive statistics summary card | 🔲 Planned |
-| **v0.3** | Searchable data table with sorting & pagination | 🔲 Planned |
-| **v0.3** | Data download (CSV / Excel / PDF) | 🔲 Planned |
-| **v0.4** | Age–sex stratification toggle | 🔲 Planned |
-| **v0.5** | Bookmark / share filtered view via URL parameters | 🔲 Planned |
+suppressPackageStartupMessages({
+  library(data.table)
+  library(plotly)
+  library(crosstalk)
+  library(DT)
+  library(lubridate)
+  library(htmltools)
+})
 
-*Data pipeline:* `R/prepare_dashboard_data.r` → `data/processed/`
+source("R/nmc_categories.r")
+
+# ── Load national & provincial data ──────────────────────────────────────────
+agg_nat  <- readRDS("data/processed/agg_national.rds")
+agg_prov <- readRDS("data/processed/agg_province.rds")
+setDT(agg_nat); setDT(agg_prov)
+
+# Assign NMC categories
+agg_nat  <- assign_nmc_category(agg_nat)
+agg_prov <- assign_nmc_category(agg_prov)
+agg_prov <- agg_prov[!is.na(prov_) & prov_ != ""]
+
+agg_nat[, date := as.Date(date)]
+agg_prov[, date := as.Date(date)]
+
+latest_date <- max(agg_nat$date, na.rm = TRUE)
+month_start <- floor_date(latest_date, "month")
+
+# ── Category colour palette ──────────────────────────────────────────────────
+cat_colours <- c(
+  "1" = "#d9534f",
+  "2" = "#5bc0de",
+  "3" = "#5cb85c",
+  "4" = "#f0ad4e",
+  "0" = "#999999"
+)
+
+# ── National summaries ───────────────────────────────────────────────────────
+nat_weekly <- agg_nat[, .(cases = sum(count, na.rm = TRUE)),
+                      by = .(Week = floor_date(date, "week"), Condition = condition, nmc_category)]
+nat_monthly <- agg_nat[, .(cases = sum(count, na.rm = TRUE)),
+                       by = .(Month = floor_date(date, "month"), Condition = condition, nmc_category)]
+nat_current <- agg_nat[date >= month_start,
+                       .(cases = sum(count, na.rm = TRUE)),
+                       by = .(Condition = condition, nmc_category)]
+nat_current[, Category := nmc_category_short(nmc_category)]
+setorder(nat_current, nmc_category, -cases)
+
+# Category-level KPIs
+cat_kpis <- nat_current[, .(
+  total    = sum(cases),
+  n_cond   = uniqueN(Condition[cases > 0]),
+  top_cond = Condition[which.max(cases)],
+  top_n    = max(cases)
+), by = .(nmc_category)]
+setorder(cat_kpis, nmc_category)
+
+# ── Province summary for current month ───────────────────────────────────────
+prov_current <- agg_prov[date >= month_start,
+                         .(cases = sum(count, na.rm = TRUE)),
+                         by = .(Province = prov_, Condition = condition, nmc_category)]
+prov_current[, Category := nmc_category_short(nmc_category)]
+```
+
+The **Data Explorer** lets you query NMC surveillance data organised by the four regulatory notification categories. **Category 1 conditions are highlighted first** — they require immediate public health action. Category 2 supports trend monitoring for higher-volume conditions like TB and schistosomiasis.
+
+**Data through:** `r format(latest_date, "%d %B %Y")`
+
+---
+
+## Category Overview
+
+```{r}
+#| label: kpi-cards
+#| results: asis
+#| echo: false
+for (i in seq_len(nrow(cat_kpis))) {
+  cnum  <- cat_kpis$nmc_category[i]
+  clbl  <- nmc_category_label(cnum)
+  col   <- cat_colours[as.character(cnum)]
+  txtcol <- if (cnum == 4) "text-dark" else "text-white"
+  cat(sprintf(
+    '::: {.card .p-3 .text-center style="background-color:%s; color:%s; margin-bottom:0.8rem;"}\n**%s**\n\n### %s cases\n<span style="font-size:0.85rem;">%d conditions reporting &nbsp;|&nbsp; Top: %s (%s)</span>\n:::\n\n',
+    col, if (cnum == 4) "#333" else "white",
+    clbl, format(cat_kpis$total[i], big.mark = ","),
+    cat_kpis$n_cond[i], cat_kpis$top_cond[i],
+    format(cat_kpis$top_n[i], big.mark = ",")
+  ))
+}
+```
+
+---
+
+## Category 1 — Immediate Notification {#cat1}
+
+::: {.callout-important}
+## Requires immediate public health action
+Category 1 conditions must be notified within **24 hours**. These include diseases of high epidemic potential: cholera, measles, malaria, meningococcal disease, VHFs, and other nationally significant threats. This section is designed for **rapid situational awareness and action**.
 :::
 
-## About the Explorer
+```{r}
+#| label: cat1-data
+#| include: false
+cat1_current <- nat_current[nmc_category == 1]
+cat1_weekly  <- nat_weekly[nmc_category == 1]
+cat1_monthly <- nat_monthly[nmc_category == 1]
+cat1_prov    <- prov_current[nmc_category == 1]
+sd_cat1_prov <- SharedData$new(cat1_prov)
+```
 
-The **Data Explorer** is a self-service tool for epidemiologists and public health officials to query NMC surveillance data interactively. Use the filters below to build a custom view, then visualise or download the results.
+### National Snapshot {.tabset}
 
-::: {.panel-sidebar}
-### Filters
-*Interactive selectors will appear here once data integration is complete.*
+#### Current Month — Cases
 
-- **Condition** — multi-select from notifiable conditions list
-- **Date range** — start and end date picker
-- **Province** — one or more provinces
-- **District** — auto-filtered by province selection
+```{r}
+#| label: fig-cat1-bar
+if (nrow(cat1_current) > 0) {
+  plot_ly(cat1_current[cases > 0], x = ~reorder(Condition, -cases), y = ~cases,
+          type = "bar", marker = list(color = "#d9534f"),
+          hoverinfo = "text",
+          text = ~paste0(Condition, ": ", cases)) %>%
+    layout(xaxis = list(title = "", tickangle = -45),
+           yaxis = list(title = "Cases"),
+           margin = list(b = 140),
+           title = list(text = paste0("Category 1 — ", format(month_start, "%B %Y"))))
+} else {
+  p("No Category 1 notifications this month.", style = "color:gray;")
+}
+```
+
+#### Weekly Epicurve
+
+```{r}
+#| label: fig-cat1-weekly
+if (nrow(cat1_weekly) > 0) {
+  plot_ly(cat1_weekly, x = ~Week, y = ~cases, color = ~Condition,
+          type = "bar", hoverinfo = "text",
+          text = ~paste0(Condition, "<br>Week: ", format(Week, "%d %b %Y"),
+                         "<br>Cases: ", cases)) %>%
+    layout(barmode = "stack",
+           xaxis = list(title = "Week starting"),
+           yaxis = list(title = "Weekly cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  p("No Category 1 data.", style = "color:gray;")
+}
+```
+
+#### Monthly Trend
+
+```{r}
+#| label: fig-cat1-monthly
+if (nrow(cat1_monthly) > 0) {
+  plot_ly(cat1_monthly, x = ~Month, y = ~cases, color = ~Condition,
+          type = "scatter", mode = "lines+markers", marker = list(size = 5),
+          hoverinfo = "text",
+          text = ~paste0(Condition, "<br>", format(Month, "%b %Y"),
+                         "<br>Cases: ", cases)) %>%
+    layout(xaxis = list(title = "Month"),
+           yaxis = list(title = "Monthly cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  p("No Category 1 trend data.", style = "color:gray;")
+}
+```
+
+### By Province
+
+```{r}
+#| label: cat1-prov-filters
+div(
+  style = "display:flex; gap:2rem; flex-wrap:wrap; margin-bottom:1rem;",
+  div(style = "min-width:260px;", filter_select("cat1cond", "Condition", sd_cat1_prov, ~Condition)),
+  div(style = "min-width:180px;", filter_slider("cat1cases", "Cases ≥", sd_cat1_prov, ~cases, min = 0))
+)
+```
+
+```{r}
+#| label: fig-cat1-prov
+if (nrow(cat1_prov) > 0) {
+  plot_ly(sd_cat1_prov, x = ~Province, y = ~cases, color = ~Condition,
+          type = "bar", hoverinfo = "text",
+          text = ~paste0(Condition, "<br>", Province, ": ", cases)) %>%
+    layout(barmode = "stack",
+           xaxis = list(title = "Province", categoryorder = "total descending"),
+           yaxis = list(title = "Cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  p("No Category 1 provincial data.", style = "color:gray;")
+}
+```
+
+### Data Table
+
+```{r}
+#| label: tbl-cat1
+if (nrow(cat1_current) > 0) {
+  DT::datatable(
+    cat1_current[, .(Condition, Cases = cases)],
+    extensions = "Buttons", rownames = FALSE,
+    options = list(dom = "Bfrtip", buttons = c("csv", "excel"),
+                   pageLength = 30, order = list(list(1, "desc")))
+  )
+} else {
+  p("No Category 1 data to display.", style = "color:gray;")
+}
+```
+
+---
+
+## Category 2 — Routine Notification (Trend Monitoring) {#cat2}
+
+::: {.callout-note}
+## Higher-volume conditions for trend monitoring
+Category 2 conditions are notified within **7 days**. These are typically higher-volume diseases — tuberculosis (all forms), hepatitis A–E, schistosomiasis, congenital syphilis, poisonings, and maternal deaths. This section supports **quarterly trend analysis and routine reporting**.
 :::
 
-::: {.panel-fill}
+```{r}
+#| label: cat2-data
+#| include: false
+cat2_current <- nat_current[nmc_category == 2]
+cat2_weekly  <- nat_weekly[nmc_category == 2]
+cat2_monthly <- nat_monthly[nmc_category == 2]
+cat2_prov    <- prov_current[nmc_category == 2]
+sd_cat2_prov <- SharedData$new(cat2_prov)
+```
 
-### Epicurve {#epicurve}
+### National Snapshot {.tabset}
 
-*Coming soon — interactive epidemic curve with weekly/monthly aggregation toggle.*
+#### Current Month — Cases
+
+```{r}
+#| label: fig-cat2-bar
+if (nrow(cat2_current) > 0) {
+  plot_ly(cat2_current[cases > 0], x = ~reorder(Condition, -cases), y = ~cases,
+          type = "bar", marker = list(color = "#5bc0de"),
+          hoverinfo = "text",
+          text = ~paste0(Condition, ": ", cases)) %>%
+    layout(xaxis = list(title = "", tickangle = -45),
+           yaxis = list(title = "Cases"),
+           margin = list(b = 140),
+           title = list(text = paste0("Category 2 — ", format(month_start, "%B %Y"))))
+} else {
+  p("No Category 2 notifications this month.", style = "color:gray;")
+}
+```
+
+#### Weekly Epicurve
+
+```{r}
+#| label: fig-cat2-weekly
+if (nrow(cat2_weekly) > 0) {
+  plot_ly(cat2_weekly, x = ~Week, y = ~cases, color = ~Condition,
+          type = "bar", hoverinfo = "text",
+          text = ~paste0(Condition, "<br>Week: ", format(Week, "%d %b %Y"),
+                         "<br>Cases: ", cases)) %>%
+    layout(barmode = "stack",
+           xaxis = list(title = "Week starting"),
+           yaxis = list(title = "Weekly cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  p("No Category 2 data.", style = "color:gray;")
+}
+```
+
+#### Monthly Trend
+
+```{r}
+#| label: fig-cat2-monthly
+if (nrow(cat2_monthly) > 0) {
+  plot_ly(cat2_monthly, x = ~Month, y = ~cases, color = ~Condition,
+          type = "scatter", mode = "lines+markers", marker = list(size = 5),
+          hoverinfo = "text",
+          text = ~paste0(Condition, "<br>", format(Month, "%b %Y"),
+                         "<br>Cases: ", cases)) %>%
+    layout(xaxis = list(title = "Month"),
+           yaxis = list(title = "Monthly cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  p("No Category 2 trend data.", style = "color:gray;")
+}
+```
+
+#### Quarterly Summary
+
+```{r}
+#| label: fig-cat2-quarterly
+if (nrow(cat2_monthly) > 0) {
+  cat2_qtr <- cat2_monthly[, .(cases = sum(cases)),
+                            by = .(Quarter = floor_date(Month, "quarter"), Condition)]
+  plot_ly(cat2_qtr, x = ~Quarter, y = ~cases, color = ~Condition,
+          type = "bar", hoverinfo = "text",
+          text = ~paste0(Condition, "<br>Q", quarter(Quarter), " ",
+                         year(Quarter), "<br>Cases: ", cases)) %>%
+    layout(barmode = "stack",
+           xaxis = list(title = "Quarter"),
+           yaxis = list(title = "Quarterly cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  p("No Category 2 quarterly data.", style = "color:gray;")
+}
+```
+
+### By Province
+
+```{r}
+#| label: cat2-prov-filters
+div(
+  style = "display:flex; gap:2rem; flex-wrap:wrap; margin-bottom:1rem;",
+  div(style = "min-width:260px;", filter_select("cat2cond", "Condition", sd_cat2_prov, ~Condition)),
+  div(style = "min-width:180px;", filter_slider("cat2cases", "Cases ≥", sd_cat2_prov, ~cases, min = 0))
+)
+```
+
+```{r}
+#| label: fig-cat2-prov
+if (nrow(cat2_prov) > 0) {
+  plot_ly(sd_cat2_prov, x = ~Province, y = ~cases, color = ~Condition,
+          type = "bar", hoverinfo = "text",
+          text = ~paste0(Condition, "<br>", Province, ": ", cases)) %>%
+    layout(barmode = "stack",
+           xaxis = list(title = "Province", categoryorder = "total descending"),
+           yaxis = list(title = "Cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  p("No Category 2 provincial data.", style = "color:gray;")
+}
+```
+
+### Data Table
+
+```{r}
+#| label: tbl-cat2
+if (nrow(cat2_current) > 0) {
+  DT::datatable(
+    cat2_current[, .(Condition, Cases = cases)],
+    extensions = "Buttons", rownames = FALSE,
+    options = list(dom = "Bfrtip", buttons = c("csv", "excel"),
+                   pageLength = 30, order = list(list(1, "desc")))
+  )
+} else {
+  p("No Category 2 data to display.", style = "color:gray;")
+}
+```
 
 ---
 
-### Map {#map}
+## Category 3 — Sentinel Surveillance {#cat3}
 
-*Coming soon — Leaflet/Plotly choropleth map showing case distribution by geography.*
-
----
-
-### Descriptive Statistics {#descriptive-stats}
-
-*Coming soon — summary cards showing total cases, incidence rate, median age, CFR and other key indicators for the selected filter combination.*
-
----
-
-### Data Table {#data-table}
-
-*Coming soon — searchable, sortable table with CSV/Excel export buttons.*
-
+::: {.callout-tip collapse="true"}
+## Sentinel site monitoring
+Category 3 conditions are monitored through **sentinel surveillance** networks. These include arboviral diseases (Chikungunya, Sindbis, West Nile, Zika, Dengue), non-typhoidal Salmonellosis, STEC, Shigellosis, and resistant Gonorrhoea.
 :::
+
+```{r}
+#| label: cat3-data
+#| include: false
+cat3_current <- nat_current[nmc_category == 3]
+cat3_weekly  <- nat_weekly[nmc_category == 3]
+cat3_monthly <- nat_monthly[nmc_category == 3]
+```
+
+### National Snapshot {.tabset}
+
+#### Current Month
+
+```{r}
+#| label: fig-cat3-bar
+if (nrow(cat3_current) > 0) {
+  plot_ly(cat3_current[cases > 0], x = ~reorder(Condition, -cases), y = ~cases,
+          type = "bar", marker = list(color = "#5cb85c"),
+          hoverinfo = "text",
+          text = ~paste0(Condition, ": ", cases)) %>%
+    layout(xaxis = list(title = "", tickangle = -45),
+           yaxis = list(title = "Cases"), margin = list(b = 140))
+} else {
+  p("No Category 3 notifications this month.", style = "color:gray;")
+}
+```
+
+#### Monthly Trend
+
+```{r}
+#| label: fig-cat3-monthly
+if (nrow(cat3_monthly) > 0) {
+  plot_ly(cat3_monthly, x = ~Month, y = ~cases, color = ~Condition,
+          type = "scatter", mode = "lines+markers", marker = list(size = 5),
+          hoverinfo = "text",
+          text = ~paste0(Condition, "<br>", format(Month, "%b %Y"),
+                         "<br>Cases: ", cases)) %>%
+    layout(xaxis = list(title = "Month"), yaxis = list(title = "Monthly cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  p("No Category 3 trend data.", style = "color:gray;")
+}
+```
+
+### Data Table
+
+```{r}
+#| label: tbl-cat3
+if (nrow(cat3_current) > 0) {
+  DT::datatable(cat3_current[, .(Condition, Cases = cases)],
+    extensions = "Buttons", rownames = FALSE,
+    options = list(dom = "Bfrtip", buttons = c("csv", "excel"), pageLength = 20))
+} else {
+  p("No Category 3 data.", style = "color:gray;")
+}
+```
+
+---
+
+## Category 4 — AMR Organisms {#cat4}
+
+::: {.callout-warning collapse="true"}
+## Antimicrobial resistance monitoring
+Category 4 covers **antimicrobial-resistant organisms**: CPE, VRE, GISA/hGISA, colistin-resistant *Pseudomonas*/*Acinetobacter*, and *C. difficile*.
+:::
+
+```{r}
+#| label: cat4-data
+#| include: false
+cat4_current <- nat_current[nmc_category == 4]
+cat4_weekly  <- nat_weekly[nmc_category == 4]
+cat4_monthly <- nat_monthly[nmc_category == 4]
+```
+
+### National Snapshot {.tabset}
+
+#### Current Month
+
+```{r}
+#| label: fig-cat4-bar
+if (nrow(cat4_current) > 0) {
+  plot_ly(cat4_current[cases > 0], x = ~reorder(Condition, -cases), y = ~cases,
+          type = "bar", marker = list(color = "#f0ad4e"),
+          hoverinfo = "text",
+          text = ~paste0(Condition, ": ", cases)) %>%
+    layout(xaxis = list(title = "", tickangle = -45),
+           yaxis = list(title = "Cases"), margin = list(b = 140))
+} else {
+  p("No Category 4 notifications this month.", style = "color:gray;")
+}
+```
+
+#### Monthly Trend
+
+```{r}
+#| label: fig-cat4-monthly
+if (nrow(cat4_monthly) > 0) {
+  plot_ly(cat4_monthly, x = ~Month, y = ~cases, color = ~Condition,
+          type = "scatter", mode = "lines+markers", marker = list(size = 5),
+          hoverinfo = "text",
+          text = ~paste0(Condition, "<br>", format(Month, "%b %Y"),
+                         "<br>Cases: ", cases)) %>%
+    layout(xaxis = list(title = "Month"), yaxis = list(title = "Monthly cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  p("No Category 4 trend data.", style = "color:gray;")
+}
+```
+
+### Data Table
+
+```{r}
+#| label: tbl-cat4
+if (nrow(cat4_current) > 0) {
+  DT::datatable(cat4_current[, .(Condition, Cases = cases)],
+    extensions = "Buttons", rownames = FALSE,
+    options = list(dom = "Bfrtip", buttons = c("csv", "excel"), pageLength = 20))
+} else {
+  p("No Category 4 data.", style = "color:gray;")
+}
+```
+
+---
+
+## All Conditions — Full Download
+
+```{r}
+#| label: tbl-all-explorer
+DT::datatable(
+  nat_current[order(nmc_category, -cases),
+              .(Category, Condition, Cases = cases)],
+  extensions = "Buttons",
+  filter = "top",
+  rownames = FALSE,
+  options = list(
+    dom = "Bfrtip",
+    buttons = c("csv", "excel", "pdf"),
+    pageLength = 50,
+    scrollX = TRUE,
+    order = list(list(2, "desc"))
+  ),
+  caption = paste0("All notifiable conditions — ", format(month_start, "%B %Y"))
+)
+```
 
 ---
 
 ::: {.callout-tip}
 ## Related Sections
-- [By Province](../by-province/index.html) — pre-built provincial summaries
+- [By Province](../by-province/index.html) — provincial summaries organised by NMC category
 - [By Condition](../by-condition/index.html) — condition-specific national trends
 - [Trending](../by-trending/index.html) — signal detection and alert log
 - [Forecasts](../by-forecasts/index.html) — short-term predictive models

@@ -1,11 +1,11 @@
 ---
 title: "By Province"
-subtitle: "Provincial summary of notifiable conditions — counts, incidence & district drilldown"
+subtitle: "Provincial surveillance organised by NMC notification category — Category 1 for immediate action, Category 2 for trend monitoring"
 format:
   html:
     page-layout: full
     toc: true
-    toc-depth: 2
+    toc-depth: 3
 ---
 
 ::: {.callout-note collapse="true"}
@@ -16,6 +16,7 @@ format:
 | **v0.1** | Monthly case counts by province × condition (interactive bar chart) | ✅ Done |
 | **v0.1** | Incidence per 100 000 dot-plot, filterable by condition | ✅ Done |
 | **v0.1** | Searchable & downloadable data table (CSV / Excel) | ✅ Done |
+| **v0.1** | NMC category organisation (Cat 1–4 tabs) | ✅ Done |
 | **v0.2** | Leaflet choropleth map — province-level counts | 🔲 Planned |
 | **v0.2** | District drilldown table per province | 🔲 Planned |
 | **v0.3** | Click-to-zoom district maps with Leaflet + lightbox | 🔲 Planned |
@@ -41,65 +42,93 @@ suppressPackageStartupMessages({
   library(htmltools)
 })
 
-# ── Load processed data (execute-dir: project ⇒ paths from project root) ──
+source("R/nmc_categories.r")
+
+# ── Load processed data ──────────────────────────────────────────────────────
 agg_prov <- readRDS("data/processed/agg_province.rds")
 setDT(agg_prov)
-
-# Safety: drop any NA provinces produced by CJ expansion
 agg_prov <- agg_prov[!is.na(prov_) & prov_ != ""]
+agg_prov[, date := as.Date(date)]
+
+# Assign NMC categories
+agg_prov <- assign_nmc_category(agg_prov)
 
 latest_date <- max(agg_prov$date)
 month_start <- floor_date(latest_date, "month")
 
-# Monthly summary: province × condition
-prov_month <- agg_prov[date >= month_start, .(
-  cases          = sum(count),
-  incidence_100k = round(sum(count) / first(pop) * 1e5, 2)
-), by = .(Province = prov_, Condition = condition)]
-
-# Shared data for linked filtering
-sd <- SharedData$new(prov_month)
-```
-
-## Filters
-
-Use these controls to filter all plots and the table below.
-
-```{r}
-#| label: filters
-div(
-  style = "display:flex; gap:2rem; flex-wrap:wrap; margin-bottom:1.5rem;",
-  div(style = "min-width:220px;", filter_select("cond", "Condition", sd, ~Condition)),
-  div(style = "min-width:180px;", filter_slider("cases", "Cases ≥", sd, ~cases, min = 0))
+# ── Category colour palette ──────────────────────────────────────────────────
+cat_colours <- c(
+  "1" = "#d9534f", "2" = "#5bc0de", "3" = "#5cb85c",
+  "4" = "#f0ad4e", "0" = "#999999"
 )
+
+# ── Monthly summary: province × condition × category ─────────────────────────
+prov_month <- agg_prov[date >= month_start, .(
+  cases          = sum(count, na.rm = TRUE),
+  incidence_100k = round(sum(count, na.rm = TRUE) / first(pop) * 1e5, 2)
+), by = .(Province = prov_, Condition = condition, nmc_category)]
+prov_month[, Category := nmc_category_short(nmc_category)]
+
+# ── Category totals per province ─────────────────────────────────────────────
+cat_prov_totals <- prov_month[, .(
+  total_cases = sum(cases),
+  n_conditions = uniqueN(Condition[cases > 0])
+), by = .(Province, nmc_category, Category)]
+setorder(cat_prov_totals, nmc_category, -total_cases)
 ```
+
+Provincial surveillance data organised by NMC notification category. **Category 1 conditions appear first** — they require immediate public health action. Category 2 supports trend monitoring for higher-volume routine conditions.
 
 **Data through:** `r format(latest_date, "%d %B %Y")`
 
 ---
 
-## Cases by Province {.tabset}
+## Category 1 — Immediate Notification {#cat1}
 
-### Stacked Bar Chart
+::: {.callout-important}
+## Requires immediate public health action
+Category 1 conditions must be notified within **24 hours**. Includes cholera, measles, malaria, meningococcal disease, VHFs, and other nationally significant threats. **Use this section for rapid situational awareness across provinces.**
+:::
 
 ```{r}
-#| label: fig-prov-bar
-#| fig-cap: "Monthly case counts stacked by condition (current month)"
-plot_ly(sd, x = ~Province, y = ~cases, color = ~Condition,
+#| label: cat1-data
+#| include: false
+cat1_prov <- prov_month[nmc_category == 1]
+sd_cat1   <- SharedData$new(cat1_prov)
+```
+
+### Filters
+
+```{r}
+#| label: cat1-filters
+div(
+  style = "display:flex; gap:2rem; flex-wrap:wrap; margin-bottom:1.5rem;",
+  div(style = "min-width:260px;", filter_select("cat1cond", "Condition", sd_cat1, ~Condition)),
+  div(style = "min-width:180px;", filter_slider("cat1cases", "Cases ≥", sd_cat1, ~cases, min = 0))
+)
+```
+
+### Cases by Province {.tabset}
+
+#### Stacked Bar Chart
+
+```{r}
+#| label: fig-cat1-bar
+plot_ly(sd_cat1, x = ~Province, y = ~cases, color = ~Condition,
         type = "bar", hoverinfo = "text",
         text = ~paste0(Condition, "<br>", Province, ": ", cases, " cases")) %>%
   layout(barmode = "stack",
          xaxis = list(title = "Province", categoryorder = "total descending"),
          yaxis = list(title = "Cases"),
-         legend = list(orientation = "h", y = -0.2))
+         legend = list(orientation = "h", y = -0.2),
+         title = list(text = "Category 1 — Immediate Notification"))
 ```
 
-### Incidence Dot-plot
+#### Incidence Dot-plot
 
 ```{r}
-#| label: fig-prov-incidence
-#| fig-cap: "Incidence per 100 000 population by province (current month)"
-plot_ly(sd, x = ~Province, y = ~incidence_100k, color = ~Condition,
+#| label: fig-cat1-incidence
+plot_ly(sd_cat1, x = ~Province, y = ~incidence_100k, color = ~Condition,
         type = "scatter", mode = "markers",
         marker = list(size = 10, opacity = 0.8),
         hoverinfo = "text",
@@ -110,19 +139,19 @@ plot_ly(sd, x = ~Province, y = ~incidence_100k, color = ~Condition,
          legend = list(orientation = "h", y = -0.2))
 ```
 
-### Data Table
+#### Data Table
 
 ```{r}
-#| label: tbl-prov-data
+#| label: tbl-cat1-data
 DT::datatable(
-  sd,
+  sd_cat1,
   extensions = "Buttons",
   filter   = "top",
   rownames = FALSE,
   options  = list(
     dom        = "Bfrtip",
     buttons    = c("csv", "excel", "pdf"),
-    pageLength = 20,
+    pageLength = 30,
     scrollX    = TRUE
   )
 )
@@ -130,9 +159,208 @@ DT::datatable(
 
 ---
 
+## Category 2 — Routine Notification (Trend Monitoring) {#cat2}
+
+::: {.callout-note}
+## Higher-volume conditions for quarterly trend reports
+Category 2 conditions are notified within **7 days**. Includes TB (all forms), hepatitis A–E, schistosomiasis (bilharzia), congenital syphilis, poisonings, and maternal deaths. **Use this section for routine monitoring and quarterly reporting.**
+:::
+
+```{r}
+#| label: cat2-data
+#| include: false
+cat2_prov <- prov_month[nmc_category == 2]
+sd_cat2   <- SharedData$new(cat2_prov)
+```
+
+### Filters
+
+```{r}
+#| label: cat2-filters
+div(
+  style = "display:flex; gap:2rem; flex-wrap:wrap; margin-bottom:1.5rem;",
+  div(style = "min-width:260px;", filter_select("cat2cond", "Condition", sd_cat2, ~Condition)),
+  div(style = "min-width:180px;", filter_slider("cat2cases", "Cases ≥", sd_cat2, ~cases, min = 0))
+)
+```
+
+### Cases by Province {.tabset}
+
+#### Stacked Bar Chart
+
+```{r}
+#| label: fig-cat2-bar
+plot_ly(sd_cat2, x = ~Province, y = ~cases, color = ~Condition,
+        type = "bar", hoverinfo = "text",
+        text = ~paste0(Condition, "<br>", Province, ": ", cases, " cases")) %>%
+  layout(barmode = "stack",
+         xaxis = list(title = "Province", categoryorder = "total descending"),
+         yaxis = list(title = "Cases"),
+         legend = list(orientation = "h", y = -0.2),
+         title = list(text = "Category 2 — Routine Notification"))
+```
+
+#### Incidence Dot-plot
+
+```{r}
+#| label: fig-cat2-incidence
+plot_ly(sd_cat2, x = ~Province, y = ~incidence_100k, color = ~Condition,
+        type = "scatter", mode = "markers",
+        marker = list(size = 10, opacity = 0.8),
+        hoverinfo = "text",
+        text = ~paste0(Condition, "<br>", Province,
+                       ": ", incidence_100k, " per 100k")) %>%
+  layout(yaxis = list(title = "Incidence per 100 000"),
+         xaxis = list(title = "Province"),
+         legend = list(orientation = "h", y = -0.2))
+```
+
+#### Data Table
+
+```{r}
+#| label: tbl-cat2-data
+DT::datatable(
+  sd_cat2,
+  extensions = "Buttons",
+  filter   = "top",
+  rownames = FALSE,
+  options  = list(
+    dom        = "Bfrtip",
+    buttons    = c("csv", "excel", "pdf"),
+    pageLength = 30,
+    scrollX    = TRUE
+  )
+)
+```
+
+---
+
+## Category 3 — Sentinel Surveillance {#cat3}
+
+::: {.callout-tip collapse="true"}
+## Sentinel site monitoring
+Category 3 covers arboviral diseases (Chikungunya, Sindbis, West Nile, Zika, Dengue), non-typhoidal Salmonellosis, STEC, Shigellosis, and resistant Gonorrhoea.
+:::
+
+```{r}
+#| label: cat3-data
+#| include: false
+cat3_prov <- prov_month[nmc_category == 3]
+sd_cat3   <- SharedData$new(cat3_prov)
+```
+
+### Cases by Province {.tabset}
+
+#### Stacked Bar Chart
+
+```{r}
+#| label: fig-cat3-bar
+if (nrow(cat3_prov) > 0) {
+  plot_ly(sd_cat3, x = ~Province, y = ~cases, color = ~Condition,
+          type = "bar", hoverinfo = "text",
+          text = ~paste0(Condition, "<br>", Province, ": ", cases)) %>%
+    layout(barmode = "stack",
+           xaxis = list(title = "Province", categoryorder = "total descending"),
+           yaxis = list(title = "Cases"),
+           legend = list(orientation = "h", y = -0.2),
+           title = list(text = "Category 3 — Sentinel Surveillance"))
+} else {
+  htmltools::p("No Category 3 data this month.", style = "color:gray;")
+}
+```
+
+#### Data Table
+
+```{r}
+#| label: tbl-cat3-data
+if (nrow(cat3_prov) > 0) {
+  DT::datatable(sd_cat3, extensions = "Buttons", filter = "top",
+    rownames = FALSE,
+    options = list(dom = "Bfrtip", buttons = c("csv", "excel"),
+                   pageLength = 20, scrollX = TRUE))
+} else {
+  htmltools::p("No Category 3 data to display.", style = "color:gray;")
+}
+```
+
+---
+
+## Category 4 — AMR Organisms {#cat4}
+
+::: {.callout-warning collapse="true"}
+## Antimicrobial resistance monitoring
+Category 4 covers CPE, VRE, GISA/hGISA, colistin-resistant *Pseudomonas*/*Acinetobacter*, and *C. difficile*.
+:::
+
+```{r}
+#| label: cat4-data
+#| include: false
+cat4_prov <- prov_month[nmc_category == 4]
+sd_cat4   <- SharedData$new(cat4_prov)
+```
+
+### Cases by Province {.tabset}
+
+#### Stacked Bar Chart
+
+```{r}
+#| label: fig-cat4-bar
+if (nrow(cat4_prov) > 0) {
+  plot_ly(sd_cat4, x = ~Province, y = ~cases, color = ~Condition,
+          type = "bar", hoverinfo = "text",
+          text = ~paste0(Condition, "<br>", Province, ": ", cases)) %>%
+    layout(barmode = "stack",
+           xaxis = list(title = "Province", categoryorder = "total descending"),
+           yaxis = list(title = "Cases"),
+           legend = list(orientation = "h", y = -0.2),
+           title = list(text = "Category 4 — AMR Organisms"))
+} else {
+  htmltools::p("No Category 4 data this month.", style = "color:gray;")
+}
+```
+
+#### Data Table
+
+```{r}
+#| label: tbl-cat4-data
+if (nrow(cat4_prov) > 0) {
+  DT::datatable(sd_cat4, extensions = "Buttons", filter = "top",
+    rownames = FALSE,
+    options = list(dom = "Bfrtip", buttons = c("csv", "excel"),
+                   pageLength = 20, scrollX = TRUE))
+} else {
+  htmltools::p("No Category 4 data to display.", style = "color:gray;")
+}
+```
+
+---
+
+## All Categories — Summary Table
+
+```{r}
+#| label: tbl-all-prov
+all_prov <- prov_month[order(nmc_category, Province, -cases)]
+DT::datatable(
+  all_prov[, .(Category, Province, Condition, Cases = cases,
+               `Incidence /100k` = incidence_100k)],
+  extensions = "Buttons",
+  filter = "top",
+  rownames = FALSE,
+  options = list(
+    dom = "Bfrtip",
+    buttons = c("csv", "excel", "pdf"),
+    pageLength = 30,
+    scrollX = TRUE
+  ),
+  caption = paste0("All conditions by NMC category and province — ", format(month_start, "%B %Y"))
+)
+```
+
+---
+
 ## Province Sub-pages
 
-Individual province dashboards with district-level drilldowns:
+Individual province dashboards with district-level drilldowns organised by NMC category:
 
 ::: {layout-ncol=3}
 [Eastern Cape](ec/index.html){.btn .btn-outline-primary .btn-sm}

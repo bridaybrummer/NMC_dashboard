@@ -1,0 +1,83 @@
+---
+title: "Glossary"
+subtitle: "Abbreviations, indicators & epidemiological terms"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+---
+
+## Abbreviations
+
+| Abbreviation | Full Form |
+|---|---|
+| **ASR** | Age-Standardised Rate |
+| **BoD** | Burden of Disease |
+| **CDC** | Centers for Disease Control and Prevention |
+| **CFR** | Case Fatality Rate / Ratio |
+| **CI** | Credible / Confidence Interval |
+| **CUSUM** | Cumulative Sum (signal detection algorithm) |
+| **DALY** | Disability-Adjusted Life Year |
+| **DoH** | Department of Health |
+| **EARS** | Early Aberration Reporting System |
+| **EC** | Eastern Cape |
+| **FS** | Free State |
+| **GBD** | Global Burden of Disease |
+| **GP** | Gauteng |
+| **IDSR** | Integrated Disease Surveillance and Response |
+| **KZN** | KwaZulu-Natal |
+| **LP** | Limpopo |
+| **MFL** | Master Facility List |
+| **MP** | Mpumalanga |
+| **MYPE** | Mid-Year Population Estimates |
+| **NC** | Northern Cape |
+| **NDoH** | National Department of Health |
+| **NMC** | Notifiable Medical Conditions |
+| **NW** | North West |
+| **Rt** | Effective Reproduction Number |
+| **RSV** | Respiratory Syncytial Virus |
+| **SAMRC** | South African Medical Research Council |
+| **Stats SA** | Statistics South Africa |
+| **WC** | Western Cape |
+| **WHO** | World Health Organization |
+| **YLD** | Years Lived with Disability |
+| **YLL** | Years of Life Lost |
+
+---
+
+## Key Indicators
+
+| Indicator | Definition |
+|---|---|
+| **Incidence rate** | Number of new cases per 100 000 population over a defined period |
+| **CFR** | Proportion of diagnosed cases that result in death |
+| **Rt** | Average number of secondary infections caused by one case at time *t* |
+| **YLL** | Years of potential life lost due to premature death |
+| **YLD** | Years lived in less-than-full health due to illness |
+| **DALY** | Total burden = YLL + YLD — one DALY = one year of healthy life lost |
+| **ASR** | Rate adjusted for age distribution to allow fair comparison between populations |
+| **Completeness** | Proportion of expected surveillance reports actually received |
+| **Timeliness** | Time between event occurrence and its entry in the surveillance system |
+
+---
+
+## Epidemiological Terms
+
+| Term | Definition |
+|---|---|
+| **Epicurve** | A histogram of case counts over time, used to visualise the course of an outbreak |
+| **Signal** | A statistical anomaly in surveillance data that warrants investigation |
+| **Nowcast** | An estimate of current case counts adjusted for reporting delays |
+| **Forecast** | A probabilistic estimate of future case counts based on current trends |
+| **Choropleth** | A map in which areas are shaded proportional to a statistical variable |
+| **Drilldown** | Navigating from a summary view to more granular detail (e.g., province → district) |
+| **Baseline** | A reference level of disease activity, typically derived from historical data |
+
+---
+
+::: {.callout-tip}
+## Related Pages
+- [Methods](methods.html) — full technical documentation
+- [About](about.html) — credits and contact information
+- [Home](index.html) — return to the main dashboard
+:::
