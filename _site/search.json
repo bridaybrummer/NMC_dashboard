@@ -791,7 +791,14 @@
     "href": "overview.html#national-epicurve-weekly",
     "title": "National Overview",
     "section": "National Epicurve — Weekly",
-    "text": "National Epicurve — Weekly\n\n\n\n\n\n\n\n\nFigure 2: All notifiable conditions combined, weekly\n\n\n\n\n\n\n\n\n\n\n\nTipDrill Down Further\n\n\n\n\nBy Province — detailed provincial breakdowns with district drilldown\nBy Condition — condition-level national trends and hotspots\nTrending — signal detection for emerging conditions\nExplorer — custom queries and data downloads\nData Quality — reporting completeness and timeliness metrics"
+    "text": "National Epicurve — Weekly\n\n\n\n\n\n\n\n\nFigure 2: All notifiable conditions combined, weekly"
+  },
+  {
+    "objectID": "overview.html#surveillance-performance",
+    "href": "overview.html#surveillance-performance",
+    "title": "National Overview",
+    "section": "Surveillance Performance",
+    "text": "Surveillance Performance\n\nCases by SourceTimeliness (Median Days)\n\n\n\n\n\n\n\n\n\n\nFigure 3: Notifications by Case Type (Clinical vs Lab etc.)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 4: Median days to notification by condition (last 12 months)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipDrill Down Further\n\n\n\n\nBy Province — detailed provincial breakdowns with district drilldown\nBy Condition — condition-level national trends and hotspots\nTrending — signal detection for emerging conditions\nExplorer — custom queries and data downloads\nData Quality — reporting completeness and timeliness metrics"
   },
   {
     "objectID": "methods.html",

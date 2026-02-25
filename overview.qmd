@@ -41,6 +41,20 @@ agg_nat  <- readRDS("data/processed/agg_national.rds")
 agg_prov <- readRDS("data/processed/agg_province.rds")
 setDT(agg_nat); setDT(agg_prov)
 
+if (file.exists("data/processed/agg_source.rds")) {
+  agg_source <- readRDS("data/processed/agg_source.rds")
+  setDT(agg_source)
+} else {
+  agg_source <- NULL
+}
+
+if (file.exists("data/processed/agg_timeliness.rds")) {
+  agg_time <- readRDS("data/processed/agg_timeliness.rds")
+  setDT(agg_time)
+} else {
+  agg_time <- NULL
+}
+
 agg_prov <- agg_prov[!is.na(prov_) & prov_ != ""]
 
 latest_date <- max(agg_nat$date)
@@ -150,6 +164,65 @@ plot_ly(weekly_all, x = ~week, y = ~cases, type = "bar",
   layout(xaxis = list(title = "Week starting"),
          yaxis = list(title = "Weekly cases"))
 ```
+
+---
+
+## Surveillance Performance
+
+::: {.panel-tabset}
+
+### Cases by Source
+
+```{r}
+#| label: fig-source
+#| fig-cap: "Notifications by Case Type (Clinical vs Lab etc.)"
+
+if (!is.null(agg_source) && nrow(agg_source) > 0) {
+    # Aggregate across conditions for a simpler overview chart
+    # Or stack by condition + case_type? Just stack by `case_type` over time.
+    agg_src_total <- agg_source[, .(count = sum(count)), by = .(month, case_type)]
+    setorder(agg_src_total, month)
+
+    plot_ly(agg_src_total, x = ~month, y = ~count, color = ~case_type,
+            type = 'bar', 
+            colors = "Set2") %>%
+      layout(barmode = 'stack',
+             xaxis = list(title = "Month"),
+             yaxis = list(title = "Notifications"))
+} else {
+    cat("Data for Cases by Source not available.")
+}
+```
+
+### Timeliness (Median Days)
+
+```{r}
+#| label: fig-timeliness
+#| fig-cap: "Median days to notification by condition (last 12 months)"
+
+if (!is.null(agg_time) && nrow(agg_time) > 0) {
+    # Filter to last 12 months for readability
+    subset_time <- agg_time[month >= (max(month) - years(1))]
+    
+    # We can do a heatmap or a line chart
+    # Let's do a heatmap: X=Month, Y=Condition, Z=Median Days
+    # Only show conditions with significant activity
+    
+    top_conds <- agg_nat[date >= (max(date) - years(1)), .(total = sum(count)), by=condition][order(-total)][1:15, condition]
+    
+    subset_time <- subset_time[condition %in% top_conds]
+    
+    plot_ly(subset_time, x = ~month, y = ~condition, z = ~median_days,
+            type = "heatmap", colors = "Reds") %>%
+      layout(xaxis = list(title = "Month"),
+             yaxis = list(title = "", automargin=TRUE))
+
+} else {
+    cat("Data for Timeliness not available.")
+}
+```
+
+:::
 
 ---
 

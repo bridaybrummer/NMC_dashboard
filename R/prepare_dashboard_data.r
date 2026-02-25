@@ -97,8 +97,39 @@ if(exists("dt")) {
     pop = c(6700000, 2900000, 15500000, 11500000, 5900000, 4700000, 1300000, 4100000, 7100000)
     )
 
+
     agg_province <- merge(agg_province, pop_province, by = "prov_", all.x = TRUE)
     agg_province[, incidence_100k := (count / pop) * 100000]
+
+    # D. Overview Indicators (Source & Timeliness)
+    if ("case_type" %in% names(dt)) {
+        # 1. Cases by Source (Month + Case Type) + Condition
+        # Group by month for overview, by condition for detailed views if needed
+        # We aggregate to (Condition, Case Type, Month)
+        agg_source <- dt[, .(count = .N), keyby = .(condition, case_type, month = tryCatch(format(date, "%Y-%m-01"), error=function(e) NA))]
+        agg_source <- agg_source[!is.na(month)]
+        agg_source[, month := as.Date(month)]
+    } else {
+        agg_source <- NULL
+    }
+
+    if ("time_to_notification" %in% names(dt)) {
+        # 2. Timeliness (Median days per Condition per Month)
+        # Ensure time_to_notification is numeric
+        dt[, time_val := suppressWarnings(as.numeric(time_to_notification))]
+        
+        agg_timeliness <- dt[!is.na(time_val), .(
+            median_days = median(time_val, na.rm=TRUE),
+            q25 = quantile(time_val, 0.25, na.rm=TRUE),
+            q75 = quantile(time_val, 0.75, na.rm=TRUE),
+            n_cases = .N
+        ), keyby = .(condition, month = tryCatch(format(date, "%Y-%m-01"), error=function(e) NA))]
+        
+        agg_timeliness <- agg_timeliness[!is.na(month)]
+        agg_timeliness[, month := as.Date(month)]
+    } else {
+        agg_timeliness <- NULL
+    }
 
     # --- 4. Save Processed Data ---
     out_dir <- "/Users/briday/Desktop/SAFETP/CLA/NMC_website/NMC_dashboard/data/processed"
@@ -107,6 +138,9 @@ if(exists("dt")) {
     saveRDS(agg_national, file.path(out_dir, "agg_national.rds"))
     saveRDS(agg_province, file.path(out_dir, "agg_province.rds"))
     saveRDS(agg_district, file.path(out_dir, "agg_district.rds"))
+
+    if (!is.null(agg_source))     saveRDS(agg_source, file.path(out_dir, "agg_source.rds"))
+    if (!is.null(agg_timeliness)) saveRDS(agg_timeliness, file.path(out_dir, "agg_timeliness.rds"))
 
     log_msg("Data preparation complete. Files saved to ", out_dir)
 } else {
