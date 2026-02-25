@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>SA NMC Dashboard</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-502aca659cf5a6683e07c8541966b8d4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<script src="site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+<link href="site_libs/tabwid-1.1.3/tabwid.css" rel="stylesheet">
+<script src="site_libs/tabwid-1.1.3/tabwid.js"></script>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">SA NMC Dashboard</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="./index.html" aria-current="page"> <i class="bi bi-house-door" role="img">
+</i> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./overview.html"> <i class="bi bi-bar-chart-line" role="img">
+</i> 
+<span class="menu-text">Overview</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-surveillance" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-clipboard2-pulse" role="img">
+</i> 
+ <span class="menu-text">Surveillance</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-surveillance">    
+        <li>
+    <a class="dropdown-item" href="./by-province/index.html">
+ <span class="dropdown-text">By Province — Overview</span></a>
+  </li>  
+        <li><hr class="dropdown-divider"></li>
+        <li>
+    <a class="dropdown-item" href="./by-province/ec/index.html">
+ <span class="dropdown-text">Eastern Cape</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./by-province/fs/index.html">
+ <span class="dropdown-text">Free State</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./by-province/gp/index.html">
+ <span class="dropdown-text">Gauteng</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./by-province/kzn/index.html">
+ <span class="dropdown-text">KwaZulu-Natal</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./by-province/lp/index.html">
+ <span class="dropdown-text">Limpopo</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./by-province/mp/index.html">
+ <span class="dropdown-text">Mpumalanga</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./by-province/nc/index.html">
+ <span class="dropdown-text">Northern Cape</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./by-province/nw/index.html">
+ <span class="dropdown-text">North West</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./by-province/wc/index.html">
+ <span class="dropdown-text">Western Cape</span></a>
+  </li>  
+        <li><hr class="dropdown-divider"></li>
+        <li>
+    <a class="dropdown-item" href="./by-condition/index.html">
+ <span class="dropdown-text">By Condition</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-analytics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-graph-up-arrow" role="img">
+</i> 
+ <span class="menu-text">Analytics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-analytics">    
+        <li>
+    <a class="dropdown-item" href="./by-trending/index.html">
+ <span class="dropdown-text">Trending &amp; Signals</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./burden-of-disease/index.html">
+ <span class="dropdown-text">Burden of Disease</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./by-forecasts/index.html">
+ <span class="dropdown-text">Forecasts &amp; Scenarios</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="./explorer/index.html"> <i class="bi bi-search" role="img">
+</i> 
+<span class="menu-text">Explorer</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./quality.html"> <i class="bi bi-clipboard-check" role="img">
+</i> 
+<span class="menu-text">Data Quality</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-docs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-book" role="img">
+</i> 
+ <span class="menu-text">Docs</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-docs">    
+        <li>
+    <a class="dropdown-item" href="./methods.html">
+ <span class="dropdown-text">Methods</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./glossary.html">
+ <span class="dropdown-text">Glossary</span></a>
+  </li>  
+        <li><hr class="dropdown-divider"></li>
+        <li>
+    <a class="dropdown-item" href="./about.html">
+ <span class="dropdown-text">About &amp; Credits</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content column-page" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">SA NMC Dashboard</h1>
+<p class="subtitle lead">Epidemiological Intelligence for Notifiable Medical Conditions</p>
+</div>
+
+
+
+<div class="quarto-title-meta column-page">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="welcome" class="level2 hero-intro">
+<h2 data-anchor-id="welcome">Welcome</h2>
+<p>This dashboard makes <strong>Notifiable Medical Conditions (NMC)</strong> data accessible and actionable for public health officials across South Africa. It provides timely insights into disease trends, hotspots, and forecasts to support effective decision-making and resource allocation.</p>
+<p>All coding and analysis is open-source — any epidemiologist can reproduce the work locally and contribute improvements.</p>
+</section>
+<section id="dashboard-sections" class="level2 unlisted">
+<h2 class="unlisted" data-anchor-id="dashboard-sections">Dashboard Sections</h2>
+<div class="section-grid">
+<section id="national-overview" class="level4 section-card">
+<h4 data-anchor-id="national-overview"><a href="overview.html">National Overview</a></h4>
+<p><span class="badge-descriptive">DESCRIPTIVE</span> <span class="status-dev"></span> In development</p>
+<p>High-level surveillance snapshot — total cases, top conditions, national epicurve and key indicators.</p>
+</section>
+<section id="by-province" class="level4 section-card">
+<h4 data-anchor-id="by-province"><a href="by-province/index.html">By Province</a></h4>
+<p><span class="badge-descriptive">DESCRIPTIVE</span> <span class="status-active"></span> Active</p>
+<p>Provincial summaries with case counts, incidence rates, interactive charts and district drilldown. Includes sub-pages for all 9 provinces.</p>
+</section>
+<section id="by-condition" class="level4 section-card">
+<h4 data-anchor-id="by-condition"><a href="by-condition/index.html">By Condition</a></h4>
+<p><span class="badge-descriptive">DESCRIPTIVE</span> <span class="status-active"></span> Active</p>
+<p>Condition-centric view: national epicurves, provincial comparisons, district hotspot tables with export.</p>
+</section>
+<section id="trending-signals" class="level4 section-card">
+<h4 data-anchor-id="trending-signals"><a href="by-trending/index.html">Trending &amp; Signals</a></h4>
+<p><span class="badge-analytical">ANALYTICAL</span> <span class="status-dev"></span> In development</p>
+<p>Signal detection (CUSUM/EARS) for emerging conditions, surge tables, trend sparklines and alert log.</p>
+</section>
+<section id="burden-of-disease" class="level4 section-card">
+<h4 data-anchor-id="burden-of-disease"><a href="burden-of-disease/index.html">Burden of Disease</a></h4>
+<p><span class="badge-analytical">ANALYTICAL</span> <span class="status-planned"></span> Planned</p>
+<p>Years of Life Lost (YLL), DALYs and age-standardised rates to quantify health impact beyond case counts.</p>
+</section>
+<section id="forecasts-scenarios" class="level4 section-card">
+<h4 data-anchor-id="forecasts-scenarios"><a href="by-forecasts/index.html">Forecasts &amp; Scenarios</a></h4>
+<p><span class="badge-predictive">PREDICTIVE</span> <span class="status-dev"></span> In development</p>
+<p>Short-term EpiNow2 forecasts (1–6 weeks), scenario bands, nowcasting with reporting-delay adjustment.</p>
+</section>
+<section id="data-explorer" class="level4 section-card">
+<h4 data-anchor-id="data-explorer"><a href="explorer/index.html">Data Explorer</a></h4>
+<p><span class="badge-interactive">INTERACTIVE</span> <span class="status-planned"></span> Planned</p>
+<p>Self-service tool: select conditions, dates and locations, then visualise epicurves, maps, statistics and download data.</p>
+</section>
+<section id="data-quality" class="level4 section-card">
+<h4 data-anchor-id="data-quality"><a href="quality.html">Data Quality</a></h4>
+<p><span class="badge-quality">QUALITY</span> <span class="status-dev"></span> In development</p>
+<p>Reporting completeness by province, submission volume heatmaps, timeliness metrics and validation checks.</p>
+</section>
+</div>
+<hr>
+</section>
+<section id="documentation" class="level2 unlisted">
+<h2 class="unlisted" data-anchor-id="documentation">Documentation</h2>
+<div class="section-grid">
+<section id="methods" class="level4 section-card">
+<h4 data-anchor-id="methods"><a href="methods.html">Methods</a></h4>
+<p>Data sources, indicator formulas, signal detection algorithms, forecasting methodology and QC procedures.</p>
+</section>
+<section id="glossary" class="level4 section-card">
+<h4 data-anchor-id="glossary"><a href="glossary.html">Glossary</a></h4>
+<p>Abbreviations, epidemiological terms and indicator definitions used throughout the dashboard.</p>
+</section>
+<section id="about-credits" class="level4 section-card">
+<h4 data-anchor-id="about-credits"><a href="about.html">About &amp; Credits</a></h4>
+<p>Project background, partner organisations, software stack and contribution guidelines.</p>
+</section>
+</div>
+<hr>
+</section>
+<section id="planned-architecture" class="level2">
+<h2 data-anchor-id="planned-architecture">Planned Architecture</h2>
+<p>The planned structure of the dashboard is as follows:</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart TD
+    %% ---------- MAIN LAYERS ----------
+    A["Home: NMC Epidemiology SA"]
+
+    %% Descriptive
+    B["By Province"]
+    B1["Province Overview of all conditions"]
+    B2["District Drilldown"]
+    C["By Condition"]
+    C1["National Trends"]
+    C2["Province Comparison of condition X"]
+    C3["District Hotspots of condition X"]
+
+    %% Interactive
+    G["Explorer"]
+    G1["Interactive Condition, Date &amp; Location Selector"]
+    G2["Epicurve Visualisation"]
+    G3["Map Visualisation"]
+    G4["Descriptive Statistics"]
+    G5["Data Table view and download"]
+
+    %% Analytical
+    D["Burden of Disease"]
+    D1["YLL — life tables &amp; from vital status"]
+    D2["DALYs — YLL + YLD"]
+    D3["ASR — age-standardised rates"]
+
+     %%
+    E["Trending Conditions"]
+    E1["Signal Detection (CUSUM/EARS)"]
+    E2["Hotspots (province→district)"]
+    E3["Analyst Notes &amp; Alert Log"]
+
+    %% Predictive
+    F["Forecasts and scenarios"]
+    F1["Short-term forecasts (1–6 wks)"]
+    F2["Scenario bands &amp; seasonality"]
+    F3["Nowcasting (delay adjustment)"]
+
+    %% ---------- FLOW ----------
+    A --&gt; B --&gt; B1 --&gt; B2
+    A --&gt; C --&gt; C1 --&gt; C2 --&gt; C3
+    A --&gt; D --&gt; D1 --&gt; D2 --&gt; D3
+    A --&gt; G --&gt; G1 --&gt; G2 --&gt; G3 --&gt; G4 --&gt; G5
+    A --&gt; E --&gt; E1 --&gt; E2 --&gt; E3
+    E --&gt; F --&gt; F1 --&gt; F2 --&gt; F3
+
+    %% ---------- CLASSES ----------
+    classDef Descriptive fill:#e6f2ff,stroke:#1d4ed8,stroke-width:1.5px,color:#0b2e78;
+    classDef Interactive fill:#e0f7fa,stroke:#00796b,stroke-width:1.5px,color:#004d40;
+    classDef Analytical fill:#fff4e5,stroke:#b45309,stroke-width:1.5px,color:#7a3b07;
+    classDef Predictive fill:#f3e8ff,stroke:#7e22ce,stroke-width:1.5px,color:#42136a;
+    classDef LegendBox fill:#f8fafc,stroke:#94a3b8,color:#334155;
+
+    class B,B1,B2,C,C1,C2,C3, Descriptive;
+    class G,G1,G2,G3,G4,G5 Interactive;
+    class D,D1,D2,D3,E,E1,E2,E3 Analytical;
+    class F,F1,F2,F3 Predictive;
+
+    %% ---------- LEGEND ----------
+    subgraph LEG["Legend"]
+      direction TB
+      L1["Descriptive"]:::Descriptive
+      L2["Interactive"]:::Interactive
+      L3["Analytical"]:::Analytical
+      L4["Predictive"]:::Predictive
+    end
+
+    class LEG LegendBox;
+
+    %% ---------- OPTIONAL STYLING ----------
+    style A stroke:#0b3a75,stroke-width:2px,fill:#eef2ff,rx:8,ry:8
+    style LEG rx:6,ry:6
+
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div class="tabwid"><style>.cl-0489e628{}.cl-04843458{font-family:'Helvetica';font-size:9pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-04843462{font-family:'Helvetica';font-size:9pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(6, 95, 70, 1.00);background-color:transparent;}.cl-0484346c{font-family:'Helvetica';font-size:9pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(51, 65, 85, 1.00);background-color:transparent;}.cl-0484346d{font-family:'Helvetica';font-size:9pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(122, 59, 7, 1.00);background-color:transparent;}.cl-04843476{font-family:'Helvetica';font-size:9pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(180, 83, 9, 1.00);background-color:transparent;}.cl-04867510{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-0486751a{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-04869360{width:0.424in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 1pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0486936a{width:1.175in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 1pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0486936b{width:1.821in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 1pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0486936c{width:4.023in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 1pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0486936d{width:0.653in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 1pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0486936e{width:0.925in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 1pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869374{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 1pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869375{width:0.91in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 1pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869376{width:2.488in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 1pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869377{width:0.772in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 1pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869378{width:0.424in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869379{width:1.175in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0486937a{width:1.821in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0486937e{width:4.023in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0486937f{width:0.653in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869380{width:0.925in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869381{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869382{width:0.91in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869383{width:2.488in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869388{width:0.772in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869389{width:0.424in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0486938a{width:1.175in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0486938b{width:1.821in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0486938c{width:4.023in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0486938d{width:0.653in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869392{width:0.925in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869393{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869394{width:0.91in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869395{width:2.488in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869396{width:0.772in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-04869397{width:0.424in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0486939c{width:1.175in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0486939d{width:1.821in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0486939e{width:4.023in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0486939f{width:0.653in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693a6{width:0.925in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693a7{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693a8{width:0.91in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693a9{width:2.488in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693aa{width:0.772in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693b0{width:0.424in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693b1{width:1.175in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693b2{width:1.821in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693b3{width:4.023in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693b4{width:0.653in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693b5{width:0.925in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693ba{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693bb{width:0.91in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693bc{width:2.488in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693bd{width:0.772in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693be{width:0.424in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693bf{width:1.175in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693c0{width:1.821in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693c1{width:4.023in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693c4{width:0.653in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693c5{width:0.925in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693c6{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693c7{width:0.91in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693c8{width:2.488in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693c9{width:0.772in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693ce{width:0.424in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693cf{width:1.175in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693d0{width:1.821in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693d1{width:4.023in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693d2{width:0.653in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693d3{width:0.925in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693d8{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693d9{width:0.91in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693da{width:2.488in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693db{width:0.772in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693dc{width:0.424in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693dd{width:1.175in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693de{width:1.821in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693e2{width:4.023in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693e3{width:0.653in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693e4{width:0.925in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693e5{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693e6{width:0.91in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693e7{width:2.488in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693e8{width:0.772in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693e9{width:0.424in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693ec{width:1.175in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693ed{width:1.821in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693ee{width:4.023in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693ef{width:0.653in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693f0{width:0.925in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693f1{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693f6{width:0.91in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693f7{width:2.488in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-048693f8{width:0.772in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table data-quarto-disable-processing="true" class="cl-0489e628"><thead><tr style="overflow-wrap:break-word;"><th class="cl-04869360"><p class="cl-04867510"><span class="cl-04843458">ID</span></p></th><th class="cl-0486936a"><p class="cl-0486751a"><span class="cl-04843458">Category</span></p></th><th class="cl-0486936b"><p class="cl-0486751a"><span class="cl-04843458">Task</span></p></th><th class="cl-0486936c"><p class="cl-0486751a"><span class="cl-04843458">Description</span></p></th><th class="cl-0486936d"><p class="cl-0486751a"><span class="cl-04843458">Owner</span></p></th><th class="cl-0486936e"><p class="cl-04867510"><span class="cl-04843458">Due Date</span></p></th><th class="cl-04869374"><p class="cl-04867510"><span class="cl-04843458">Days Remaining</span></p></th><th class="cl-04869375"><p class="cl-0486751a"><span class="cl-04843458">Status</span></p></th><th class="cl-04869376"><p class="cl-0486751a"><span class="cl-04843458">Notes</span></p></th><th class="cl-04869377"><p class="cl-04867510"><span class="cl-04843458">.overdue</span></p></th></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-04869378"><p class="cl-04867510"><span class="cl-04843458">1</span></p></td><td class="cl-04869379"><p class="cl-0486751a"><span class="cl-04843458">Project Setup</span></p></td><td class="cl-0486937a"><p class="cl-0486751a"><span class="cl-04843458">Define scope &amp; architecture</span></p></td><td class="cl-0486937e"><p class="cl-0486751a"><span class="cl-04843458">Finalize site structure (Province/Condition/BoD/Trending/Forecasts)</span></p></td><td class="cl-0486937f"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-04869380"><p class="cl-04867510"><span class="cl-04843458">2026-02-28</span></p></td><td class="cl-04869381"><p class="cl-04867510"><span class="cl-04843462">8</span></p></td><td class="cl-04869382"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-04869383"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-04869388"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-04869378"><p class="cl-04867510"><span class="cl-04843458">2</span></p></td><td class="cl-04869379"><p class="cl-0486751a"><span class="cl-04843458">Project Setup</span></p></td><td class="cl-0486937a"><p class="cl-0486751a"><span class="cl-04843458">Finalize hosting plan</span></p></td><td class="cl-0486937e"><p class="cl-0486751a"><span class="cl-04843458">Choose GitHub Pages / Netlify / Posit Connect</span></p></td><td class="cl-0486937f"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-04869380"><p class="cl-04867510"><span class="cl-04843458">2026-03-01</span></p></td><td class="cl-04869381"><p class="cl-04867510"><span class="cl-04843462">9</span></p></td><td class="cl-04869382"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-04869383"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-04869388"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-04869389"><p class="cl-04867510"><span class="cl-04843458">3</span></p></td><td class="cl-0486938a"><p class="cl-0486751a"><span class="cl-04843458">Project Setup</span></p></td><td class="cl-0486938b"><p class="cl-0486751a"><span class="cl-04843458">Create _quarto.yml</span></p></td><td class="cl-0486938c"><p class="cl-0486751a"><span class="cl-04843458">Navbar, theme, lightbox, mermaid config</span></p></td><td class="cl-0486938d"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-04869392"><p class="cl-04867510"><span class="cl-04843458">2026-03-02</span></p></td><td class="cl-04869393"><p class="cl-04867510"><span class="cl-04843462">10</span></p></td><td class="cl-04869394"><p class="cl-0486751a"><span class="cl-0484346d">In progress</span></p></td><td class="cl-04869395"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-04869396"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-04869397"><p class="cl-04867510"><span class="cl-04843458">4</span></p></td><td class="cl-0486939c"><p class="cl-0486751a"><span class="cl-04843458">Data Integration</span></p></td><td class="cl-0486939d"><p class="cl-0486751a"><span class="cl-04843458">Data source mapping</span></p></td><td class="cl-0486939e"><p class="cl-0486751a"><span class="cl-04843458">Map NMC, lab, MYPE, sentinel feeds</span></p></td><td class="cl-0486939f"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693a6"><p class="cl-04867510"><span class="cl-04843458">2026-03-05</span></p></td><td class="cl-048693a7"><p class="cl-04867510"><span class="cl-04843462">13</span></p></td><td class="cl-048693a8"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-048693a9"><p class="cl-0486751a"><span class="cl-04843458">Include canonical district dictionary</span></p></td><td class="cl-048693aa"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-04869378"><p class="cl-04867510"><span class="cl-04843458">5</span></p></td><td class="cl-04869379"><p class="cl-0486751a"><span class="cl-04843458">Data Integration</span></p></td><td class="cl-0486937a"><p class="cl-0486751a"><span class="cl-04843458">ETL scripts</span></p></td><td class="cl-0486937e"><p class="cl-0486751a"><span class="cl-04843458">R scripts for cleaning/QC/aggregation</span></p></td><td class="cl-0486937f"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-04869380"><p class="cl-04867510"><span class="cl-04843458">2026-03-09</span></p></td><td class="cl-04869381"><p class="cl-04867510"><span class="cl-04843462">17</span></p></td><td class="cl-04869382"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-04869383"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-04869388"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-04869397"><p class="cl-04867510"><span class="cl-04843458">6</span></p></td><td class="cl-0486939c"><p class="cl-0486751a"><span class="cl-04843458">Data Integration</span></p></td><td class="cl-0486939d"><p class="cl-0486751a"><span class="cl-04843458">Validation checks</span></p></td><td class="cl-0486939e"><p class="cl-0486751a"><span class="cl-04843458">Completeness, timeliness, duplicates</span></p></td><td class="cl-0486939f"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693a6"><p class="cl-04867510"><span class="cl-04843458">2026-03-12</span></p></td><td class="cl-048693a7"><p class="cl-04867510"><span class="cl-04843462">20</span></p></td><td class="cl-048693a8"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-048693a9"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693aa"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-048693b0"><p class="cl-04867510"><span class="cl-04843458">7</span></p></td><td class="cl-048693b1"><p class="cl-0486751a"><span class="cl-04843458">Descriptive</span></p></td><td class="cl-048693b2"><p class="cl-0486751a"><span class="cl-04843458">By Province page</span></p></td><td class="cl-048693b3"><p class="cl-0486751a"><span class="cl-04843458">Provincial summary, district drilldown, maps</span></p></td><td class="cl-048693b4"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693b5"><p class="cl-04867510"><span class="cl-04843458">2026-03-16</span></p></td><td class="cl-048693ba"><p class="cl-04867510"><span class="cl-04843462">24</span></p></td><td class="cl-048693bb"><p class="cl-0486751a"><span class="cl-0484346d">In progress</span></p></td><td class="cl-048693bc"><p class="cl-0486751a"><span class="cl-04843458">Basic dashboard structure implemented</span></p></td><td class="cl-048693bd"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-04869378"><p class="cl-04867510"><span class="cl-04843458">8</span></p></td><td class="cl-04869379"><p class="cl-0486751a"><span class="cl-04843458">Descriptive</span></p></td><td class="cl-0486937a"><p class="cl-0486751a"><span class="cl-04843458">By Condition page</span></p></td><td class="cl-0486937e"><p class="cl-0486751a"><span class="cl-04843458">Tabset + dropdown selector</span></p></td><td class="cl-0486937f"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-04869380"><p class="cl-04867510"><span class="cl-04843458">2026-03-19</span></p></td><td class="cl-04869381"><p class="cl-04867510"><span class="cl-04843462">27</span></p></td><td class="cl-04869382"><p class="cl-0486751a"><span class="cl-0484346d">In progress</span></p></td><td class="cl-04869383"><p class="cl-0486751a"><span class="cl-04843458">Basic dashboard structure implemented</span></p></td><td class="cl-04869388"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-048693be"><p class="cl-04867510"><span class="cl-04843458">9</span></p></td><td class="cl-048693bf"><p class="cl-0486751a"><span class="cl-04843458">Descriptive</span></p></td><td class="cl-048693c0"><p class="cl-0486751a"><span class="cl-04843458">Click-to-zoom maps</span></p></td><td class="cl-048693c1"><p class="cl-0486751a"><span class="cl-04843458">Leaflet/Plotly + lightbox</span></p></td><td class="cl-048693c4"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693c5"><p class="cl-04867510"><span class="cl-04843458">2026-03-21</span></p></td><td class="cl-048693c6"><p class="cl-04867510"><span class="cl-04843462">29</span></p></td><td class="cl-048693c7"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-048693c8"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693c9"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-04869397"><p class="cl-04867510"><span class="cl-04843458">10</span></p></td><td class="cl-0486939c"><p class="cl-0486751a"><span class="cl-04843458">Analytical</span></p></td><td class="cl-0486939d"><p class="cl-0486751a"><span class="cl-04843458">Burden of Disease</span></p></td><td class="cl-0486939e"><p class="cl-0486751a"><span class="cl-04843458">Compute YLL, DALY, ASR; document assumptions</span></p></td><td class="cl-0486939f"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693a6"><p class="cl-04867510"><span class="cl-04843458">2026-03-27</span></p></td><td class="cl-048693a7"><p class="cl-04867510"><span class="cl-04843462">35</span></p></td><td class="cl-048693a8"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-048693a9"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693aa"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-04869397"><p class="cl-04867510"><span class="cl-04843458">11</span></p></td><td class="cl-0486939c"><p class="cl-0486751a"><span class="cl-04843458">Analytical</span></p></td><td class="cl-0486939d"><p class="cl-0486751a"><span class="cl-04843458">Trending detection</span></p></td><td class="cl-0486939e"><p class="cl-0486751a"><span class="cl-04843458">CUSUM/EARS; hotspots table/map</span></p></td><td class="cl-0486939f"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693a6"><p class="cl-04867510"><span class="cl-04843458">2026-03-31</span></p></td><td class="cl-048693a7"><p class="cl-04867510"><span class="cl-04843462">39</span></p></td><td class="cl-048693a8"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-048693a9"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693aa"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-048693be"><p class="cl-04867510"><span class="cl-04843458">12</span></p></td><td class="cl-048693bf"><p class="cl-0486751a"><span class="cl-04843458">Analytical</span></p></td><td class="cl-048693c0"><p class="cl-0486751a"><span class="cl-04843458">Validate signals</span></p></td><td class="cl-048693c1"><p class="cl-0486751a"><span class="cl-04843458">Test false positives; analyst triage</span></p></td><td class="cl-048693c4"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693c5"><p class="cl-04867510"><span class="cl-04843458">2026-04-02</span></p></td><td class="cl-048693c6"><p class="cl-04867510"><span class="cl-04843462">41</span></p></td><td class="cl-048693c7"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-048693c8"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693c9"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-04869397"><p class="cl-04867510"><span class="cl-04843458">13</span></p></td><td class="cl-0486939c"><p class="cl-0486751a"><span class="cl-04843458">Predictive</span></p></td><td class="cl-0486939d"><p class="cl-0486751a"><span class="cl-04843458">Forecast models</span></p></td><td class="cl-0486939e"><p class="cl-0486751a"><span class="cl-04843458">ARIMA/Prophet/BSTS with 50–95% CI</span></p></td><td class="cl-0486939f"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693a6"><p class="cl-04867510"><span class="cl-04843458">2026-04-06</span></p></td><td class="cl-048693a7"><p class="cl-04867510"><span class="cl-04843462">45</span></p></td><td class="cl-048693a8"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-048693a9"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693aa"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-048693ce"><p class="cl-04867510"><span class="cl-04843458">14</span></p></td><td class="cl-048693cf"><p class="cl-0486751a"><span class="cl-04843458">Predictive</span></p></td><td class="cl-048693d0"><p class="cl-0486751a"><span class="cl-04843458">Nowcasting</span></p></td><td class="cl-048693d1"><p class="cl-0486751a"><span class="cl-04843458">Delay-adjusted counts integrated with signals</span></p></td><td class="cl-048693d2"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693d3"><p class="cl-04867510"><span class="cl-04843458">2026-04-08</span></p></td><td class="cl-048693d8"><p class="cl-04867510"><span class="cl-04843462">47</span></p></td><td class="cl-048693d9"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-048693da"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693db"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-04869397"><p class="cl-04867510"><span class="cl-04843458">15</span></p></td><td class="cl-0486939c"><p class="cl-0486751a"><span class="cl-04843458">Predictive</span></p></td><td class="cl-0486939d"><p class="cl-0486751a"><span class="cl-04843458">Exports/subscriptions</span></p></td><td class="cl-0486939e"><p class="cl-0486751a"><span class="cl-04843458">CSV/PDF; (optional) email hooks later</span></p></td><td class="cl-0486939f"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693a6"><p class="cl-04867510"><span class="cl-04843458">2026-04-11</span></p></td><td class="cl-048693a7"><p class="cl-04867510"><span class="cl-04843462">50</span></p></td><td class="cl-048693a8"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-048693a9"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693aa"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-04869378"><p class="cl-04867510"><span class="cl-04843458">16</span></p></td><td class="cl-04869379"><p class="cl-0486751a"><span class="cl-04843458">Design</span></p></td><td class="cl-0486937a"><p class="cl-0486751a"><span class="cl-04843458">Site-wide CSS</span></p></td><td class="cl-0486937e"><p class="cl-0486751a"><span class="cl-04843458">Consistent fonts/spacing/palette</span></p></td><td class="cl-0486937f"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-04869380"><p class="cl-04867510"><span class="cl-04843458">2026-04-12</span></p></td><td class="cl-04869381"><p class="cl-04867510"><span class="cl-04843462">51</span></p></td><td class="cl-04869382"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-04869383"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-04869388"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-04869378"><p class="cl-04867510"><span class="cl-04843458">17</span></p></td><td class="cl-04869379"><p class="cl-0486751a"><span class="cl-04843458">Design</span></p></td><td class="cl-0486937a"><p class="cl-0486751a"><span class="cl-04843458">Mermaid diagrams</span></p></td><td class="cl-0486937e"><p class="cl-0486751a"><span class="cl-04843458">Styled descriptive/analytical/predictive + SVG</span></p></td><td class="cl-0486937f"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-04869380"><p class="cl-04867510"><span class="cl-04843458">2026-02-26</span></p></td><td class="cl-04869381"><p class="cl-04867510"><span class="cl-04843476">6</span></p></td><td class="cl-04869382"><p class="cl-0486751a"><span class="cl-04843462">Done</span></p></td><td class="cl-04869383"><p class="cl-0486751a"><span class="cl-04843458">Exported SVG + lightbox</span></p></td><td class="cl-04869388"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-048693ce"><p class="cl-04867510"><span class="cl-04843458">18</span></p></td><td class="cl-048693cf"><p class="cl-0486751a"><span class="cl-04843458">Docs</span></p></td><td class="cl-048693d0"><p class="cl-0486751a"><span class="cl-04843458">Methods page</span></p></td><td class="cl-048693d1"><p class="cl-0486751a"><span class="cl-04843458">Data sources, calculations, QC</span></p></td><td class="cl-048693d2"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693d3"><p class="cl-04867510"><span class="cl-04843458">2026-04-14</span></p></td><td class="cl-048693d8"><p class="cl-04867510"><span class="cl-04843462">53</span></p></td><td class="cl-048693d9"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-048693da"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693db"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-04869378"><p class="cl-04867510"><span class="cl-04843458">19</span></p></td><td class="cl-04869379"><p class="cl-0486751a"><span class="cl-04843458">Docs</span></p></td><td class="cl-0486937a"><p class="cl-0486751a"><span class="cl-04843458">Glossary page</span></p></td><td class="cl-0486937e"><p class="cl-0486751a"><span class="cl-04843458">Indicators &amp; abbreviations</span></p></td><td class="cl-0486937f"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-04869380"><p class="cl-04867510"><span class="cl-04843458">2026-04-16</span></p></td><td class="cl-04869381"><p class="cl-04867510"><span class="cl-04843462">55</span></p></td><td class="cl-04869382"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-04869383"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-04869388"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-048693dc"><p class="cl-04867510"><span class="cl-04843458">20</span></p></td><td class="cl-048693dd"><p class="cl-0486751a"><span class="cl-04843458">Docs</span></p></td><td class="cl-048693de"><p class="cl-0486751a"><span class="cl-04843458">About/Credits</span></p></td><td class="cl-048693e2"><p class="cl-0486751a"><span class="cl-04843458">D4H, SAMRC, NDoH, Africa CDC</span></p></td><td class="cl-048693e3"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693e4"><p class="cl-04867510"><span class="cl-04843458">2026-04-17</span></p></td><td class="cl-048693e5"><p class="cl-04867510"><span class="cl-04843462">56</span></p></td><td class="cl-048693e6"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-048693e7"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693e8"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-04869397"><p class="cl-04867510"><span class="cl-04843458">21</span></p></td><td class="cl-0486939c"><p class="cl-0486751a"><span class="cl-04843458">Deploy</span></p></td><td class="cl-0486939d"><p class="cl-0486751a"><span class="cl-04843458">Internal review</span></p></td><td class="cl-0486939e"><p class="cl-0486751a"><span class="cl-04843458">CRDM &amp; MRC review of outputs</span></p></td><td class="cl-0486939f"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693a6"><p class="cl-04867510"><span class="cl-04843458">2026-05-06</span></p></td><td class="cl-048693a7"><p class="cl-04867510"><span class="cl-04843462">75</span></p></td><td class="cl-048693a8"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-048693a9"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693aa"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-04869378"><p class="cl-04867510"><span class="cl-04843458">22</span></p></td><td class="cl-04869379"><p class="cl-0486751a"><span class="cl-04843458">Deploy</span></p></td><td class="cl-0486937a"><p class="cl-0486751a"><span class="cl-04843458">External deployment</span></p></td><td class="cl-0486937e"><p class="cl-0486751a"><span class="cl-04843458">Publish to host (Pages/Connect)</span></p></td><td class="cl-0486937f"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-04869380"><p class="cl-04867510"><span class="cl-04843458">2026-05-11</span></p></td><td class="cl-04869381"><p class="cl-04867510"><span class="cl-04843462">80</span></p></td><td class="cl-04869382"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-04869383"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-04869388"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-048693e9"><p class="cl-04867510"><span class="cl-04843458">23</span></p></td><td class="cl-048693ec"><p class="cl-0486751a"><span class="cl-04843458">Deploy</span></p></td><td class="cl-048693ed"><p class="cl-0486751a"><span class="cl-04843458">Maintenance plan</span></p></td><td class="cl-048693ee"><p class="cl-0486751a"><span class="cl-04843458">Data refresh + rebuild workflow</span></p></td><td class="cl-048693ef"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693f0"><p class="cl-04867510"><span class="cl-04843458">2026-05-16</span></p></td><td class="cl-048693f1"><p class="cl-04867510"><span class="cl-04843462">85</span></p></td><td class="cl-048693f6"><p class="cl-0486751a"><span class="cl-0484346c">Not started</span></p></td><td class="cl-048693f7"><p class="cl-0486751a"><span class="cl-04843458"></span></p></td><td class="cl-048693f8"><p class="cl-04867510"><span class="cl-04843458">false</span></p></td></tr></tbody></table></div>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Data sources: NMC, Stats SA · Last update: 2025-10-16</p>
+</div>   
+    <div class="nav-footer-center">
+<p>SA NMC Epidemiological Intelligence Dashboard</p>
+</div>
+    <div class="nav-footer-right">
+<p><a href="methods.html">Methods</a> · <a href="glossary.html">Glossary</a> · <a href="about.html">About</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

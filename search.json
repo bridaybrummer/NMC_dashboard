@@ -1,0 +1,1482 @@
+[
+  {
+    "objectID": "burden-of-disease/index.html",
+    "href": "burden-of-disease/index.html",
+    "title": "Burden of Disease",
+    "section": "",
+    "text": "NoteDevelopment Roadmap — Burden of Disease\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nYLL computation using SA life tables & vital stats\n🔲 Planned\n\n\nv0.1\nSummary table: top conditions by YLL\n🔲 Planned\n\n\nv0.2\nDALY estimation (YLL + YLD) with disability weights\n🔲 Planned\n\n\nv0.2\nRanked bar chart of DALYs by condition\n🔲 Planned\n\n\nv0.3\nAge-standardised rates (ASR) using WHO standard population\n🔲 Planned\n\n\nv0.3\nProvince-level ASR comparison dot-plot\n🔲 Planned\n\n\nv0.4\nTemporal trends in BoD indicators\n🔲 Planned\n\n\nv0.5\nDownloadable BoD summary tables (CSV / PDF)\n🔲 Planned\n\n\n\nData pipeline: R/Age_Standardise_Rates.r → data/processed/",
+    "crumbs": [
+      "Burden of Disease"
+    ]
+  },
+  {
+    "objectID": "burden-of-disease/index.html#overview",
+    "href": "burden-of-disease/index.html#overview",
+    "title": "Burden of Disease",
+    "section": "Overview",
+    "text": "Overview\nThe Burden of Disease section quantifies the health impact of notifiable conditions beyond simple case counts. Three complementary indicators are computed:\n\n\n\n\n\n\n\nIndicator\nMeaning\n\n\n\n\nYLL (Years of Life Lost)\nPremature mortality impact, computed from SA life tables and vital registration data\n\n\nDALYs (Disability-Adjusted Life Years)\nCombined mortality (YLL) + morbidity (YLD) burden\n\n\nASR (Age-Standardised Rates)\nRates adjusted for population age structure to enable fair comparisons across provinces\n\n\n\n\n\n\n\n\n\nImportantMethodological Note\n\n\n\nAll estimates depend on data quality and completeness. Assumptions, disability weights, and life table sources are documented on the Methods page.",
+    "crumbs": [
+      "Burden of Disease"
+    ]
+  },
+  {
+    "objectID": "burden-of-disease/index.html#yll",
+    "href": "burden-of-disease/index.html#yll",
+    "title": "Burden of Disease",
+    "section": "Years of Life Lost (YLL)",
+    "text": "Years of Life Lost (YLL)\nComing soon — YLL computations using South African life tables (Stats SA) and vital status from NMC death notifications.",
+    "crumbs": [
+      "Burden of Disease"
+    ]
+  },
+  {
+    "objectID": "burden-of-disease/index.html#dalys",
+    "href": "burden-of-disease/index.html#dalys",
+    "title": "Burden of Disease",
+    "section": "DALYs",
+    "text": "DALYs\nComing soon — Disability-adjusted life years combining YLL with YLD estimates. Disability weights sourced from GBD 2019.",
+    "crumbs": [
+      "Burden of Disease"
+    ]
+  },
+  {
+    "objectID": "burden-of-disease/index.html#asr",
+    "href": "burden-of-disease/index.html#asr",
+    "title": "Burden of Disease",
+    "section": "Age-Standardised Rates",
+    "text": "Age-Standardised Rates\nComing soon — rates per 100 000 adjusted using the WHO World Standard Population, enabling province-to-province and time-period comparisons.\n\n\n\n\n\n\n\nTipRelated Sections\n\n\n\n\nBy Condition — national trend lines for each condition\nTrending — real-time signal detection\nData Quality — completeness and timeliness of underlying data\nMethods — full technical documentation of BoD calculations",
+    "crumbs": [
+      "Burden of Disease"
+    ]
+  },
+  {
+    "objectID": "by-forecasts/index.html",
+    "href": "by-forecasts/index.html",
+    "title": "Predictive Modelling – NMC Conditions",
+    "section": "",
+    "text": "This section showcases nowcasting and short-term outbreak forecasting for key notifiable medical conditions (NMC) reported through the national surveillance system. The models use the EpiNow2 R package, which combines:\n\nNowcasting – adjusting for reporting delays\n\nEstimation of \\(R_t\\) – the time-varying effective reproduction number\n\nShort-term forecasting – projecting cases up to 3 weeks ahead\n\n\n\n\n\n\n\nNoteConditions covered\n\n\n\n\n\n\n\n\n\n\nNMC Category\nConditions\n\n\n\n\nVaccine-preventable\nFever-Rash (Measles + Rubella), Pertussis, Diphtheria, Tetanus, Hepatitis B, Haemophilus influenzae type B, Congenital rubella syndrome, Poliomyelitis / AFP, Yellow fever\n\n\nCategory 1 — Immediate notification (non-VPD)\nCholera, Malaria, Covid-19, Enteric fever, Meningococcal disease, Listeriosis, Mpox\n\n\nCategory 2 — Routine notification\nHepatitis A\n\n\n\nForecasts are only generated for conditions with ≥ 60 days of data.\n\n\n\n\n\n\n\n\nTipLast forecast run\n\n\n\n20 February 2026 23:54 — Horizon: 28 days — Conditions: Acute flaccid paralysis, Cholera, Congenital rubella syndrome, Covid-19, Diphtheria, Enteric fever (typhoid or paratyphoid fever), Haemophilus influenzae type B, Hepatitis A, Hepatitis B, Listeriosis, Malaria, Fever-Rash, Meningococcal disease, Mpox, Pertussis, Poliomyelitis, Tetanus, Yellow fever",
+    "crumbs": [
+      "Predictive Modelling – NMC Conditions"
+    ]
+  },
+  {
+    "objectID": "by-forecasts/index.html#overview",
+    "href": "by-forecasts/index.html#overview",
+    "title": "Predictive Modelling – NMC Conditions",
+    "section": "",
+    "text": "This section showcases nowcasting and short-term outbreak forecasting for key notifiable medical conditions (NMC) reported through the national surveillance system. The models use the EpiNow2 R package, which combines:\n\nNowcasting – adjusting for reporting delays\n\nEstimation of \\(R_t\\) – the time-varying effective reproduction number\n\nShort-term forecasting – projecting cases up to 3 weeks ahead\n\n\n\n\n\n\n\nNoteConditions covered\n\n\n\n\n\n\n\n\n\n\nNMC Category\nConditions\n\n\n\n\nVaccine-preventable\nFever-Rash (Measles + Rubella), Pertussis, Diphtheria, Tetanus, Hepatitis B, Haemophilus influenzae type B, Congenital rubella syndrome, Poliomyelitis / AFP, Yellow fever\n\n\nCategory 1 — Immediate notification (non-VPD)\nCholera, Malaria, Covid-19, Enteric fever, Meningococcal disease, Listeriosis, Mpox\n\n\nCategory 2 — Routine notification\nHepatitis A\n\n\n\nForecasts are only generated for conditions with ≥ 60 days of data.\n\n\n\n\n\n\n\n\nTipLast forecast run\n\n\n\n20 February 2026 23:54 — Horizon: 28 days — Conditions: Acute flaccid paralysis, Cholera, Congenital rubella syndrome, Covid-19, Diphtheria, Enteric fever (typhoid or paratyphoid fever), Haemophilus influenzae type B, Hepatitis A, Hepatitis B, Listeriosis, Malaria, Fever-Rash, Meningococcal disease, Mpox, Pertussis, Poliomyelitis, Tetanus, Yellow fever",
+    "crumbs": [
+      "Predictive Modelling – NMC Conditions"
+    ]
+  },
+  {
+    "objectID": "by-forecasts/index.html#epicurves",
+    "href": "by-forecasts/index.html#epicurves",
+    "title": "Predictive Modelling – NMC Conditions",
+    "section": "Surveillance Epicurves",
+    "text": "Surveillance Epicurves\nAn epidemic curve of reported cases for each forecasted NMC condition, aggregated weekly at the national level.\n\n\n\n\n\n\n\n\nFigure 1: Weekly reported cases for forecasted NMC conditions",
+    "crumbs": [
+      "Predictive Modelling – NMC Conditions"
+    ]
+  },
+  {
+    "objectID": "by-forecasts/index.html#forecasts",
+    "href": "by-forecasts/index.html#forecasts",
+    "title": "Predictive Modelling – NMC Conditions",
+    "section": "EpiNow2 Forecasts",
+    "text": "EpiNow2 Forecasts\nEach panel shows the median estimate (solid line), 50 % credible interval (dark ribbon) and 90 % credible interval (light ribbon), all smoothed with a 7-day rolling average to remove weekend reporting artefacts. The shaded forecast horizon extends 28 days (4 weeks) beyond the last data point.\n\nAcute flaccid paralysisCholeraCongenital rubella syndromeCovid-19DiphtheriaEnteric fever (typhoid or paratyphoid fever)Fever-RashHaemophilus influenzae type BHepatitis AHepatitis BListeriosisMalariaMeningococcal diseaseMpoxPertussisPoliomyelitisTetanusYellow fever",
+    "crumbs": [
+      "Predictive Modelling – NMC Conditions"
+    ]
+  },
+  {
+    "objectID": "by-forecasts/index.html#epinow2-diagnostics",
+    "href": "by-forecasts/index.html#epinow2-diagnostics",
+    "title": "Predictive Modelling – NMC Conditions",
+    "section": "Standard EpiNow2 Diagnostic Plots",
+    "text": "Standard EpiNow2 Diagnostic Plots\nThe panels below show the native EpiNow2 diagnostic output for each condition. Each plot combines three key elements in a single view:\n\nReported cases — observed data with nowcast / forecast and credible intervals\nEstimated infections — latent infection trajectory inferred by the model\nEffective reproduction number (\\(R_t\\)) — with threshold line at \\(R_t = 1\\)\n\nThese are produced directly by EpiNow2::plot() and provide a comprehensive snapshot of the epidemic state without any post-processing.\n\nAcute Flaccid ParalysisCholeraCongenital Rubella SyndromeCovid 19DiphtheriaEnteric Fever (Typhoid or Paratyphoid Fever)Fever RashHaemophilus Influenzae Type bHepatitis aHepatitis bListeriosisMalariaMeningococcal DiseaseMpoxPertussisPoliomyelitisTetanusYellow Fever",
+    "crumbs": [
+      "Predictive Modelling – NMC Conditions"
+    ]
+  },
+  {
+    "objectID": "by-forecasts/index.html#animation",
+    "href": "by-forecasts/index.html#animation",
+    "title": "Predictive Modelling – NMC Conditions",
+    "section": "Animated Forecast Outlook",
+    "text": "Animated Forecast Outlook\nThe rolling forecast shows how the predicted trajectory shifted each week as new data arrived. Each coloured line represents a forecast made on a different snapshot date; vertical markers show where each snapshot’s data ended.\nThis visualisation helps assess:\n\nForecast stability – are successive predictions consistent?\nOutbreak acceleration – are newer forecasts trending higher?\nEarly warning – divergence between snapshots signals emerging outbreaks.\n\n\n\n\n\n\n\n\n\nFigure 2: Rolling weekly EpiNow2 forecasts (animated)",
+    "crumbs": [
+      "Predictive Modelling – NMC Conditions"
+    ]
+  },
+  {
+    "objectID": "by-forecasts/index.html#interpretation",
+    "href": "by-forecasts/index.html#interpretation",
+    "title": "Predictive Modelling – NMC Conditions",
+    "section": "Interpretation Guide",
+    "text": "Interpretation Guide\n\n\n\n\nTable 1: How to read the forecast outputs\n\n\n\nElementWhat it meansSuggested actionMedian lineMost likely trajectory based on current RtMonitor closely; compare to previous snapshots50% CI (dark ribbon)Central range – 1 in 2 chance the true value falls hereNormal operational uncertainty90% CI (light ribbon)Wide range – 9 in 10 chance the true value falls hereIf real counts approach the upper bound → escalateForecast horizon (dashed red)Where observed data ends and prediction beginsPredictions degrade further from this lineRolling snapshots diverging upwardSuccessive forecasts are increasingly pessimisticPossible outbreak acceleration → trigger response protocolsRolling snapshots convergingOutbreak is stabilising or decliningMaintain surveillance; consider de-escalation",
+    "crumbs": [
+      "Predictive Modelling – NMC Conditions"
+    ]
+  },
+  {
+    "objectID": "by-forecasts/index.html#rt",
+    "href": "by-forecasts/index.html#rt",
+    "title": "Predictive Modelling – NMC Conditions",
+    "section": "Effective Reproduction Number (\\(R_t\\))",
+    "text": "Effective Reproduction Number (\\(R_t\\))\nThe time-varying reproduction number \\(R_t\\) indicates how many secondary cases each infected person generates on average.\n\n\\(R_t &gt; 1\\) → epidemic is growing\n\\(R_t = 1\\) → epidemic is stable\n\\(R_t &lt; 1\\) → epidemic is declining\n\n\n\n\n\n\n\n\n\nFigure 3: Estimated Rt for vaccine-preventable conditions",
+    "crumbs": [
+      "Predictive Modelling – NMC Conditions"
+    ]
+  },
+  {
+    "objectID": "by-forecasts/index.html#growth-table",
+    "href": "by-forecasts/index.html#growth-table",
+    "title": "Predictive Modelling – NMC Conditions",
+    "section": "Growth-Rate Summary Table",
+    "text": "Growth-Rate Summary Table\n\n\n\n\nTable 2: Latest Rt and growth-rate summary per condition\n\n\n\nConditionLatest RtLower 90%Upper 90%AssessmentDateAcute flaccid paralysis1.010.941.17Growing2026-03-19Cholera1.020.791.28Growing2026-03-19Congenital rubella syndrome0.840.591.04Declining2026-03-19Covid-190.300.021.62Declining2026-03-19Diphtheria0.990.921.09Stable / slow decline2026-03-19Enteric fever (typhoid or paratyphoid fever)1.010.861.12Growing2026-03-19Fever-Rash0.760.421.25Declining2026-03-19Haemophilus influenzae type B1.000.941.06Stable / slow decline2026-03-19Hepatitis A0.980.791.12Stable / slow decline2026-03-19Hepatitis B0.960.571.56Stable / slow decline2026-03-19Listeriosis0.970.671.23Stable / slow decline2026-03-19Malaria0.430.191.00Declining2026-03-19Meningococcal disease0.990.911.06Stable / slow decline2026-03-19Mpox0.850.431.10Declining2026-03-19Pertussis0.940.761.09Stable / slow decline2026-03-19Poliomyelitis0.690.131.43Declining2026-03-19Tetanus0.930.611.27Stable / slow decline2026-03-19Yellow fever0.840.211.49Declining2026-03-19",
+    "crumbs": [
+      "Predictive Modelling – NMC Conditions"
+    ]
+  },
+  {
+    "objectID": "by-forecasts/index.html#provincial",
+    "href": "by-forecasts/index.html#provincial",
+    "title": "Predictive Modelling – NMC Conditions",
+    "section": "Provincial Breakdown",
+    "text": "Provincial Breakdown\n\n\n\n\n\n\n\n\nFigure 4: Weekly cases by province for forecasted NMC conditions",
+    "crumbs": [
+      "Predictive Modelling – NMC Conditions"
+    ]
+  },
+  {
+    "objectID": "by-forecasts/index.html#capacity",
+    "href": "by-forecasts/index.html#capacity",
+    "title": "Predictive Modelling – NMC Conditions",
+    "section": "Outbreak Capacity Indicator",
+    "text": "Outbreak Capacity Indicator\nA simple traffic-light display combining \\(R_t\\), recent case trends, and forecast trajectory.\n\n\n\n\n\n\n\n\nFigure 5: Outbreak capacity indicator per condition",
+    "crumbs": [
+      "Predictive Modelling – NMC Conditions"
+    ]
+  },
+  {
+    "objectID": "by-forecasts/index.html#updating",
+    "href": "by-forecasts/index.html#updating",
+    "title": "Predictive Modelling – NMC Conditions",
+    "section": "Updating Forecasts",
+    "text": "Updating Forecasts\n\n\n\n\n\n\nImportantStep-by-step instructions to refresh predictions\n\n\n\nForecasts are not computed live during dashboard rendering (they take ~5–15 min per condition). Instead, a batch script produces cached .rds files that the dashboard reads.\nPrerequisites:\n\nR ≥ 4.3 with packages: EpiNow2, data.table, dplyr, lubridate, here, purrr\nCmdStan installed (EpiNow2 backend). Install via: cmdstanr::install_cmdstan()\nAggregated surveillance data in data/processed/agg_national.rds (produced by R/prepare_dashboard_data.r)\n\n\n\n\n1. Update the surveillance data\n# From the project root\ncd /Users/briday/Desktop/SAFETP/CLA/NMC_website/NMC_dashboard\nRscript R/prepare_dashboard_data.r\nThis reads the latest NMC master dataset and produces:\n\ndata/processed/agg_national.rds\ndata/processed/agg_province.rds\ndata/processed/agg_district.rds\n\n\n\n2. Run the forecast batch\nRscript R/run_forecasts.r\nThis produces for each vaccine-preventable condition:\n\n\n\n\n\n\n\nFile\nContents\n\n\n\n\nforecasts_&lt;condition&gt;.rds\nSingle-point EpiNow2 summary (Rt, cases, infections)\n\n\nforecasts_obj_&lt;condition&gt;.rds\nFull EpiNow2 result object (for native plot() diagnostics)\n\n\nforecasts_rolling_&lt;condition&gt;.rds\nRolling snapshots for animated outlook\n\n\nforecasts_meta.rds\nRun timestamp and parameters\n\n\n\n\n\n3. Re-render the dashboard\nquarto render by-forecasts/index.qmd\n# Or render the full site:\nquarto render\n\n\nConfiguration\nEdit the constants at the top of R/run_forecasts.r to adjust:\n\n\n\nParameter\nDefault\nDescription\n\n\n\n\nHORIZON\n28\nDays to forecast ahead (4 weeks)\n\n\nLOOKBACK\n360\nDays of history for each model run\n\n\nN_REWINDS\n8\nNumber of rolling snapshots\n\n\nREWIND_STEP\n7\nDays between snapshots\n\n\n\n\n\nAdding a new condition\n\nEnsure the condition appears in agg_national.rds (via prepare_dashboard_data.r)\nAdd disease parameters in R/epinow2_functions.r → disease_params() function\nAdd the condition name to forecast_conditions() in the same file\nRe-run Rscript R/run_forecasts.r",
+    "crumbs": [
+      "Predictive Modelling – NMC Conditions"
+    ]
+  },
+  {
+    "objectID": "by-forecasts/index.html#assumptions",
+    "href": "by-forecasts/index.html#assumptions",
+    "title": "Predictive Modelling – NMC Conditions",
+    "section": "Model Assumptions & Parameters",
+    "text": "Model Assumptions & Parameters\nThe table below shows the disease-specific parameters fed into each EpiNow2 forecast. These are defined in R/epinow2_functions.r → disease_params() and sourced from peer-reviewed epidemiological literature. The Reference column cites the primary source for each parameter set — check these when validating or updating assumptions.\n\n\n\n\nTable 3: EpiNow2 model parameters by condition (with literature references)\n\n\n\nConditionGeneration TimeIncubation PeriodRt PriorReporting DelayWhat This MeansReferenceFever-RashGamma(shape~34, rate~2.9, max=--)Gamma (see source)Normal(mean=2.0, sd=1.0)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Fever-Rash to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Lessler et al. (2009) Lancet Infect Dis 9(5):291-300MeaslesGamma(shape~34, rate~2.9, max=--)Gamma (see source)Normal(mean=2.0, sd=1.0)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Measles to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Lessler et al. (2009) Lancet Infect Dis 9(5):291-300RubellaGamma(shape~27, rate~1.5, max=--)Gamma (see source)Normal(mean=2.0, sd=1.0)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Rubella to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Vink et al. (2014) Am J Epidemiol 180(9):865-875; Lessler et al. (2009)PertussisGamma(shape~13, rate~0.6, max=--)Gamma (see source)Normal(mean=2.0, sd=1.0)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Pertussis to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Vink et al. (2014); Wearing & Rohani (2009) Emerg Infect Dis 15(8):1248DiphtheriaGamma(shape~7, rate~0.9, max=--)Gamma (see source)Normal(mean=2.0, sd=1.0)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Diphtheria to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Truelove et al. (2020) Emerg Infect Dis 26(10):2396; AAP Red BookTetanusGamma(shape~8, rate~0.6, max=--)Gamma (see source)Normal(mean=1.0, sd=0.5)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Tetanus to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 1 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.WHO Tetanus Position Paper (2017); Roper et al. (2018) Lancet 391:1657Hepatitis BGamma(shape~9, rate~0.1, max=--)Gamma (see source)Normal(mean=1.5, sd=0.5)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Hepatitis B to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Edmunds et al. (1993) Epidemiol Infect 110(3):569; Liang (2009) Hepatology 49(S5):S13Haemophilus influenzae type BGamma(shape~4, rate~1.3, max=--)Gamma (see source)Normal(mean=1.5, sd=0.5)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Haemophilus influenzae type B to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Peltola (2000) Clin Microbiol Rev 13(2):302-317; AAP Red Book (2024)Congenital rubella syndromeGamma(shape~27, rate~1.5, max=--)Gamma (see source)Normal(mean=1.5, sd=0.5)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Congenital rubella syndrome to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Vink et al. (2014); Lessler et al. (2009) – rubella parametersPoliomyelitisGamma(shape~9, rate~0.6, max=--)Gamma (see source)Normal(mean=2.0, sd=1.0)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Poliomyelitis to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Fine & Carneiro (1999) Am J Epidemiol 150(12):1332; Nathanson & Kew (2010) Am J Epidemiol 172(11):1213Acute flaccid paralysisGamma(shape~9, rate~0.6, max=--)Gamma (see source)Normal(mean=2.0, sd=1.0)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Acute flaccid paralysis to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Fine & Carneiro (1999) Am J Epidemiol 150(12):1332; Nathanson & Kew (2010) Am J Epidemiol 172(11):1213Yellow feverGamma(shape~16, rate~1.3, max=--)Gamma (see source)Normal(mean=1.5, sd=0.5)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Yellow fever to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Johansson et al. (2010) Am J Trop Med Hyg 82(5):930; Monath & Vasconcelos (2015) J Clin Virol 64:160CholeraGamma(shape~6, rate~1.2, max=--)Gamma (see source)Normal(mean=2.0, sd=1.0)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Cholera to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Azman et al. (2013) J Infect Dis 207(11):1698-1706MalariaGamma(shape~14, rate~0.5, max=--)Gamma (see source)Normal(mean=1.5, sd=0.5)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Malaria to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Huber et al. (2016) Malar J 15:18; WHO World Malaria Report (2023)Covid-19Gamma(shape~6, rate~2.0, max=--)Gamma (see source)Normal(mean=1.5, sd=0.5)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Covid-19 to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Park et al. (2023) BMC Infect Dis 23:295; Wu et al. (2022) JAMA Netw Open 5(8):e2228008Enteric fever (typhoid or paratyphoid fever)Gamma(shape~12, rate~0.9, max=--)Gamma (see source)Normal(mean=1.5, sd=0.5)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Enteric fever (typhoid or paratyphoid fever) to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Pitzer et al. (2014) PLoS Negl Trop Dis 8(6):e2891; Crump et al. (2015) Clin Microbiol Rev 28(4):901Meningococcal diseaseGamma(shape~8, rate~1.1, max=--)Gamma (see source)Normal(mean=1.5, sd=0.5)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Meningococcal disease to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Trotter et al. (2005) Emerg Infect Dis 11(4):563; Rosenstein et al. (2001) NEJM 344(18):1378ListeriosisGamma(shape~4, rate~0.2, max=--)Gamma (see source)Normal(mean=1.2, sd=0.5)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Listeriosis to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 1 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Goulet et al. (2013) Clin Infect Dis 56(10):1411-1419MpoxGamma(shape~8, rate~0.7, max=--)Gamma (see source)Normal(mean=1.5, sd=0.5)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Mpox to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Miura et al. (2022) Euro Surveill 27(44):2200806; Thornhill et al. (2022) NEJM 387(8):679Hepatitis AGamma(shape~16, rate~0.7, max=--)Gamma (see source)Normal(mean=1.5, sd=0.5)LogNormal(mean=3, sd=2, max=15)On average, an infected person can spread Hepatitis A to others about several days after being infected themselves. Symptoms typically appear ~several days after exposure. The model starts by assuming each case infects about 2 other people on average, then adjusts this up or down based on the actual reported data. A ~3-day delay is assumed between someone falling ill and the case being officially reported.Jacobsen & Wiersma (2010) Clin Liver Dis 14(4):591; Lemon et al. (2018) Lancet 391:1587Generation time ≈ serial interval where direct measurement is unavailable. Incubation period = time from exposure to symptom onset. All distributions are Gamma. Reporting delay: default LogNormal(mean=3, sd=2, max=15) when empirical delay data is unavailable.\n\n\n\n\n\n\n\n\n\n\n\nTipReading the parameters\n\n\n\n\n\n\n\n\n\n\n\nParameter\nWhat it controls\nWhy it matters\n\n\n\n\nGeneration time\nAverage time between successive infections in a chain (≈ serial interval)\nDetermines how fast \\(R_t\\) changes translate into case-count changes\n\n\nIncubation period\nTime from infection/exposure to symptom onset\nAffects the delay between infection dynamics and observed cases\n\n\n\\(R_t\\) prior\nStarting assumption for reproduction number\nWeakly informative — the model quickly learns from data\n\n\nReporting delay\nTime from symptom onset to NMC notification\nAccounts for the surveillance lag between illness and official capture\n\n\nWhat This Means\nPlain-language summary of all parameters for this condition\nHelps non-technical readers understand what the model assumes\n\n\nReference\nPrimary literature source\nUsed for validation — update if newer estimates become available\n\n\n\n\n\n\n\n\n\n\n\nImportantHow to adjust parameters\n\n\n\nTo update parameter values for a condition:\n\nOpen R/epinow2_functions.r\nFind the condition in disease_params() (search for the condition name in lowercase)\nChange mean, sd, max values to match your preferred literature source\nUpdate the reference string to cite the new source\nRe-run: Rscript R/run_forecasts.r\nRe-render: quarto render by-forecasts/index.qmd\n\nExample — changing measles generation time to use a new study:\n\"fever-rash\" = , \"measles\" = list(\n  generation_time   = EpiNow2::Gamma(mean = 11.0, sd = 2.5, max = 20),\n  # ↑ changed from 11.7 to 11.0 based on New Study (2026)\n  incubation_period = EpiNow2::Gamma(mean = 12.5, sd = 2.3, max = 21),\n  rt_prior          = list(mean = 2, sd = 1),\n  reference         = \"New Study (2026) Journal Name DOI:...\"\n),",
+    "crumbs": [
+      "Predictive Modelling – NMC Conditions"
+    ]
+  },
+  {
+    "objectID": "by-forecasts/index.html#methods",
+    "href": "by-forecasts/index.html#methods",
+    "title": "Predictive Modelling – NMC Conditions",
+    "section": "Methods & Technical Details",
+    "text": "Methods & Technical Details\n\n\n\n\n\n\nNoteTechnical details (click to expand)\n\n\n\n\n\nModel: EpiNow2 v1.8.0 – a Bayesian semi-mechanistic model that jointly estimates the effective reproduction number (\\(R_t\\)), infection incidence, and reporting patterns. The model is fitted using Hamiltonian Monte Carlo via CmdStan. A day-of-week effect is enabled (obs_opts(week_effect = TRUE)) to account for lower weekend reporting.\nDisplay smoothing: All custom forecast plots apply a 7-day rolling average to both the observed surveillance series and the EpiNow2 median / credible-interval outputs. This removes residual day-of-week jaggedness and highlights the underlying epidemic trend.\nReporting delay: When empirical symptom→notification dates are available in the NMC data, the delay distribution is estimated via EpiNow2::estimate_delay() (capped at 15 days, max 100 observations). Otherwise a default LogNormal(mean=3, sd=2, max=15) prior is used.\nGeneration time & incubation period: Condition-specific Gamma distributions from published peer-reviewed literature. Key sources: Lessler et al. (2009) for measles/rubella; Vink et al. (2014) for serial intervals; Azman et al. (2013) for cholera; Park et al. (2023) for COVID-19 Omicron estimates. See the parameter table above for full citations. These are fixed inputs — not estimated from the data.\nPriors: \\(R_t\\) priors are weakly informative: Normal(2, 1) for directly-transmitted pathogens, Normal(1.5, 0.5) for vector-borne / lower-Rt conditions. The model quickly learns from data.\nForecast horizon: 28 days (4 weeks) ahead from the last observation date.\nHistory window: 360 days of surveillance data fed to each model run.\nCompleteness / Timeliness: The NMC is a passive surveillance system; under-reporting varies by condition and province. Forecasts represent reported cases, not true incidence.\nRolling forecast animation: Re-runs the model 8 times (weekly snapshots), each using data up to that snapshot date, to visualise how the forecast outlook evolved over time.\n\n\n\n\n\nSource code: R/epinow2_functions.r · R/run_forecasts.r · Data pipeline: R/prepare_dashboard_data.r",
+    "crumbs": [
+      "Predictive Modelling – NMC Conditions"
+    ]
+  },
+  {
+    "objectID": "by-condition/index.html",
+    "href": "by-condition/index.html",
+    "title": "By Condition",
+    "section": "",
+    "text": "NoteDevelopment Roadmap — By Condition\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nWeekly national epicurve stacked by province (interactive)\n✅ Done\n\n\nv0.1\nProvincial incidence trend lines\n✅ Done\n\n\nv0.1\nDistrict hotspot table (last 30 days) with export\n✅ Done\n\n\nv0.2\nCondition-specific summary cards (key metrics)\n🔲 Planned\n\n\nv0.2\nAnimated epi-curve (gganimate / plotly animation)\n🔲 Planned\n\n\nv0.3\nLeaflet hotspot map — district-level choropleth\n🔲 Planned\n\n\nv0.3\nProvince comparison heatmap (condition × province)\n🔲 Planned\n\n\nv0.4\nAge/sex breakdown where demographic data available\n🔲 Planned\n\n\nv0.5\nEpiNow2 Rt ribbon per condition fed from agg_national.rds\n🔲 Planned\n\n\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_province.rds, agg_district.rds",
+    "crumbs": [
+      "By Condition",
+      "By Condition"
+    ]
+  },
+  {
+    "objectID": "by-condition/index.html#filter",
+    "href": "by-condition/index.html#filter",
+    "title": "By Condition",
+    "section": "Filter",
+    "text": "Filter\n\n\n\n\n\nSelect Condition\n\n\n\n\n\n\n\n\nProvince (optional)",
+    "crumbs": [
+      "By Condition",
+      "By Condition"
+    ]
+  },
+  {
+    "objectID": "by-condition/index.html#epidemic-curves",
+    "href": "by-condition/index.html#epidemic-curves",
+    "title": "By Condition",
+    "section": "Epidemic Curves",
+    "text": "Epidemic Curves\n\nWeekly Cases by Province\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 1: Weekly case counts stacked by province — use the filter above to select a condition\n\n\n\n\n\n\nProvincial Incidence Trends\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 2: Weekly incidence per 100 000 by province",
+    "crumbs": [
+      "By Condition",
+      "By Condition"
+    ]
+  },
+  {
+    "objectID": "by-condition/index.html#district-hotspots-last-30-days",
+    "href": "by-condition/index.html#district-hotspots-last-30-days",
+    "title": "By Condition",
+    "section": "District Hotspots — Last 30 Days",
+    "text": "District Hotspots — Last 30 Days\n\n\n\n\nCondition\n\n\n\n\n\n\n\n\n\n\n\n\nTable 1\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipRelated Sections\n\n\n\n\nBy Province — province-first view with district drilldown\nTrending & Signals — signal detection for emerging conditions\nBurden of Disease — YLL, DALYs & age-standardised rates\nForecasts — short-term predictive models\nExplorer — custom data queries and downloads\nMethods — indicator definitions and data sources",
+    "crumbs": [
+      "By Condition",
+      "By Condition"
+    ]
+  },
+  {
+    "objectID": "by-province/nw/index.html",
+    "href": "by-province/nw/index.html",
+    "title": "North West",
+    "section": "",
+    "text": "North West (NW) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 4,141,774\nHome All Provinces",
+    "crumbs": [
+      "By Province",
+      "North West"
+    ]
+  },
+  {
+    "objectID": "by-province/nw/index.html#category-summary",
+    "href": "by-province/nw/index.html#category-summary",
+    "title": "North West",
+    "section": "Category Summary",
+    "text": "Category Summary\n\n\n\n\nTable 1",
+    "crumbs": [
+      "By Province",
+      "North West"
+    ]
+  },
+  {
+    "objectID": "by-province/nw/index.html#cat1",
+    "href": "by-province/nw/index.html#cat1",
+    "title": "North West",
+    "section": "Category 1 — Immediate Notification",
+    "text": "Category 1 — Immediate Notification\n\n\n\n\n\n\nImportantAbout Category 1\n\n\n\n\n\nCategory 1 conditions require immediate notification within 24 hours. These include diseases of high epidemic potential or public health emergency significance (e.g. cholera, measles, malaria, meningococcal disease).\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 1\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 2\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 3\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 4\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 2",
+    "crumbs": [
+      "By Province",
+      "North West"
+    ]
+  },
+  {
+    "objectID": "by-province/nw/index.html#cat2",
+    "href": "by-province/nw/index.html#cat2",
+    "title": "North West",
+    "section": "Category 2 — Routine Notification",
+    "text": "Category 2 — Routine Notification\n\n\n\n\n\n\nNoteAbout Category 2\n\n\n\n\n\nCategory 2 conditions require notification within 7 days. These include conditions such as hepatitis A–E, tuberculosis variants, congenital syphilis, lead/mercury poisoning, and maternal deaths.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 5\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 6\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 7\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 8\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 3",
+    "crumbs": [
+      "By Province",
+      "North West"
+    ]
+  },
+  {
+    "objectID": "by-province/nw/index.html#cat3",
+    "href": "by-province/nw/index.html#cat3",
+    "title": "North West",
+    "section": "Category 3 — Sentinel Surveillance",
+    "text": "Category 3 — Sentinel Surveillance\n\n\n\n\n\n\nTipAbout Category 3\n\n\n\n\n\nCategory 3 conditions are monitored through sentinel surveillance. These include endemic arboviral diseases (Chikungunya, Sindbis, West Nile), non-endemic arbovirals (Zika, Dengue), non-typhoidal Salmonellosis, STEC, and Shigellosis.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 9\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\n\n\n\n\nFigure 10\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\n\n\n\n\nFigure 11\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\n\n\n\n\nFigure 12\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 4",
+    "crumbs": [
+      "By Province",
+      "North West"
+    ]
+  },
+  {
+    "objectID": "by-province/nw/index.html#cat4",
+    "href": "by-province/nw/index.html#cat4",
+    "title": "North West",
+    "section": "Category 4 — AMR Organisms",
+    "text": "Category 4 — AMR Organisms\n\n\n\n\n\n\nWarningAbout Category 4\n\n\n\n\n\nCategory 4 covers antimicrobial-resistant organisms: CPE, VRE, GISA/hGISA, colistin-resistant Pseudomonas/Acinetobacter, and C. difficile.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\nNo Category 4 conditions reported this month.\n\n\nFigure 13\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 14\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 15\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\nNo Category 4 incidence data available.\n\n\nFigure 16\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 5\n\n\n\nNo Category 4 data to display.",
+    "crumbs": [
+      "By Province",
+      "North West"
+    ]
+  },
+  {
+    "objectID": "by-province/nw/index.html#all-conditions-full-table",
+    "href": "by-province/nw/index.html#all-conditions-full-table",
+    "title": "North West",
+    "section": "All Conditions — Full Table",
+    "text": "All Conditions — Full Table\n\n\n\n\nTable 6",
+    "crumbs": [
+      "By Province",
+      "North West"
+    ]
+  },
+  {
+    "objectID": "by-province/nw/index.html#province-navigation",
+    "href": "by-province/nw/index.html#province-navigation",
+    "title": "North West",
+    "section": "Province Navigation",
+    "text": "Province Navigation\n\n\n\nEastern Cape Free State Gauteng KwaZulu-Natal Limpopo Mpumalanga Northern Cape North West Western Cape\n\n\n\n\n\n\n\n\n\n\nTipRelated Sections\n\n\n\n\nBy Province — Overview — cross-province comparison\nBy Condition — condition-first view\nTrending & Signals — signal detection\nForecasts — short-term predictive models",
+    "crumbs": [
+      "By Province",
+      "North West"
+    ]
+  },
+  {
+    "objectID": "by-province/mp/index.html",
+    "href": "by-province/mp/index.html",
+    "title": "Mpumalanga",
+    "section": "",
+    "text": "Mpumalanga (MP) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 4,743,584\nHome All Provinces",
+    "crumbs": [
+      "By Province",
+      "Mpumalanga"
+    ]
+  },
+  {
+    "objectID": "by-province/mp/index.html#category-summary",
+    "href": "by-province/mp/index.html#category-summary",
+    "title": "Mpumalanga",
+    "section": "Category Summary",
+    "text": "Category Summary\n\n\n\n\nTable 1",
+    "crumbs": [
+      "By Province",
+      "Mpumalanga"
+    ]
+  },
+  {
+    "objectID": "by-province/mp/index.html#cat1",
+    "href": "by-province/mp/index.html#cat1",
+    "title": "Mpumalanga",
+    "section": "Category 1 — Immediate Notification",
+    "text": "Category 1 — Immediate Notification\n\n\n\n\n\n\nImportantAbout Category 1\n\n\n\n\n\nCategory 1 conditions require immediate notification within 24 hours. These include diseases of high epidemic potential or public health emergency significance (e.g. cholera, measles, malaria, meningococcal disease).\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 1\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 2\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 3\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 4\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 2",
+    "crumbs": [
+      "By Province",
+      "Mpumalanga"
+    ]
+  },
+  {
+    "objectID": "by-province/mp/index.html#cat2",
+    "href": "by-province/mp/index.html#cat2",
+    "title": "Mpumalanga",
+    "section": "Category 2 — Routine Notification",
+    "text": "Category 2 — Routine Notification\n\n\n\n\n\n\nNoteAbout Category 2\n\n\n\n\n\nCategory 2 conditions require notification within 7 days. These include conditions such as hepatitis A–E, tuberculosis variants, congenital syphilis, lead/mercury poisoning, and maternal deaths.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 5\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 6\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 7\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 8\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 3",
+    "crumbs": [
+      "By Province",
+      "Mpumalanga"
+    ]
+  },
+  {
+    "objectID": "by-province/mp/index.html#cat3",
+    "href": "by-province/mp/index.html#cat3",
+    "title": "Mpumalanga",
+    "section": "Category 3 — Sentinel Surveillance",
+    "text": "Category 3 — Sentinel Surveillance\n\n\n\n\n\n\nTipAbout Category 3\n\n\n\n\n\nCategory 3 conditions are monitored through sentinel surveillance. These include endemic arboviral diseases (Chikungunya, Sindbis, West Nile), non-endemic arbovirals (Zika, Dengue), non-typhoidal Salmonellosis, STEC, and Shigellosis.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 9\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\n\n\n\n\nFigure 10\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\n\n\n\n\nFigure 11\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\n\n\n\n\nFigure 12\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 4",
+    "crumbs": [
+      "By Province",
+      "Mpumalanga"
+    ]
+  },
+  {
+    "objectID": "by-province/mp/index.html#cat4",
+    "href": "by-province/mp/index.html#cat4",
+    "title": "Mpumalanga",
+    "section": "Category 4 — AMR Organisms",
+    "text": "Category 4 — AMR Organisms\n\n\n\n\n\n\nWarningAbout Category 4\n\n\n\n\n\nCategory 4 covers antimicrobial-resistant organisms: CPE, VRE, GISA/hGISA, colistin-resistant Pseudomonas/Acinetobacter, and C. difficile.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\nNo Category 4 conditions reported this month.\n\n\nFigure 13\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 14\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 15\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\nNo Category 4 incidence data available.\n\n\nFigure 16\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 5\n\n\n\nNo Category 4 data to display.",
+    "crumbs": [
+      "By Province",
+      "Mpumalanga"
+    ]
+  },
+  {
+    "objectID": "by-province/mp/index.html#all-conditions-full-table",
+    "href": "by-province/mp/index.html#all-conditions-full-table",
+    "title": "Mpumalanga",
+    "section": "All Conditions — Full Table",
+    "text": "All Conditions — Full Table\n\n\n\n\nTable 6",
+    "crumbs": [
+      "By Province",
+      "Mpumalanga"
+    ]
+  },
+  {
+    "objectID": "by-province/mp/index.html#province-navigation",
+    "href": "by-province/mp/index.html#province-navigation",
+    "title": "Mpumalanga",
+    "section": "Province Navigation",
+    "text": "Province Navigation\n\n\n\nEastern Cape Free State Gauteng KwaZulu-Natal Limpopo Mpumalanga Northern Cape North West Western Cape\n\n\n\n\n\n\n\n\n\n\nTipRelated Sections\n\n\n\n\nBy Province — Overview — cross-province comparison\nBy Condition — condition-first view\nTrending & Signals — signal detection\nForecasts — short-term predictive models",
+    "crumbs": [
+      "By Province",
+      "Mpumalanga"
+    ]
+  },
+  {
+    "objectID": "by-province/kzn/index.html",
+    "href": "by-province/kzn/index.html",
+    "title": "KwaZulu-Natal",
+    "section": "",
+    "text": "KwaZulu-Natal (KZN) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 11,538,813\nHome All Provinces",
+    "crumbs": [
+      "By Province",
+      "KwaZulu-Natal"
+    ]
+  },
+  {
+    "objectID": "by-province/kzn/index.html#category-summary",
+    "href": "by-province/kzn/index.html#category-summary",
+    "title": "KwaZulu-Natal",
+    "section": "Category Summary",
+    "text": "Category Summary\n\n\n\n\nTable 1",
+    "crumbs": [
+      "By Province",
+      "KwaZulu-Natal"
+    ]
+  },
+  {
+    "objectID": "by-province/kzn/index.html#cat1",
+    "href": "by-province/kzn/index.html#cat1",
+    "title": "KwaZulu-Natal",
+    "section": "Category 1 — Immediate Notification",
+    "text": "Category 1 — Immediate Notification\n\n\n\n\n\n\nImportantAbout Category 1\n\n\n\n\n\nCategory 1 conditions require immediate notification within 24 hours. These include diseases of high epidemic potential or public health emergency significance (e.g. cholera, measles, malaria, meningococcal disease).\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 1\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 2\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 3\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 4\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 2",
+    "crumbs": [
+      "By Province",
+      "KwaZulu-Natal"
+    ]
+  },
+  {
+    "objectID": "by-province/kzn/index.html#cat2",
+    "href": "by-province/kzn/index.html#cat2",
+    "title": "KwaZulu-Natal",
+    "section": "Category 2 — Routine Notification",
+    "text": "Category 2 — Routine Notification\n\n\n\n\n\n\nNoteAbout Category 2\n\n\n\n\n\nCategory 2 conditions require notification within 7 days. These include conditions such as hepatitis A–E, tuberculosis variants, congenital syphilis, lead/mercury poisoning, and maternal deaths.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 5\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 6\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 7\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 8\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 3",
+    "crumbs": [
+      "By Province",
+      "KwaZulu-Natal"
+    ]
+  },
+  {
+    "objectID": "by-province/kzn/index.html#cat3",
+    "href": "by-province/kzn/index.html#cat3",
+    "title": "KwaZulu-Natal",
+    "section": "Category 3 — Sentinel Surveillance",
+    "text": "Category 3 — Sentinel Surveillance\n\n\n\n\n\n\nTipAbout Category 3\n\n\n\n\n\nCategory 3 conditions are monitored through sentinel surveillance. These include endemic arboviral diseases (Chikungunya, Sindbis, West Nile), non-endemic arbovirals (Zika, Dengue), non-typhoidal Salmonellosis, STEC, and Shigellosis.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 9\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\n\n\n\n\nFigure 10\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\n\n\n\n\nFigure 11\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\n\n\n\n\nFigure 12\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 4",
+    "crumbs": [
+      "By Province",
+      "KwaZulu-Natal"
+    ]
+  },
+  {
+    "objectID": "by-province/kzn/index.html#cat4",
+    "href": "by-province/kzn/index.html#cat4",
+    "title": "KwaZulu-Natal",
+    "section": "Category 4 — AMR Organisms",
+    "text": "Category 4 — AMR Organisms\n\n\n\n\n\n\nWarningAbout Category 4\n\n\n\n\n\nCategory 4 covers antimicrobial-resistant organisms: CPE, VRE, GISA/hGISA, colistin-resistant Pseudomonas/Acinetobacter, and C. difficile.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\nNo Category 4 conditions reported this month.\n\n\nFigure 13\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 14\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 15\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\nNo Category 4 incidence data available.\n\n\nFigure 16\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 5\n\n\n\nNo Category 4 data to display.",
+    "crumbs": [
+      "By Province",
+      "KwaZulu-Natal"
+    ]
+  },
+  {
+    "objectID": "by-province/kzn/index.html#all-conditions-full-table",
+    "href": "by-province/kzn/index.html#all-conditions-full-table",
+    "title": "KwaZulu-Natal",
+    "section": "All Conditions — Full Table",
+    "text": "All Conditions — Full Table\n\n\n\n\nTable 6",
+    "crumbs": [
+      "By Province",
+      "KwaZulu-Natal"
+    ]
+  },
+  {
+    "objectID": "by-province/kzn/index.html#province-navigation",
+    "href": "by-province/kzn/index.html#province-navigation",
+    "title": "KwaZulu-Natal",
+    "section": "Province Navigation",
+    "text": "Province Navigation\n\n\n\nEastern Cape Free State Gauteng KwaZulu-Natal Limpopo Mpumalanga Northern Cape North West Western Cape\n\n\n\n\n\n\n\n\n\n\nTipRelated Sections\n\n\n\n\nBy Province — Overview — cross-province comparison\nBy Condition — condition-first view\nTrending & Signals — signal detection\nForecasts — short-term predictive models",
+    "crumbs": [
+      "By Province",
+      "KwaZulu-Natal"
+    ]
+  },
+  {
+    "objectID": "by-province/fs/index.html",
+    "href": "by-province/fs/index.html",
+    "title": "Free State",
+    "section": "",
+    "text": "Free State (FS) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 2,928,903\nHome All Provinces",
+    "crumbs": [
+      "By Province",
+      "Free State"
+    ]
+  },
+  {
+    "objectID": "by-province/fs/index.html#category-summary",
+    "href": "by-province/fs/index.html#category-summary",
+    "title": "Free State",
+    "section": "Category Summary",
+    "text": "Category Summary\n\n\n\n\nTable 1",
+    "crumbs": [
+      "By Province",
+      "Free State"
+    ]
+  },
+  {
+    "objectID": "by-province/fs/index.html#cat1",
+    "href": "by-province/fs/index.html#cat1",
+    "title": "Free State",
+    "section": "Category 1 — Immediate Notification",
+    "text": "Category 1 — Immediate Notification\n\n\n\n\n\n\nImportantAbout Category 1\n\n\n\n\n\nCategory 1 conditions require immediate notification within 24 hours. These include diseases of high epidemic potential or public health emergency significance (e.g. cholera, measles, malaria, meningococcal disease).\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 1\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 2\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 3\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 4\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 2",
+    "crumbs": [
+      "By Province",
+      "Free State"
+    ]
+  },
+  {
+    "objectID": "by-province/fs/index.html#cat2",
+    "href": "by-province/fs/index.html#cat2",
+    "title": "Free State",
+    "section": "Category 2 — Routine Notification",
+    "text": "Category 2 — Routine Notification\n\n\n\n\n\n\nNoteAbout Category 2\n\n\n\n\n\nCategory 2 conditions require notification within 7 days. These include conditions such as hepatitis A–E, tuberculosis variants, congenital syphilis, lead/mercury poisoning, and maternal deaths.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 5\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 6\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 7\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 8\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 3",
+    "crumbs": [
+      "By Province",
+      "Free State"
+    ]
+  },
+  {
+    "objectID": "by-province/fs/index.html#cat3",
+    "href": "by-province/fs/index.html#cat3",
+    "title": "Free State",
+    "section": "Category 3 — Sentinel Surveillance",
+    "text": "Category 3 — Sentinel Surveillance\n\n\n\n\n\n\nTipAbout Category 3\n\n\n\n\n\nCategory 3 conditions are monitored through sentinel surveillance. These include endemic arboviral diseases (Chikungunya, Sindbis, West Nile), non-endemic arbovirals (Zika, Dengue), non-typhoidal Salmonellosis, STEC, and Shigellosis.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 9\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\n\n\n\n\nFigure 10\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\n\n\n\n\nFigure 11\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\n\n\n\n\nFigure 12\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 4",
+    "crumbs": [
+      "By Province",
+      "Free State"
+    ]
+  },
+  {
+    "objectID": "by-province/fs/index.html#cat4",
+    "href": "by-province/fs/index.html#cat4",
+    "title": "Free State",
+    "section": "Category 4 — AMR Organisms",
+    "text": "Category 4 — AMR Organisms\n\n\n\n\n\n\nWarningAbout Category 4\n\n\n\n\n\nCategory 4 covers antimicrobial-resistant organisms: CPE, VRE, GISA/hGISA, colistin-resistant Pseudomonas/Acinetobacter, and C. difficile.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\nNo Category 4 conditions reported this month.\n\n\nFigure 13\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 14\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 15\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\nNo Category 4 incidence data available.\n\n\nFigure 16\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 5\n\n\n\nNo Category 4 data to display.",
+    "crumbs": [
+      "By Province",
+      "Free State"
+    ]
+  },
+  {
+    "objectID": "by-province/fs/index.html#all-conditions-full-table",
+    "href": "by-province/fs/index.html#all-conditions-full-table",
+    "title": "Free State",
+    "section": "All Conditions — Full Table",
+    "text": "All Conditions — Full Table\n\n\n\n\nTable 6",
+    "crumbs": [
+      "By Province",
+      "Free State"
+    ]
+  },
+  {
+    "objectID": "by-province/fs/index.html#province-navigation",
+    "href": "by-province/fs/index.html#province-navigation",
+    "title": "Free State",
+    "section": "Province Navigation",
+    "text": "Province Navigation\n\n\n\nEastern Cape Free State Gauteng KwaZulu-Natal Limpopo Mpumalanga Northern Cape North West Western Cape\n\n\n\n\n\n\n\n\n\n\nTipRelated Sections\n\n\n\n\nBy Province — Overview — cross-province comparison\nBy Condition — condition-first view\nTrending & Signals — signal detection\nForecasts — short-term predictive models",
+    "crumbs": [
+      "By Province",
+      "Free State"
+    ]
+  },
+  {
+    "objectID": "by-province/index.html",
+    "href": "by-province/index.html",
+    "title": "By Province",
+    "section": "",
+    "text": "NoteDevelopment Roadmap — By Province\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nMonthly case counts by province × condition (interactive bar chart)\n✅ Done\n\n\nv0.1\nIncidence per 100 000 dot-plot, filterable by condition\n✅ Done\n\n\nv0.1\nSearchable & downloadable data table (CSV / Excel)\n✅ Done\n\n\nv0.1\nNMC category organisation (Cat 1–4 tabs)\n✅ Done\n\n\nv0.2\nLeaflet choropleth map — province-level counts\n🔲 Planned\n\n\nv0.2\nDistrict drilldown table per province\n🔲 Planned\n\n\nv0.3\nClick-to-zoom district maps with Leaflet + lightbox\n🔲 Planned\n\n\nv0.3\nTime-series sparklines per province\n🔲 Planned\n\n\nv0.4\nLink to per-province sub-pages (EC, GP, …)\n🔲 Planned\n\n\nv0.5\nEpiNow2 Rt estimates per province fed from agg_province.rds\n🔲 Planned\n\n\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_province.rds\nProvincial surveillance data organised by NMC notification category. Category 1 conditions appear first — they require immediate public health action. Category 2 supports trend monitoring for higher-volume routine conditions.\nData through: 19 February 2026",
+    "crumbs": [
+      "By Province",
+      "By Province"
+    ]
+  },
+  {
+    "objectID": "by-province/index.html#cat1",
+    "href": "by-province/index.html#cat1",
+    "title": "By Province",
+    "section": "Category 1 — Immediate Notification",
+    "text": "Category 1 — Immediate Notification\n\n\n\n\n\n\nImportantRequires immediate public health action\n\n\n\nCategory 1 conditions must be notified within 24 hours. Includes cholera, measles, malaria, meningococcal disease, VHFs, and other nationally significant threats. Use this section for rapid situational awareness across provinces.\n\n\n\nFilters\n\n\n\n\n\nCondition\n\n\n\n\n\n\n\n\nCases ≥\n\n\n\n\n\n\n\n\n\nCases by Province\n\nStacked Bar Chart\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 1\n\n\n\n\n\n\nIncidence Dot-plot\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 2\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 1",
+    "crumbs": [
+      "By Province",
+      "By Province"
+    ]
+  },
+  {
+    "objectID": "by-province/index.html#cat2",
+    "href": "by-province/index.html#cat2",
+    "title": "By Province",
+    "section": "Category 2 — Routine Notification (Trend Monitoring)",
+    "text": "Category 2 — Routine Notification (Trend Monitoring)\n\n\n\n\n\n\nNoteHigher-volume conditions for quarterly trend reports\n\n\n\nCategory 2 conditions are notified within 7 days. Includes TB (all forms), hepatitis A–E, schistosomiasis (bilharzia), congenital syphilis, poisonings, and maternal deaths. Use this section for routine monitoring and quarterly reporting.\n\n\n\nFilters\n\n\n\n\n\nCondition\n\n\n\n\n\n\n\n\nCases ≥\n\n\n\n\n\n\n\n\n\nCases by Province\n\nStacked Bar Chart\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 3\n\n\n\n\n\n\nIncidence Dot-plot\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 4\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 2",
+    "crumbs": [
+      "By Province",
+      "By Province"
+    ]
+  },
+  {
+    "objectID": "by-province/index.html#cat3",
+    "href": "by-province/index.html#cat3",
+    "title": "By Province",
+    "section": "Category 3 — Sentinel Surveillance",
+    "text": "Category 3 — Sentinel Surveillance\n\n\n\n\n\n\nTipSentinel site monitoring\n\n\n\n\n\nCategory 3 covers arboviral diseases (Chikungunya, Sindbis, West Nile, Zika, Dengue), non-typhoidal Salmonellosis, STEC, Shigellosis, and resistant Gonorrhoea.\n\n\n\n\nCases by Province\n\nStacked Bar Chart\n\n\n\n\n\n\n\n\nFigure 5\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 3",
+    "crumbs": [
+      "By Province",
+      "By Province"
+    ]
+  },
+  {
+    "objectID": "by-province/index.html#cat4",
+    "href": "by-province/index.html#cat4",
+    "title": "By Province",
+    "section": "Category 4 — AMR Organisms",
+    "text": "Category 4 — AMR Organisms\n\n\n\n\n\n\nWarningAntimicrobial resistance monitoring\n\n\n\n\n\nCategory 4 covers CPE, VRE, GISA/hGISA, colistin-resistant Pseudomonas/Acinetobacter, and C. difficile.\n\n\n\n\nCases by Province\n\nStacked Bar Chart\n\n\n\n\nNo Category 4 data this month.\n\n\nFigure 6\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 4\n\n\n\nNo Category 4 data to display.",
+    "crumbs": [
+      "By Province",
+      "By Province"
+    ]
+  },
+  {
+    "objectID": "by-province/index.html#all-categories-summary-table",
+    "href": "by-province/index.html#all-categories-summary-table",
+    "title": "By Province",
+    "section": "All Categories — Summary Table",
+    "text": "All Categories — Summary Table\n\n\n\n\nTable 5",
+    "crumbs": [
+      "By Province",
+      "By Province"
+    ]
+  },
+  {
+    "objectID": "by-province/index.html#province-sub-pages",
+    "href": "by-province/index.html#province-sub-pages",
+    "title": "By Province",
+    "section": "Province Sub-pages",
+    "text": "Province Sub-pages\nIndividual province dashboards with district-level drilldowns organised by NMC category:\n\n\n\nEastern Cape Free State Gauteng KwaZulu-Natal Limpopo Mpumalanga Northern Cape North West Western Cape\n\n\n\n\n\n\n\n\n\n\nTipRelated Sections\n\n\n\n\nBy Condition — condition-first view with national trends\nTrending & Signals — signal detection for emerging conditions\nBurden of Disease — YLL, DALYs & age-standardised rates\nForecasts — short-term predictive models\nExplorer — custom data queries and downloads\nData Quality — reporting completeness underpinning this data",
+    "crumbs": [
+      "By Province",
+      "By Province"
+    ]
+  },
+  {
+    "objectID": "glossary.html",
+    "href": "glossary.html",
+    "title": "Glossary",
+    "section": "",
+    "text": "Abbreviation\nFull Form\n\n\n\n\nASR\nAge-Standardised Rate\n\n\nBoD\nBurden of Disease\n\n\nCDC\nCenters for Disease Control and Prevention\n\n\nCFR\nCase Fatality Rate / Ratio\n\n\nCI\nCredible / Confidence Interval\n\n\nCUSUM\nCumulative Sum (signal detection algorithm)\n\n\nDALY\nDisability-Adjusted Life Year\n\n\nDoH\nDepartment of Health\n\n\nEARS\nEarly Aberration Reporting System\n\n\nEC\nEastern Cape\n\n\nFS\nFree State\n\n\nGBD\nGlobal Burden of Disease\n\n\nGP\nGauteng\n\n\nIDSR\nIntegrated Disease Surveillance and Response\n\n\nKZN\nKwaZulu-Natal\n\n\nLP\nLimpopo\n\n\nMFL\nMaster Facility List\n\n\nMP\nMpumalanga\n\n\nMYPE\nMid-Year Population Estimates\n\n\nNC\nNorthern Cape\n\n\nNDoH\nNational Department of Health\n\n\nNMC\nNotifiable Medical Conditions\n\n\nNW\nNorth West\n\n\nRt\nEffective Reproduction Number\n\n\nRSV\nRespiratory Syncytial Virus\n\n\nSAMRC\nSouth African Medical Research Council\n\n\nStats SA\nStatistics South Africa\n\n\nWC\nWestern Cape\n\n\nWHO\nWorld Health Organization\n\n\nYLD\nYears Lived with Disability\n\n\nYLL\nYears of Life Lost",
+    "crumbs": [
+      "Glossary"
+    ]
+  },
+  {
+    "objectID": "glossary.html#abbreviations",
+    "href": "glossary.html#abbreviations",
+    "title": "Glossary",
+    "section": "",
+    "text": "Abbreviation\nFull Form\n\n\n\n\nASR\nAge-Standardised Rate\n\n\nBoD\nBurden of Disease\n\n\nCDC\nCenters for Disease Control and Prevention\n\n\nCFR\nCase Fatality Rate / Ratio\n\n\nCI\nCredible / Confidence Interval\n\n\nCUSUM\nCumulative Sum (signal detection algorithm)\n\n\nDALY\nDisability-Adjusted Life Year\n\n\nDoH\nDepartment of Health\n\n\nEARS\nEarly Aberration Reporting System\n\n\nEC\nEastern Cape\n\n\nFS\nFree State\n\n\nGBD\nGlobal Burden of Disease\n\n\nGP\nGauteng\n\n\nIDSR\nIntegrated Disease Surveillance and Response\n\n\nKZN\nKwaZulu-Natal\n\n\nLP\nLimpopo\n\n\nMFL\nMaster Facility List\n\n\nMP\nMpumalanga\n\n\nMYPE\nMid-Year Population Estimates\n\n\nNC\nNorthern Cape\n\n\nNDoH\nNational Department of Health\n\n\nNMC\nNotifiable Medical Conditions\n\n\nNW\nNorth West\n\n\nRt\nEffective Reproduction Number\n\n\nRSV\nRespiratory Syncytial Virus\n\n\nSAMRC\nSouth African Medical Research Council\n\n\nStats SA\nStatistics South Africa\n\n\nWC\nWestern Cape\n\n\nWHO\nWorld Health Organization\n\n\nYLD\nYears Lived with Disability\n\n\nYLL\nYears of Life Lost",
+    "crumbs": [
+      "Glossary"
+    ]
+  },
+  {
+    "objectID": "glossary.html#key-indicators",
+    "href": "glossary.html#key-indicators",
+    "title": "Glossary",
+    "section": "Key Indicators",
+    "text": "Key Indicators\n\n\n\n\n\n\n\nIndicator\nDefinition\n\n\n\n\nIncidence rate\nNumber of new cases per 100 000 population over a defined period\n\n\nCFR\nProportion of diagnosed cases that result in death\n\n\nRt\nAverage number of secondary infections caused by one case at time t\n\n\nYLL\nYears of potential life lost due to premature death\n\n\nYLD\nYears lived in less-than-full health due to illness\n\n\nDALY\nTotal burden = YLL + YLD — one DALY = one year of healthy life lost\n\n\nASR\nRate adjusted for age distribution to allow fair comparison between populations\n\n\nCompleteness\nProportion of expected surveillance reports actually received\n\n\nTimeliness\nTime between event occurrence and its entry in the surveillance system",
+    "crumbs": [
+      "Glossary"
+    ]
+  },
+  {
+    "objectID": "glossary.html#epidemiological-terms",
+    "href": "glossary.html#epidemiological-terms",
+    "title": "Glossary",
+    "section": "Epidemiological Terms",
+    "text": "Epidemiological Terms\n\n\n\n\n\n\n\nTerm\nDefinition\n\n\n\n\nEpicurve\nA histogram of case counts over time, used to visualise the course of an outbreak\n\n\nSignal\nA statistical anomaly in surveillance data that warrants investigation\n\n\nNowcast\nAn estimate of current case counts adjusted for reporting delays\n\n\nForecast\nA probabilistic estimate of future case counts based on current trends\n\n\nChoropleth\nA map in which areas are shaded proportional to a statistical variable\n\n\nDrilldown\nNavigating from a summary view to more granular detail (e.g., province → district)\n\n\nBaseline\nA reference level of disease activity, typically derived from historical data\n\n\n\n\n\n\n\n\n\n\nTipRelated Pages\n\n\n\n\nMethods — full technical documentation\nAbout — credits and contact information\nHome — return to the main dashboard",
+    "crumbs": [
+      "Glossary"
+    ]
+  },
+  {
+    "objectID": "quality.html",
+    "href": "quality.html",
+    "title": "Data Quality",
+    "section": "",
+    "text": "NoteDevelopment Roadmap — Data Quality\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nReporting completeness by province (% days with ≥ 1 case)\n✅ Done\n\n\nv0.1\nWeekly submission heatmap\n✅ Done\n\n\nv0.2\nTimeliness metrics (median days from onset to notification)\n🔲 Planned\n\n\nv0.2\nDuplicate detection summary\n🔲 Planned\n\n\nv0.3\nMissing-field rates by condition (name, age, sex, district)\n🔲 Planned\n\n\nv0.3\nFacility-level reporting participation rates\n🔲 Planned\n\n\nv0.4\nAutomated data-quality score card (red/amber/green)\n🔲 Planned\n\n\nv0.5\nHistoric trend of completeness to track improvement\n🔲 Planned\n\n\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_province.rds\nData through: 19 February 2026"
+  },
+  {
+    "objectID": "quality.html#reporting-completeness-by-province",
+    "href": "quality.html#reporting-completeness-by-province",
+    "title": "Data Quality",
+    "section": "Reporting Completeness by Province",
+    "text": "Reporting Completeness by Province\nProportion of days in the last 90 days where at least one case was notified, aggregated across all conditions.\n\n\n\n\n\n\n\n\nFigure 1: Reporting completeness (last 90 days)"
+  },
+  {
+    "objectID": "quality.html#weekly-submission-volume",
+    "href": "quality.html#weekly-submission-volume",
+    "title": "Data Quality",
+    "section": "Weekly Submission Volume",
+    "text": "Weekly Submission Volume\n\n\n\n\n\n\n\n\nFigure 2: Weekly case volume by province (last 52 weeks)"
+  },
+  {
+    "objectID": "quality.html#completeness-table",
+    "href": "quality.html#completeness-table",
+    "title": "Data Quality",
+    "section": "Completeness Table",
+    "text": "Completeness Table\n\n\n\n\nTable 1\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipRelated Pages\n\n\n\n\nMethods — full technical documentation of quality checks and indicator definitions\nOverview — national-level surveillance summary\nBy Province — province-level data that depends on reporting quality\nGlossary — abbreviations and term definitions"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "SA NMC Dashboard",
+    "section": "",
+    "text": "This dashboard makes Notifiable Medical Conditions (NMC) data accessible and actionable for public health officials across South Africa. It provides timely insights into disease trends, hotspots, and forecasts to support effective decision-making and resource allocation.\nAll coding and analysis is open-source — any epidemiologist can reproduce the work locally and contribute improvements."
+  },
+  {
+    "objectID": "index.html#welcome",
+    "href": "index.html#welcome",
+    "title": "SA NMC Dashboard",
+    "section": "",
+    "text": "This dashboard makes Notifiable Medical Conditions (NMC) data accessible and actionable for public health officials across South Africa. It provides timely insights into disease trends, hotspots, and forecasts to support effective decision-making and resource allocation.\nAll coding and analysis is open-source — any epidemiologist can reproduce the work locally and contribute improvements."
+  },
+  {
+    "objectID": "index.html#dashboard-sections",
+    "href": "index.html#dashboard-sections",
+    "title": "SA NMC Dashboard",
+    "section": "Dashboard Sections",
+    "text": "Dashboard Sections\n\n\nNational Overview\nDESCRIPTIVE  In development\nHigh-level surveillance snapshot — total cases, top conditions, national epicurve and key indicators.\n\n\nBy Province\nDESCRIPTIVE  Active\nProvincial summaries with case counts, incidence rates, interactive charts and district drilldown. Includes sub-pages for all 9 provinces.\n\n\nBy Condition\nDESCRIPTIVE  Active\nCondition-centric view: national epicurves, provincial comparisons, district hotspot tables with export.\n\n\nTrending & Signals\nANALYTICAL  In development\nSignal detection (CUSUM/EARS) for emerging conditions, surge tables, trend sparklines and alert log.\n\n\nBurden of Disease\nANALYTICAL  Planned\nYears of Life Lost (YLL), DALYs and age-standardised rates to quantify health impact beyond case counts.\n\n\nForecasts & Scenarios\nPREDICTIVE  In development\nShort-term EpiNow2 forecasts (1–6 weeks), scenario bands, nowcasting with reporting-delay adjustment.\n\n\nData Explorer\nINTERACTIVE  Planned\nSelf-service tool: select conditions, dates and locations, then visualise epicurves, maps, statistics and download data.\n\n\nData Quality\nQUALITY  In development\nReporting completeness by province, submission volume heatmaps, timeliness metrics and validation checks."
+  },
+  {
+    "objectID": "index.html#documentation",
+    "href": "index.html#documentation",
+    "title": "SA NMC Dashboard",
+    "section": "Documentation",
+    "text": "Documentation\n\n\nMethods\nData sources, indicator formulas, signal detection algorithms, forecasting methodology and QC procedures.\n\n\nGlossary\nAbbreviations, epidemiological terms and indicator definitions used throughout the dashboard.\n\n\nAbout & Credits\nProject background, partner organisations, software stack and contribution guidelines."
+  },
+  {
+    "objectID": "index.html#planned-architecture",
+    "href": "index.html#planned-architecture",
+    "title": "SA NMC Dashboard",
+    "section": "Planned Architecture",
+    "text": "Planned Architecture\nThe planned structure of the dashboard is as follows:\n\n\n\n\n\nflowchart TD\n    %% ---------- MAIN LAYERS ----------\n    A[\"Home: NMC Epidemiology SA\"]\n\n    %% Descriptive\n    B[\"By Province\"]\n    B1[\"Province Overview of all conditions\"]\n    B2[\"District Drilldown\"]\n    C[\"By Condition\"]\n    C1[\"National Trends\"]\n    C2[\"Province Comparison of condition X\"]\n    C3[\"District Hotspots of condition X\"]\n\n    %% Interactive\n    G[\"Explorer\"]\n    G1[\"Interactive Condition, Date & Location Selector\"]\n    G2[\"Epicurve Visualisation\"]\n    G3[\"Map Visualisation\"]\n    G4[\"Descriptive Statistics\"]\n    G5[\"Data Table view and download\"]\n\n    %% Analytical\n    D[\"Burden of Disease\"]\n    D1[\"YLL — life tables & from vital status\"]\n    D2[\"DALYs — YLL + YLD\"]\n    D3[\"ASR — age-standardised rates\"]\n\n     %%\n    E[\"Trending Conditions\"]\n    E1[\"Signal Detection (CUSUM/EARS)\"]\n    E2[\"Hotspots (province→district)\"]\n    E3[\"Analyst Notes & Alert Log\"]\n\n    %% Predictive\n    F[\"Forecasts and scenarios\"]\n    F1[\"Short-term forecasts (1–6 wks)\"]\n    F2[\"Scenario bands & seasonality\"]\n    F3[\"Nowcasting (delay adjustment)\"]\n\n    %% ---------- FLOW ----------\n    A --&gt; B --&gt; B1 --&gt; B2\n    A --&gt; C --&gt; C1 --&gt; C2 --&gt; C3\n    A --&gt; D --&gt; D1 --&gt; D2 --&gt; D3\n    A --&gt; G --&gt; G1 --&gt; G2 --&gt; G3 --&gt; G4 --&gt; G5\n    A --&gt; E --&gt; E1 --&gt; E2 --&gt; E3\n    E --&gt; F --&gt; F1 --&gt; F2 --&gt; F3\n\n    %% ---------- CLASSES ----------\n    classDef Descriptive fill:#e6f2ff,stroke:#1d4ed8,stroke-width:1.5px,color:#0b2e78;\n    classDef Interactive fill:#e0f7fa,stroke:#00796b,stroke-width:1.5px,color:#004d40;\n    classDef Analytical fill:#fff4e5,stroke:#b45309,stroke-width:1.5px,color:#7a3b07;\n    classDef Predictive fill:#f3e8ff,stroke:#7e22ce,stroke-width:1.5px,color:#42136a;\n    classDef LegendBox fill:#f8fafc,stroke:#94a3b8,color:#334155;\n\n    class B,B1,B2,C,C1,C2,C3, Descriptive;\n    class G,G1,G2,G3,G4,G5 Interactive;\n    class D,D1,D2,D3,E,E1,E2,E3 Analytical;\n    class F,F1,F2,F3 Predictive;\n\n    %% ---------- LEGEND ----------\n    subgraph LEG[\"Legend\"]\n      direction TB\n      L1[\"Descriptive\"]:::Descriptive\n      L2[\"Interactive\"]:::Interactive\n      L3[\"Analytical\"]:::Analytical\n      L4[\"Predictive\"]:::Predictive\n    end\n\n    class LEG LegendBox;\n\n    %% ---------- OPTIONAL STYLING ----------\n    style A stroke:#0b3a75,stroke-width:2px,fill:#eef2ff,rx:8,ry:8\n    style LEG rx:6,ry:6\n\n\n\n\n\n\n\n\n\nIDCategoryTaskDescriptionOwnerDue DateDays RemainingStatusNotes.overdue1Project SetupDefine scope & architectureFinalize site structure (Province/Condition/BoD/Trending/Forecasts)2026-02-288Not startedfalse2Project SetupFinalize hosting planChoose GitHub Pages / Netlify / Posit Connect2026-03-019Not startedfalse3Project SetupCreate _quarto.ymlNavbar, theme, lightbox, mermaid config2026-03-0210In progressfalse4Data IntegrationData source mappingMap NMC, lab, MYPE, sentinel feeds2026-03-0513Not startedInclude canonical district dictionaryfalse5Data IntegrationETL scriptsR scripts for cleaning/QC/aggregation2026-03-0917Not startedfalse6Data IntegrationValidation checksCompleteness, timeliness, duplicates2026-03-1220Not startedfalse7DescriptiveBy Province pageProvincial summary, district drilldown, maps2026-03-1624In progressBasic dashboard structure implementedfalse8DescriptiveBy Condition pageTabset + dropdown selector2026-03-1927In progressBasic dashboard structure implementedfalse9DescriptiveClick-to-zoom mapsLeaflet/Plotly + lightbox2026-03-2129Not startedfalse10AnalyticalBurden of DiseaseCompute YLL, DALY, ASR; document assumptions2026-03-2735Not startedfalse11AnalyticalTrending detectionCUSUM/EARS; hotspots table/map2026-03-3139Not startedfalse12AnalyticalValidate signalsTest false positives; analyst triage2026-04-0241Not startedfalse13PredictiveForecast modelsARIMA/Prophet/BSTS with 50–95% CI2026-04-0645Not startedfalse14PredictiveNowcastingDelay-adjusted counts integrated with signals2026-04-0847Not startedfalse15PredictiveExports/subscriptionsCSV/PDF; (optional) email hooks later2026-04-1150Not startedfalse16DesignSite-wide CSSConsistent fonts/spacing/palette2026-04-1251Not startedfalse17DesignMermaid diagramsStyled descriptive/analytical/predictive + SVG2026-02-266DoneExported SVG + lightboxfalse18DocsMethods pageData sources, calculations, QC2026-04-1453Not startedfalse19DocsGlossary pageIndicators & abbreviations2026-04-1655Not startedfalse20DocsAbout/CreditsD4H, SAMRC, NDoH, Africa CDC2026-04-1756Not startedfalse21DeployInternal reviewCRDM & MRC review of outputs2026-05-0675Not startedfalse22DeployExternal deploymentPublish to host (Pages/Connect)2026-05-1180Not startedfalse23DeployMaintenance planData refresh + rebuild workflow2026-05-1685Not startedfalse"
+  },
+  {
+    "objectID": "overview.html",
+    "href": "overview.html",
+    "title": "National Overview",
+    "section": "",
+    "text": "NoteDevelopment Roadmap — National Overview\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nSummary value boxes (total cases, conditions, provinces)\n✅ Done\n\n\nv0.1\nTop-10 conditions bar chart (current month)\n✅ Done\n\n\nv0.1\nNational weekly epicurve (all conditions combined)\n✅ Done\n\n\nv0.2\nProvincial choropleth map (total cases)\n🔲 Planned\n\n\nv0.2\nMonth-on-month change indicators (↑/↓)\n🔲 Planned\n\n\nv0.3\nAge/sex pyramid (when demographic data available)\n🔲 Planned\n\n\nv0.3\nSeasonal overlay / historical comparison bands\n🔲 Planned\n\n\nv0.4\nEpiNow2 national Rt estimate cards\n🔲 Planned\n\n\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_national.rds, agg_province.rds"
+  },
+  {
+    "objectID": "overview.html#key-figures-february-2026",
+    "href": "overview.html#key-figures-february-2026",
+    "title": "National Overview",
+    "section": "Key Figures — February 2026",
+    "text": "Key Figures — February 2026\n\n\n\nTotal Cases\n\n7,659\n\n\n\nMonth Δ\n\n↓ 38%\n\n\n\nConditions Reported\n\n38\n\n\n\nProvinces Reporting\n\n9 / 9"
+  },
+  {
+    "objectID": "overview.html#top-conditions-current-month",
+    "href": "overview.html#top-conditions-current-month",
+    "title": "National Overview",
+    "section": "Top Conditions — Current Month",
+    "text": "Top Conditions — Current Month\n\nBar Chart\n\n\n\n\n\n\n\n\nFigure 1: Top 10 conditions by case count this month\n\n\n\n\n\n\nTable\n\n\n\n\nTable 1"
+  },
+  {
+    "objectID": "overview.html#national-epicurve-weekly",
+    "href": "overview.html#national-epicurve-weekly",
+    "title": "National Overview",
+    "section": "National Epicurve — Weekly",
+    "text": "National Epicurve — Weekly\n\n\n\n\n\n\n\n\nFigure 2: All notifiable conditions combined, weekly"
+  },
+  {
+    "objectID": "overview.html#surveillance-performance",
+    "href": "overview.html#surveillance-performance",
+    "title": "National Overview",
+    "section": "Surveillance Performance",
+    "text": "Surveillance Performance\n\nCases by SourceTimeliness (Median Days)\n\n\n\n\n\n\n\n\n\n\nFigure 3: Notifications by Case Type (Clinical vs Lab etc.)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 4: Median days to notification by condition (last 12 months)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipDrill Down Further\n\n\n\n\nBy Province — detailed provincial breakdowns with district drilldown\nBy Condition — condition-level national trends and hotspots\nTrending — signal detection for emerging conditions\nExplorer — custom queries and data downloads\nData Quality — reporting completeness and timeliness metrics"
+  },
+  {
+    "objectID": "methods.html",
+    "href": "methods.html",
+    "title": "Methods",
+    "section": "",
+    "text": "Source\nDescription\nUpdate Frequency\n\n\n\n\nNMC (Notifiable Medical Conditions)\nCase-based surveillance of notifiable conditions\nWeekly\n\n\nStats SA\nMid-year population estimates, life tables, vital registrations\nAnnual\n\n\nMYPE\nMid-Year Population Estimates for incidence rate denominators\nAnnual\n\n\nWHO\nStandard population for age-standardised rates; disability weights (GBD 2019)\nReference dataset",
+    "crumbs": [
+      "Methods"
+    ]
+  },
+  {
+    "objectID": "methods.html#data-sources",
+    "href": "methods.html#data-sources",
+    "title": "Methods",
+    "section": "",
+    "text": "Source\nDescription\nUpdate Frequency\n\n\n\n\nNMC (Notifiable Medical Conditions)\nCase-based surveillance of notifiable conditions\nWeekly\n\n\nStats SA\nMid-year population estimates, life tables, vital registrations\nAnnual\n\n\nMYPE\nMid-Year Population Estimates for incidence rate denominators\nAnnual\n\n\nWHO\nStandard population for age-standardised rates; disability weights (GBD 2019)\nReference dataset",
+    "crumbs": [
+      "Methods"
+    ]
+  },
+  {
+    "objectID": "methods.html#pipeline",
+    "href": "methods.html#pipeline",
+    "title": "Methods",
+    "section": "Data Pipeline",
+    "text": "Data Pipeline\nThe dashboard data flows through the following pipeline:\n\nImport — R/data_import.r reads raw NMC data and reference files\nCleaning & QC — deduplication, date validation, district dictionary lookups\nAggregation — R/aggregator_national.r produces national, provincial and district summaries\nDashboard preparation — R/prepare_dashboard_data.r writes .rds files to data/processed/\nForecasting — R/run_forecasts.r + R/epinow2_functions.r produce short-term forecasts\nRendering — Quarto renders .qmd pages into the _site/ output directory",
+    "crumbs": [
+      "Methods"
+    ]
+  },
+  {
+    "objectID": "methods.html#indicators",
+    "href": "methods.html#indicators",
+    "title": "Methods",
+    "section": "Indicator Definitions",
+    "text": "Indicator Definitions\n\nIncidence Rate\n\\[\n\\text{Incidence} = \\frac{\\text{Cases}}{\\text{Population}} \\times 100\\,000\n\\]\nPopulation denominators are from Stats SA mid-year estimates.\n\n\nYears of Life Lost (YLL)\n\\[\n\\text{YLL} = \\sum_{i} d_i \\times e_i\n\\]\nWhere \\(d_i\\) is the number of deaths at age \\(i\\) and \\(e_i\\) is the remaining life expectancy at age \\(i\\) from the SA life table.\n\n\nDALYs\n\\[\n\\text{DALY} = \\text{YLL} + \\text{YLD}\n\\]\nWhere \\(\\text{YLD} = \\text{prevalent cases} \\times \\text{disability weight} \\times \\text{duration}\\).\n\n\nAge-Standardised Rate (ASR)\n\\[\n\\text{ASR} = \\frac{\\sum_{i} w_i \\cdot r_i}{\\sum_{i} w_i} \\times 100\\,000\n\\]\nWhere \\(w_i\\) is the WHO standard population weight for age group \\(i\\) and \\(r_i\\) is the age-specific rate.",
+    "crumbs": [
+      "Methods"
+    ]
+  },
+  {
+    "objectID": "methods.html#signal-detection",
+    "href": "methods.html#signal-detection",
+    "title": "Methods",
+    "section": "Signal Detection",
+    "text": "Signal Detection\nThe Trending section uses:\n\nCUSUM (Cumulative Sum) — detects sustained shifts from the expected mean\nEARS C1/C2/C3 — CDC’s Early Aberration Reporting System algorithms for rapid signal detection\n\nThresholds and baseline windows are documented in the trending page notes.",
+    "crumbs": [
+      "Methods"
+    ]
+  },
+  {
+    "objectID": "methods.html#forecasting",
+    "href": "methods.html#forecasting",
+    "title": "Methods",
+    "section": "Forecasting",
+    "text": "Forecasting\nShort-term forecasts in the Forecasts section use EpiNow2:\n\nRenewal equation–based model with Rt estimation\nGeneration interval and incubation period distributions sourced from literature\nForecast horizon: 1–6 weeks with 50% and 95% credible intervals\nNowcasting: delay-adjusted counts using empirical reporting delay distributions",
+    "crumbs": [
+      "Methods"
+    ]
+  },
+  {
+    "objectID": "methods.html#qc",
+    "href": "methods.html#qc",
+    "title": "Methods",
+    "section": "Quality Control",
+    "text": "Quality Control\nSee the Data Quality page for detailed metrics. Key checks include:\n\nCompleteness — proportion of expected reports received by district and week\nTimeliness — median reporting delay (notification → NMC entry)\nDuplicates — fuzzy matching on name, date of birth, condition and date of onset\nConsistency — cross-checks between age, date of onset, and notification date",
+    "crumbs": [
+      "Methods"
+    ]
+  },
+  {
+    "objectID": "methods.html#software",
+    "href": "methods.html#software",
+    "title": "Methods",
+    "section": "Software & Reproducibility",
+    "text": "Software & Reproducibility\n\n\n\nTool\nVersion\nPurpose\n\n\n\n\nR\n≥ 4.3\nData processing and analysis\n\n\nQuarto\n≥ 1.4\nDashboard rendering\n\n\nEpiNow2\n≥ 1.4\nForecasting & Rt estimation\n\n\nPlotly / Leaflet\nLatest\nInteractive visualisations\n\n\nDT\nLatest\nInteractive data tables\n\n\n\nAll code is open-source. See the About page for repository links and contribution guidelines.\n\n\n\n\n\n\n\nTipQuick Navigation\n\n\n\n\nGlossary — abbreviations and term definitions\nAbout — credits, partners and contact information\nHome — return to the main dashboard",
+    "crumbs": [
+      "Methods"
+    ]
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About & Credits",
+    "section": "",
+    "text": "The SA NMC Epidemiological Intelligence Dashboard aims to make Notifiable Medical Conditions (NMC) data accessible and actionable for public health officials across South Africa. It provides timely insights into disease trends, hotspots, and forecasts to support effective decision-making and resource allocation.\nAll coding and analysis is open-source so that any epidemiologist can reproduce the work locally and contribute improvements.",
+    "crumbs": [
+      "About & Credits"
+    ]
+  },
+  {
+    "objectID": "about.html#project-background",
+    "href": "about.html#project-background",
+    "title": "About & Credits",
+    "section": "",
+    "text": "The SA NMC Epidemiological Intelligence Dashboard aims to make Notifiable Medical Conditions (NMC) data accessible and actionable for public health officials across South Africa. It provides timely insights into disease trends, hotspots, and forecasts to support effective decision-making and resource allocation.\nAll coding and analysis is open-source so that any epidemiologist can reproduce the work locally and contribute improvements.",
+    "crumbs": [
+      "About & Credits"
+    ]
+  },
+  {
+    "objectID": "about.html#partners-acknowledgements",
+    "href": "about.html#partners-acknowledgements",
+    "title": "About & Credits",
+    "section": "Partners & Acknowledgements",
+    "text": "Partners & Acknowledgements\n\n\n\n\n\n\n\nOrganisation\nRole\n\n\n\n\nSouth African Field Epidemiology Training Programme (SAFETP)\nDashboard development and epidemiological analysis\n\n\nSouth African Medical Research Council (SAMRC)\nTechnical oversight and data access\n\n\nNational Department of Health (NDoH)\nNMC data governance and policy guidance\n\n\nAfrica CDC\nRegional surveillance coordination\n\n\nData for Health (D4H)\nTechnical support and capacity building",
+    "crumbs": [
+      "About & Credits"
+    ]
+  },
+  {
+    "objectID": "about.html#data-sources",
+    "href": "about.html#data-sources",
+    "title": "About & Credits",
+    "section": "Data Sources",
+    "text": "Data Sources\n\nNMC Surveillance System — case-based notifiable conditions data\nStatistics South Africa (Stats SA) — mid-year population estimates, life tables, vital registration\nWHO — standard population weights, disability weights (GBD 2019)\n\nAll data is processed according to the methods described on the Methods page.",
+    "crumbs": [
+      "About & Credits"
+    ]
+  },
+  {
+    "objectID": "about.html#how-to-contribute",
+    "href": "about.html#how-to-contribute",
+    "title": "About & Credits",
+    "section": "How to Contribute",
+    "text": "How to Contribute\nThis project welcomes contributions from epidemiologists, data scientists, and public health practitioners:\n\nReport issues — flag data discrepancies, bugs, or feature requests\nImprove analyses — submit pull requests with enhanced visualisations or models\nAdd documentation — help expand the Methods and Glossary pages",
+    "crumbs": [
+      "About & Credits"
+    ]
+  },
+  {
+    "objectID": "about.html#software-stack",
+    "href": "about.html#software-stack",
+    "title": "About & Credits",
+    "section": "Software Stack",
+    "text": "Software Stack\n\n\n\nComponent\nTechnology\n\n\n\n\nDashboard framework\nQuarto\n\n\nData processing\nR (data.table, dplyr, tidyr)\n\n\nVisualisation\nPlotly, Leaflet, ggplot2\n\n\nForecasting\nEpiNow2\n\n\nSignal detection\nCUSUM, EARS\n\n\nHosting\nGitHub Pages / Posit Connect",
+    "crumbs": [
+      "About & Credits"
+    ]
+  },
+  {
+    "objectID": "about.html#contact",
+    "href": "about.html#contact",
+    "title": "About & Credits",
+    "section": "Contact",
+    "text": "Contact\nFor questions or access requests, please contact the SAFETP project team.\n\n\n\n\n\n\n\nTipQuick Navigation\n\n\n\n\nHome — main dashboard landing page\nMethods — technical documentation\nGlossary — abbreviations and definitions\nData Quality — completeness and timeliness metrics",
+    "crumbs": [
+      "About & Credits"
+    ]
+  },
+  {
+    "objectID": "by-province/ec/index.html",
+    "href": "by-province/ec/index.html",
+    "title": "Eastern Cape",
+    "section": "",
+    "text": "Eastern Cape (EC) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 6,734,001\nHome All Provinces",
+    "crumbs": [
+      "By Province",
+      "Eastern Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/ec/index.html#category-summary",
+    "href": "by-province/ec/index.html#category-summary",
+    "title": "Eastern Cape",
+    "section": "Category Summary",
+    "text": "Category Summary\n\n\n\n\nTable 1",
+    "crumbs": [
+      "By Province",
+      "Eastern Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/ec/index.html#cat1",
+    "href": "by-province/ec/index.html#cat1",
+    "title": "Eastern Cape",
+    "section": "Category 1 — Immediate Notification",
+    "text": "Category 1 — Immediate Notification\n\n\n\n\n\n\nImportantAbout Category 1\n\n\n\n\n\nCategory 1 conditions require immediate notification within 24 hours. These include diseases of high epidemic potential or public health emergency significance (e.g. cholera, measles, malaria, meningococcal disease).\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 1\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 2\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 3\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 4\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 2",
+    "crumbs": [
+      "By Province",
+      "Eastern Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/ec/index.html#cat2",
+    "href": "by-province/ec/index.html#cat2",
+    "title": "Eastern Cape",
+    "section": "Category 2 — Routine Notification",
+    "text": "Category 2 — Routine Notification\n\n\n\n\n\n\nNoteAbout Category 2\n\n\n\n\n\nCategory 2 conditions require notification within 7 days. These include conditions such as hepatitis A–E, tuberculosis variants, congenital syphilis, lead/mercury poisoning, and maternal deaths.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 5\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 6\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 7\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 8\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 3",
+    "crumbs": [
+      "By Province",
+      "Eastern Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/ec/index.html#cat3",
+    "href": "by-province/ec/index.html#cat3",
+    "title": "Eastern Cape",
+    "section": "Category 3 — Sentinel Surveillance",
+    "text": "Category 3 — Sentinel Surveillance\n\n\n\n\n\n\nTipAbout Category 3\n\n\n\n\n\nCategory 3 conditions are monitored through sentinel surveillance. These include endemic arboviral diseases (Chikungunya, Sindbis, West Nile), non-endemic arbovirals (Zika, Dengue), non-typhoidal Salmonellosis, STEC, and Shigellosis.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 9\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\n\n\n\n\nFigure 10\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\n\n\n\n\nFigure 11\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\n\n\n\n\nFigure 12\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 4",
+    "crumbs": [
+      "By Province",
+      "Eastern Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/ec/index.html#cat4",
+    "href": "by-province/ec/index.html#cat4",
+    "title": "Eastern Cape",
+    "section": "Category 4 — AMR Organisms",
+    "text": "Category 4 — AMR Organisms\n\n\n\n\n\n\nWarningAbout Category 4\n\n\n\n\n\nCategory 4 covers antimicrobial-resistant organisms: CPE, VRE, GISA/hGISA, colistin-resistant Pseudomonas/Acinetobacter, and C. difficile.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\nNo Category 4 conditions reported this month.\n\n\nFigure 13\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 14\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 15\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\nNo Category 4 incidence data available.\n\n\nFigure 16\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 5\n\n\n\nNo Category 4 data to display.",
+    "crumbs": [
+      "By Province",
+      "Eastern Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/ec/index.html#all-conditions-full-table",
+    "href": "by-province/ec/index.html#all-conditions-full-table",
+    "title": "Eastern Cape",
+    "section": "All Conditions — Full Table",
+    "text": "All Conditions — Full Table\n\n\n\n\nTable 6",
+    "crumbs": [
+      "By Province",
+      "Eastern Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/ec/index.html#province-navigation",
+    "href": "by-province/ec/index.html#province-navigation",
+    "title": "Eastern Cape",
+    "section": "Province Navigation",
+    "text": "Province Navigation\n\n\n\nEastern Cape Free State Gauteng KwaZulu-Natal Limpopo Mpumalanga Northern Cape North West Western Cape\n\n\n\n\n\n\n\n\n\n\nTipRelated Sections\n\n\n\n\nBy Province — Overview — cross-province comparison\nBy Condition — condition-first view\nTrending & Signals — signal detection\nForecasts — short-term predictive models",
+    "crumbs": [
+      "By Province",
+      "Eastern Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/gp/index.html",
+    "href": "by-province/gp/index.html",
+    "title": "Gauteng",
+    "section": "",
+    "text": "Gauteng (GP) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 16,098,571\nHome All Provinces",
+    "crumbs": [
+      "By Province",
+      "Gauteng"
+    ]
+  },
+  {
+    "objectID": "by-province/gp/index.html#category-summary",
+    "href": "by-province/gp/index.html#category-summary",
+    "title": "Gauteng",
+    "section": "Category Summary",
+    "text": "Category Summary\n\n\n\n\nTable 1",
+    "crumbs": [
+      "By Province",
+      "Gauteng"
+    ]
+  },
+  {
+    "objectID": "by-province/gp/index.html#cat1",
+    "href": "by-province/gp/index.html#cat1",
+    "title": "Gauteng",
+    "section": "Category 1 — Immediate Notification",
+    "text": "Category 1 — Immediate Notification\n\n\n\n\n\n\nImportantAbout Category 1\n\n\n\n\n\nCategory 1 conditions require immediate notification within 24 hours. These include diseases of high epidemic potential or public health emergency significance (e.g. cholera, measles, malaria, meningococcal disease).\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 1\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 2\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 3\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 4\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 2",
+    "crumbs": [
+      "By Province",
+      "Gauteng"
+    ]
+  },
+  {
+    "objectID": "by-province/gp/index.html#cat2",
+    "href": "by-province/gp/index.html#cat2",
+    "title": "Gauteng",
+    "section": "Category 2 — Routine Notification",
+    "text": "Category 2 — Routine Notification\n\n\n\n\n\n\nNoteAbout Category 2\n\n\n\n\n\nCategory 2 conditions require notification within 7 days. These include conditions such as hepatitis A–E, tuberculosis variants, congenital syphilis, lead/mercury poisoning, and maternal deaths.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 5\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 6\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 7\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 8\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 3",
+    "crumbs": [
+      "By Province",
+      "Gauteng"
+    ]
+  },
+  {
+    "objectID": "by-province/gp/index.html#cat3",
+    "href": "by-province/gp/index.html#cat3",
+    "title": "Gauteng",
+    "section": "Category 3 — Sentinel Surveillance",
+    "text": "Category 3 — Sentinel Surveillance\n\n\n\n\n\n\nTipAbout Category 3\n\n\n\n\n\nCategory 3 conditions are monitored through sentinel surveillance. These include endemic arboviral diseases (Chikungunya, Sindbis, West Nile), non-endemic arbovirals (Zika, Dengue), non-typhoidal Salmonellosis, STEC, and Shigellosis.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 9\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\n\n\n\n\nFigure 10\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\n\n\n\n\nFigure 11\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\n\n\n\n\nFigure 12\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 4",
+    "crumbs": [
+      "By Province",
+      "Gauteng"
+    ]
+  },
+  {
+    "objectID": "by-province/gp/index.html#cat4",
+    "href": "by-province/gp/index.html#cat4",
+    "title": "Gauteng",
+    "section": "Category 4 — AMR Organisms",
+    "text": "Category 4 — AMR Organisms\n\n\n\n\n\n\nWarningAbout Category 4\n\n\n\n\n\nCategory 4 covers antimicrobial-resistant organisms: CPE, VRE, GISA/hGISA, colistin-resistant Pseudomonas/Acinetobacter, and C. difficile.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\nNo Category 4 conditions reported this month.\n\n\nFigure 13\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 14\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 15\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\nNo Category 4 incidence data available.\n\n\nFigure 16\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 5\n\n\n\nNo Category 4 data to display.",
+    "crumbs": [
+      "By Province",
+      "Gauteng"
+    ]
+  },
+  {
+    "objectID": "by-province/gp/index.html#all-conditions-full-table",
+    "href": "by-province/gp/index.html#all-conditions-full-table",
+    "title": "Gauteng",
+    "section": "All Conditions — Full Table",
+    "text": "All Conditions — Full Table\n\n\n\n\nTable 6",
+    "crumbs": [
+      "By Province",
+      "Gauteng"
+    ]
+  },
+  {
+    "objectID": "by-province/gp/index.html#province-navigation",
+    "href": "by-province/gp/index.html#province-navigation",
+    "title": "Gauteng",
+    "section": "Province Navigation",
+    "text": "Province Navigation\n\n\n\nEastern Cape Free State Gauteng KwaZulu-Natal Limpopo Mpumalanga Northern Cape North West Western Cape\n\n\n\n\n\n\n\n\n\n\nTipRelated Sections\n\n\n\n\nBy Province — Overview — cross-province comparison\nBy Condition — condition-first view\nTrending & Signals — signal detection\nForecasts — short-term predictive models",
+    "crumbs": [
+      "By Province",
+      "Gauteng"
+    ]
+  },
+  {
+    "objectID": "by-province/lp/index.html",
+    "href": "by-province/lp/index.html",
+    "title": "Limpopo",
+    "section": "",
+    "text": "Limpopo (LP) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 5,941,439\nHome All Provinces",
+    "crumbs": [
+      "By Province",
+      "Limpopo"
+    ]
+  },
+  {
+    "objectID": "by-province/lp/index.html#category-summary",
+    "href": "by-province/lp/index.html#category-summary",
+    "title": "Limpopo",
+    "section": "Category Summary",
+    "text": "Category Summary\n\n\n\n\nTable 1",
+    "crumbs": [
+      "By Province",
+      "Limpopo"
+    ]
+  },
+  {
+    "objectID": "by-province/lp/index.html#cat1",
+    "href": "by-province/lp/index.html#cat1",
+    "title": "Limpopo",
+    "section": "Category 1 — Immediate Notification",
+    "text": "Category 1 — Immediate Notification\n\n\n\n\n\n\nImportantAbout Category 1\n\n\n\n\n\nCategory 1 conditions require immediate notification within 24 hours. These include diseases of high epidemic potential or public health emergency significance (e.g. cholera, measles, malaria, meningococcal disease).\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 1\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 2\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 3\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 4\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 2",
+    "crumbs": [
+      "By Province",
+      "Limpopo"
+    ]
+  },
+  {
+    "objectID": "by-province/lp/index.html#cat2",
+    "href": "by-province/lp/index.html#cat2",
+    "title": "Limpopo",
+    "section": "Category 2 — Routine Notification",
+    "text": "Category 2 — Routine Notification\n\n\n\n\n\n\nNoteAbout Category 2\n\n\n\n\n\nCategory 2 conditions require notification within 7 days. These include conditions such as hepatitis A–E, tuberculosis variants, congenital syphilis, lead/mercury poisoning, and maternal deaths.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 5\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 6\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 7\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 8\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 3",
+    "crumbs": [
+      "By Province",
+      "Limpopo"
+    ]
+  },
+  {
+    "objectID": "by-province/lp/index.html#cat3",
+    "href": "by-province/lp/index.html#cat3",
+    "title": "Limpopo",
+    "section": "Category 3 — Sentinel Surveillance",
+    "text": "Category 3 — Sentinel Surveillance\n\n\n\n\n\n\nTipAbout Category 3\n\n\n\n\n\nCategory 3 conditions are monitored through sentinel surveillance. These include endemic arboviral diseases (Chikungunya, Sindbis, West Nile), non-endemic arbovirals (Zika, Dengue), non-typhoidal Salmonellosis, STEC, and Shigellosis.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 9\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\n\n\n\n\nFigure 10\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\n\n\n\n\nFigure 11\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\n\n\n\n\nFigure 12\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 4",
+    "crumbs": [
+      "By Province",
+      "Limpopo"
+    ]
+  },
+  {
+    "objectID": "by-province/lp/index.html#cat4",
+    "href": "by-province/lp/index.html#cat4",
+    "title": "Limpopo",
+    "section": "Category 4 — AMR Organisms",
+    "text": "Category 4 — AMR Organisms\n\n\n\n\n\n\nWarningAbout Category 4\n\n\n\n\n\nCategory 4 covers antimicrobial-resistant organisms: CPE, VRE, GISA/hGISA, colistin-resistant Pseudomonas/Acinetobacter, and C. difficile.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\nNo Category 4 conditions reported this month.\n\n\nFigure 13\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 14\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 15\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\nNo Category 4 incidence data available.\n\n\nFigure 16\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 5\n\n\n\nNo Category 4 data to display.",
+    "crumbs": [
+      "By Province",
+      "Limpopo"
+    ]
+  },
+  {
+    "objectID": "by-province/lp/index.html#all-conditions-full-table",
+    "href": "by-province/lp/index.html#all-conditions-full-table",
+    "title": "Limpopo",
+    "section": "All Conditions — Full Table",
+    "text": "All Conditions — Full Table\n\n\n\n\nTable 6",
+    "crumbs": [
+      "By Province",
+      "Limpopo"
+    ]
+  },
+  {
+    "objectID": "by-province/lp/index.html#province-navigation",
+    "href": "by-province/lp/index.html#province-navigation",
+    "title": "Limpopo",
+    "section": "Province Navigation",
+    "text": "Province Navigation\n\n\n\nEastern Cape Free State Gauteng KwaZulu-Natal Limpopo Mpumalanga Northern Cape North West Western Cape\n\n\n\n\n\n\n\n\n\n\nTipRelated Sections\n\n\n\n\nBy Province — Overview — cross-province comparison\nBy Condition — condition-first view\nTrending & Signals — signal detection\nForecasts — short-term predictive models",
+    "crumbs": [
+      "By Province",
+      "Limpopo"
+    ]
+  },
+  {
+    "objectID": "by-province/nc/index.html",
+    "href": "by-province/nc/index.html",
+    "title": "Northern Cape",
+    "section": "",
+    "text": "Northern Cape (NC) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 1,303,047\nHome All Provinces",
+    "crumbs": [
+      "By Province",
+      "Northern Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/nc/index.html#category-summary",
+    "href": "by-province/nc/index.html#category-summary",
+    "title": "Northern Cape",
+    "section": "Category Summary",
+    "text": "Category Summary\n\n\n\n\nTable 1",
+    "crumbs": [
+      "By Province",
+      "Northern Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/nc/index.html#cat1",
+    "href": "by-province/nc/index.html#cat1",
+    "title": "Northern Cape",
+    "section": "Category 1 — Immediate Notification",
+    "text": "Category 1 — Immediate Notification\n\n\n\n\n\n\nImportantAbout Category 1\n\n\n\n\n\nCategory 1 conditions require immediate notification within 24 hours. These include diseases of high epidemic potential or public health emergency significance (e.g. cholera, measles, malaria, meningococcal disease).\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 1\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 2\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 3\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 4\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 2",
+    "crumbs": [
+      "By Province",
+      "Northern Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/nc/index.html#cat2",
+    "href": "by-province/nc/index.html#cat2",
+    "title": "Northern Cape",
+    "section": "Category 2 — Routine Notification",
+    "text": "Category 2 — Routine Notification\n\n\n\n\n\n\nNoteAbout Category 2\n\n\n\n\n\nCategory 2 conditions require notification within 7 days. These include conditions such as hepatitis A–E, tuberculosis variants, congenital syphilis, lead/mercury poisoning, and maternal deaths.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 5\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 6\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 7\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 8\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 3",
+    "crumbs": [
+      "By Province",
+      "Northern Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/nc/index.html#cat3",
+    "href": "by-province/nc/index.html#cat3",
+    "title": "Northern Cape",
+    "section": "Category 3 — Sentinel Surveillance",
+    "text": "Category 3 — Sentinel Surveillance\n\n\n\n\n\n\nTipAbout Category 3\n\n\n\n\n\nCategory 3 conditions are monitored through sentinel surveillance. These include endemic arboviral diseases (Chikungunya, Sindbis, West Nile), non-endemic arbovirals (Zika, Dengue), non-typhoidal Salmonellosis, STEC, and Shigellosis.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 9\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\n\n\n\n\nFigure 10\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\n\n\n\n\nFigure 11\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\n\n\n\n\nFigure 12\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 4",
+    "crumbs": [
+      "By Province",
+      "Northern Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/nc/index.html#cat4",
+    "href": "by-province/nc/index.html#cat4",
+    "title": "Northern Cape",
+    "section": "Category 4 — AMR Organisms",
+    "text": "Category 4 — AMR Organisms\n\n\n\n\n\n\nWarningAbout Category 4\n\n\n\n\n\nCategory 4 covers antimicrobial-resistant organisms: CPE, VRE, GISA/hGISA, colistin-resistant Pseudomonas/Acinetobacter, and C. difficile.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\nNo Category 4 conditions reported this month.\n\n\nFigure 13\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 14\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 15\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\nNo Category 4 incidence data available.\n\n\nFigure 16\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 5\n\n\n\nNo Category 4 data to display.",
+    "crumbs": [
+      "By Province",
+      "Northern Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/nc/index.html#all-conditions-full-table",
+    "href": "by-province/nc/index.html#all-conditions-full-table",
+    "title": "Northern Cape",
+    "section": "All Conditions — Full Table",
+    "text": "All Conditions — Full Table\n\n\n\n\nTable 6",
+    "crumbs": [
+      "By Province",
+      "Northern Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/nc/index.html#province-navigation",
+    "href": "by-province/nc/index.html#province-navigation",
+    "title": "Northern Cape",
+    "section": "Province Navigation",
+    "text": "Province Navigation\n\n\n\nEastern Cape Free State Gauteng KwaZulu-Natal Limpopo Mpumalanga Northern Cape North West Western Cape\n\n\n\n\n\n\n\n\n\n\nTipRelated Sections\n\n\n\n\nBy Province — Overview — cross-province comparison\nBy Condition — condition-first view\nTrending & Signals — signal detection\nForecasts — short-term predictive models",
+    "crumbs": [
+      "By Province",
+      "Northern Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/wc/index.html",
+    "href": "by-province/wc/index.html",
+    "title": "Western Cape",
+    "section": "",
+    "text": "Western Cape (WC) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 7,187,004\nHome All Provinces",
+    "crumbs": [
+      "By Province",
+      "Western Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/wc/index.html#category-summary",
+    "href": "by-province/wc/index.html#category-summary",
+    "title": "Western Cape",
+    "section": "Category Summary",
+    "text": "Category Summary\n\n\n\n\nTable 1",
+    "crumbs": [
+      "By Province",
+      "Western Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/wc/index.html#cat1",
+    "href": "by-province/wc/index.html#cat1",
+    "title": "Western Cape",
+    "section": "Category 1 — Immediate Notification",
+    "text": "Category 1 — Immediate Notification\n\n\n\n\n\n\nImportantAbout Category 1\n\n\n\n\n\nCategory 1 conditions require immediate notification within 24 hours. These include diseases of high epidemic potential or public health emergency significance (e.g. cholera, measles, malaria, meningococcal disease).\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 1\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 2\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 3\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 4\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 2",
+    "crumbs": [
+      "By Province",
+      "Western Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/wc/index.html#cat2",
+    "href": "by-province/wc/index.html#cat2",
+    "title": "Western Cape",
+    "section": "Category 2 — Routine Notification",
+    "text": "Category 2 — Routine Notification\n\n\n\n\n\n\nNoteAbout Category 2\n\n\n\n\n\nCategory 2 conditions require notification within 7 days. These include conditions such as hepatitis A–E, tuberculosis variants, congenital syphilis, lead/mercury poisoning, and maternal deaths.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 5\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 6\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 7\n\n\n\n\n\n\nIncidence Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 8\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 3",
+    "crumbs": [
+      "By Province",
+      "Western Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/wc/index.html#cat3",
+    "href": "by-province/wc/index.html#cat3",
+    "title": "Western Cape",
+    "section": "Category 3 — Sentinel Surveillance",
+    "text": "Category 3 — Sentinel Surveillance\n\n\n\n\n\n\nTipAbout Category 3\n\n\n\n\n\nCategory 3 conditions are monitored through sentinel surveillance. These include endemic arboviral diseases (Chikungunya, Sindbis, West Nile), non-endemic arbovirals (Zika, Dengue), non-typhoidal Salmonellosis, STEC, and Shigellosis.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 9\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\n\n\n\n\nFigure 10\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\n\n\n\n\nFigure 11\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\n\n\n\n\nFigure 12\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 4",
+    "crumbs": [
+      "By Province",
+      "Western Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/wc/index.html#cat4",
+    "href": "by-province/wc/index.html#cat4",
+    "title": "Western Cape",
+    "section": "Category 4 — AMR Organisms",
+    "text": "Category 4 — AMR Organisms\n\n\n\n\n\n\nWarningAbout Category 4\n\n\n\n\n\nCategory 4 covers antimicrobial-resistant organisms: CPE, VRE, GISA/hGISA, colistin-resistant Pseudomonas/Acinetobacter, and C. difficile.\n\n\n\n\nCases by Condition\n\nCurrent Month\n\n\n\n\nNo Category 4 conditions reported this month.\n\n\nFigure 13\n\n\n\n\n\n\nWeekly Epicurve\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 14\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\nNo Category 4 data available.\n\n\nFigure 15\n\n\n\n\n\n\nIncidence Trend\n\n\n\n\nNo Category 4 incidence data available.\n\n\nFigure 16\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 5\n\n\n\nNo Category 4 data to display.",
+    "crumbs": [
+      "By Province",
+      "Western Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/wc/index.html#all-conditions-full-table",
+    "href": "by-province/wc/index.html#all-conditions-full-table",
+    "title": "Western Cape",
+    "section": "All Conditions — Full Table",
+    "text": "All Conditions — Full Table\n\n\n\n\nTable 6",
+    "crumbs": [
+      "By Province",
+      "Western Cape"
+    ]
+  },
+  {
+    "objectID": "by-province/wc/index.html#province-navigation",
+    "href": "by-province/wc/index.html#province-navigation",
+    "title": "Western Cape",
+    "section": "Province Navigation",
+    "text": "Province Navigation\n\n\n\nEastern Cape Free State Gauteng KwaZulu-Natal Limpopo Mpumalanga Northern Cape North West Western Cape\n\n\n\n\n\n\n\n\n\n\nTipRelated Sections\n\n\n\n\nBy Province — Overview — cross-province comparison\nBy Condition — condition-first view\nTrending & Signals — signal detection\nForecasts — short-term predictive models",
+    "crumbs": [
+      "By Province",
+      "Western Cape"
+    ]
+  },
+  {
+    "objectID": "by-trending/index.html",
+    "href": "by-trending/index.html",
+    "title": "Trending Conditions",
+    "section": "",
+    "text": "NoteDevelopment Roadmap — Trending / Signal Detection\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nRecent surge table — conditions with biggest % increase (last 14 days vs prior 14)\n✅ Done\n\n\nv0.1\nInteractive trend sparklines for flagged conditions\n✅ Done\n\n\nv0.2\nCUSUM / EARS algorithm signal detection integration\n🔲 Planned\n\n\nv0.2\nProvince → district hotspot drill-down for flagged conditions\n🔲 Planned\n\n\nv0.3\nAnalyst notes & alert log (manual triage layer)\n🔲 Planned\n\n\nv0.3\nAutomated alert email / webhook on threshold breach\n🔲 Planned\n\n\nv0.4\nLink to Forecasts page — auto-trigger EpiNow2 for flagged conditions\n🔲 Planned\n\n\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_national.rds Forecasting extension: by-forecasts/index.qmd (uses EpiNow2)\nData through: 19 February 2026",
+    "crumbs": [
+      "Trending Conditions"
+    ]
+  },
+  {
+    "objectID": "by-trending/index.html#emerging-signals-last-14-days",
+    "href": "by-trending/index.html#emerging-signals-last-14-days",
+    "title": "Trending Conditions",
+    "section": "Emerging Signals — Last 14 Days",
+    "text": "Emerging Signals — Last 14 Days\nConditions with the largest percentage increase comparing the most recent 14-day window to the preceding 14 days.\n\nSurge Table\n\n\n\n\nTable 1",
+    "crumbs": [
+      "Trending Conditions"
+    ]
+  },
+  {
+    "objectID": "by-trending/index.html#trend-sparklines-flagged-conditions",
+    "href": "by-trending/index.html#trend-sparklines-flagged-conditions",
+    "title": "Trending Conditions",
+    "section": "Trend Sparklines — Flagged Conditions",
+    "text": "Trend Sparklines — Flagged Conditions\nWeekly trends for the top flagged conditions over the last 26 weeks.\n\n\n\n\n\n\n\n\nFigure 1",
+    "crumbs": [
+      "Trending Conditions"
+    ]
+  },
+  {
+    "objectID": "by-trending/index.html#next-steps",
+    "href": "by-trending/index.html#next-steps",
+    "title": "Trending Conditions",
+    "section": "Next Steps",
+    "text": "Next Steps\n\n\n\n\n\n\nTipFuture: CUSUM / EARS Integration\n\n\n\nThe trending page will integrate formal signal-detection algorithms (CUSUM, EARS C1/C2/C3) from the surveillance R package. Detected signals will be highlighted automatically and linked to the Forecasts tab for EpiNow2-based short-term projections.\nSee Forecasts →\n\n\n\n\n\n\n\n\n\nTipRelated Sections\n\n\n\n\nForecasts & Scenarios — short-term predictive models fed by signals\nBurden of Disease — quantified health impact of conditions\nBy Condition — condition-level national trends\nBy Province — province-level surveillance detail\nMethods — signal detection methodology documentation",
+    "crumbs": [
+      "Trending Conditions"
+    ]
+  },
+  {
+    "objectID": "explorer/index.html",
+    "href": "explorer/index.html",
+    "title": "Data Explorer",
+    "section": "",
+    "text": "The Data Explorer lets you query NMC surveillance data organised by the four regulatory notification categories. Category 1 conditions are highlighted first — they require immediate public health action. Category 2 supports trend monitoring for higher-volume conditions like TB and schistosomiasis.\nData through: 19 February 2026"
+  },
+  {
+    "objectID": "explorer/index.html#category-overview",
+    "href": "explorer/index.html#category-overview",
+    "title": "Data Explorer",
+    "section": "Category Overview",
+    "text": "Category Overview\n\nCategory 1 — Immediate Notification\n\n1,232 cases\n16 conditions reporting  |  Top: Malaria (555)\n\n\n\nCategory 2 — Routine Notification\n\n6,373 cases\n19 conditions reporting  |  Top: Tuberculosis:pulmonary (4,080)\n\n\n\nCategory 3 — Sentinel Surveillance\n\n54 cases\n3 conditions reporting  |  Top: Non-typhoidal salmonellosis (27)"
+  },
+  {
+    "objectID": "explorer/index.html#cat1",
+    "href": "explorer/index.html#cat1",
+    "title": "Data Explorer",
+    "section": "Category 1 — Immediate Notification",
+    "text": "Category 1 — Immediate Notification\n\n\n\n\n\n\nImportantRequires immediate public health action\n\n\n\nCategory 1 conditions must be notified within 24 hours. These include diseases of high epidemic potential: cholera, measles, malaria, meningococcal disease, VHFs, and other nationally significant threats. This section is designed for rapid situational awareness and action.\n\n\n\nNational Snapshot\n\nCurrent Month — Cases\n\n\n\n\n\n\n\n\nFigure 1\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 2\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 3\n\n\n\n\n\n\n\nBy Province\n\n\n\n\n\nCondition\n\n\n\n\n\n\n\n\nCases ≥\n\n\n\n\n\n\n\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 4\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 1"
+  },
+  {
+    "objectID": "explorer/index.html#cat2",
+    "href": "explorer/index.html#cat2",
+    "title": "Data Explorer",
+    "section": "Category 2 — Routine Notification (Trend Monitoring)",
+    "text": "Category 2 — Routine Notification (Trend Monitoring)\n\n\n\n\n\n\nNoteHigher-volume conditions for trend monitoring\n\n\n\nCategory 2 conditions are notified within 7 days. These are typically higher-volume diseases — tuberculosis (all forms), hepatitis A–E, schistosomiasis, congenital syphilis, poisonings, and maternal deaths. This section supports quarterly trend analysis and routine reporting.\n\n\n\nNational Snapshot\n\nCurrent Month — Cases\n\n\n\n\n\n\n\n\nFigure 5\n\n\n\n\n\n\nWeekly Epicurve\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 6\n\n\n\n\n\n\nMonthly Trend\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 7\n\n\n\n\n\n\nQuarterly Summary\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 8\n\n\n\n\n\n\n\nBy Province\n\n\n\n\n\nCondition\n\n\n\n\n\n\n\n\nCases ≥\n\n\n\n\n\n\n\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 9\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 2"
+  },
+  {
+    "objectID": "explorer/index.html#cat3",
+    "href": "explorer/index.html#cat3",
+    "title": "Data Explorer",
+    "section": "Category 3 — Sentinel Surveillance",
+    "text": "Category 3 — Sentinel Surveillance\n\n\n\n\n\n\nTipSentinel site monitoring\n\n\n\n\n\nCategory 3 conditions are monitored through sentinel surveillance networks. These include arboviral diseases (Chikungunya, Sindbis, West Nile, Zika, Dengue), non-typhoidal Salmonellosis, STEC, Shigellosis, and resistant Gonorrhoea.\n\n\n\n\nNational Snapshot\n\nCurrent Month\n\n\n\n\n\n\n\n\nFigure 10\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\n\n\n\n\nFigure 11\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 3"
+  },
+  {
+    "objectID": "explorer/index.html#cat4",
+    "href": "explorer/index.html#cat4",
+    "title": "Data Explorer",
+    "section": "Category 4 — AMR Organisms",
+    "text": "Category 4 — AMR Organisms\n\n\n\n\n\n\nWarningAntimicrobial resistance monitoring\n\n\n\n\n\nCategory 4 covers antimicrobial-resistant organisms: CPE, VRE, GISA/hGISA, colistin-resistant Pseudomonas/Acinetobacter, and C. difficile.\n\n\n\n\nNational Snapshot\n\nCurrent Month\n\n\n\n\nNo Category 4 notifications this month.\n\n\nFigure 12\n\n\n\n\n\n\nMonthly Trend\n\n\n\n\nNo Category 4 trend data.\n\n\nFigure 13\n\n\n\n\n\n\n\nData Table\n\n\n\n\nTable 4\n\n\n\nNo Category 4 data."
+  },
+  {
+    "objectID": "explorer/index.html#all-conditions-full-download",
+    "href": "explorer/index.html#all-conditions-full-download",
+    "title": "Data Explorer",
+    "section": "All Conditions — Full Download",
+    "text": "All Conditions — Full Download\n\n\n\n\nTable 5\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipRelated Sections\n\n\n\n\nBy Province — provincial summaries organised by NMC category\nBy Condition — condition-specific national trends\nTrending — signal detection and alert log\nForecasts — short-term predictive models"
+  }
+]
