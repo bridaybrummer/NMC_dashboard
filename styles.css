@@ -321,3 +321,149 @@ table.dataTable thead th {
   max-width: 100%;
   height: auto;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Burden of Disease – Dashboard-Specific Styles
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── BoD KPI Strip ──────────────────────────────────────────────────────────── */
+.bod-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0 2rem 0;
+}
+
+.bod-kpi {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.1rem 1rem;
+  text-align: center;
+  border-top: 3px solid #2563eb;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.bod-kpi:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.bod-kpi.severity   { border-top-color: #b91c1c; }
+.bod-kpi.mortality  { border-top-color: #dc2626; }
+.bod-kpi.disability { border-top-color: #3b82f6; }
+.bod-kpi.economic   { border-top-color: #7c3aed; }
+.bod-kpi.demographic { border-top-color: #0ea5e9; }
+.bod-kpi.highlight  { border-top-color: #059669; }
+
+.bod-kpi .kpi-value {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.bod-kpi .kpi-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+  margin: 0.3rem 0 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.bod-kpi .kpi-detail {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin: 0.2rem 0 0 0;
+}
+
+/* ── Epi Insight Box ────────────────────────────────────────────────────────── */
+.bod-insight {
+  background: linear-gradient(135deg, #f0f9ff 0%, #eff6ff 100%);
+  border-left: 4px solid #2563eb;
+  border-radius: 0 6px 6px 0;
+  padding: 0.75rem 1.1rem;
+  margin: 1rem 0 1.5rem 0;
+  font-size: 0.92rem;
+  color: #1e40af;
+  line-height: 1.5;
+}
+
+.bod-insight strong {
+  color: #1e3a8a;
+}
+
+.bod-insight.warning {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-left-color: #d97706;
+  color: #92400e;
+}
+
+.bod-insight.warning strong {
+  color: #78350f;
+}
+
+/* ── Section Intro ──────────────────────────────────────────────────────────── */
+.bod-section-intro {
+  color: #475569;
+  font-size: 0.95rem;
+  border-left: 3px solid #cbd5e1;
+  padding-left: 1rem;
+  margin: 0.25rem 0 1.25rem 0;
+  line-height: 1.55;
+}
+
+/* ── Panel-Tabset polish for BoD ────────────────────────────────────────────── */
+.bod-tabs .nav-tabs {
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 0;
+}
+
+.bod-tabs .nav-tabs .nav-link {
+  font-size: 0.88rem;
+  padding: 0.5rem 1rem;
+}
+
+.bod-tabs .tab-content {
+  padding-top: 1.25rem;
+}
+
+/* ── Indicator colours for inline badges ────────────────────────────────────── */
+.badge-severity {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-economic {
+  background-color: #ede9fe;
+  color: #5b21b6;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-demographic {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ── Responsive adjustments ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .bod-kpi-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .bod-kpi .kpi-value {
+    font-size: 1.3rem;
+  }
+}

@@ -21,5 +21,6 @@ source(file.path(project_root, "R/visualisation_extras.r"))
 source(file.path(project_root, "R/quality_functions.r"))
 source(file.path(project_root, "R/tabulate_functions.r"))
 source(file.path(project_root, "R/epinow2_functions.r"))
+source(file.path(project_root, "R/burden_of_disease.r"))
 
 cat("NMC dashboard functions loaded.\n")

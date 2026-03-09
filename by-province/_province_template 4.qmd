@@ -1,0 +1,663 @@
+
+```{r}
+#| label: setup
+#| include: false
+#| message: false
+#| warning: false
+
+# PROV_CODE and PROV_NAME must be set by the parent stub before knit_child()
+stopifnot(exists("PROV_CODE"), exists("PROV_NAME"))
+
+suppressPackageStartupMessages({
+  library(data.table)
+  library(plotly)
+  library(crosstalk)
+  library(DT)
+  library(lubridate)
+  library(htmltools)
+  library(dplyr)
+})
+
+source("R/nmc_categories.r")
+
+# ── Load data ────────────────────────────────────────────────────────────────
+agg_prov <- readRDS("data/processed/agg_province.rds")
+setDT(agg_prov)
+agg_prov <- agg_prov[!is.na(prov_) & prov_ != ""]
+agg_prov[, date := as.Date(date)]
+
+# Filter to this province
+prov_dt <- agg_prov[prov_ == PROV_CODE]
+
+# Assign NMC categories
+prov_dt <- assign_nmc_category(prov_dt)
+
+latest_date <- max(prov_dt$date, na.rm = TRUE)
+
+# ── Population lookup ────────────────────────────────────────────────────────
+pop_lookup <- data.table(
+  prov_ = c("EC", "FS", "GP", "KZN", "LP", "MP", "NC", "NW", "WC"),
+  pop   = c(6734001, 2928903, 16098571, 11538813, 5941439, 4743584,
+            1303047, 4141774, 7187004)
+)
+prov_pop <- pop_lookup[prov_ == PROV_CODE, pop]
+
+# ── KPI metrics ──────────────────────────────────────────────────────────────
+month_start <- floor_date(latest_date, "month")
+prev_month  <- month_start - months(1)
+
+current_month <- prov_dt[date >= month_start]
+total_current <- sum(current_month$count, na.rm = TRUE)
+total_prev    <- sum(prov_dt[date >= prev_month & date < month_start, count], na.rm = TRUE)
+n_conditions  <- uniqueN(current_month$condition[current_month$count > 0])
+
+pct_change <- ifelse(total_prev > 0,
+                     round((total_current - total_prev) / total_prev * 100, 1),
+                     NA_real_)
+arrow <- ifelse(!is.na(pct_change) & pct_change >= 0, "\u2191", "\u2193")
+
+top_condition <- current_month[, .(n = sum(count, na.rm = TRUE)),
+                                by = condition][which.max(n), condition]
+
+# ── Monthly summary by category ─────────────────────────────────────────────
+prov_dt[, month := floor_date(date, "month")]
+monthly <- prov_dt[, .(
+  cases = sum(count, na.rm = TRUE)
+), by = .(Month = month, Condition = condition, nmc_category)]
+monthly[, incidence_100k := round(cases / prov_pop * 1e5, 2)]
+monthly[, Category := nmc_category_label(nmc_category)]
+
+# ── Weekly summary by category ───────────────────────────────────────────────
+prov_dt[, week_start := floor_date(date, "week")]
+weekly <- prov_dt[, .(
+  cases = sum(count, na.rm = TRUE)
+), by = .(Week = week_start, Condition = condition, nmc_category)]
+weekly[, incidence_100k := round(cases / prov_pop * 1e5, 2)]
+weekly[, Category := nmc_category_label(nmc_category)]
+
+# ── Current month summary by category ───────────────────────────────────────
+current_summary <- current_month[, .(
+  cases = sum(count, na.rm = TRUE)
+), by = .(Condition = condition, nmc_category)]
+current_summary[, incidence_100k := round(cases / prov_pop * 1e5, 2)]
+current_summary[, Category := nmc_category_label(nmc_category)]
+setorder(current_summary, nmc_category, -cases)
+
+# ── Category totals ──────────────────────────────────────────────────────────
+cat_totals <- current_summary[, .(
+  total_cases      = sum(cases),
+  n_conditions     = .N,
+  top_condition    = Condition[which.max(cases)],
+  top_cases        = max(cases)
+), by = .(nmc_category, Category)]
+setorder(cat_totals, nmc_category)
+
+# Categories present in data
+cats_present <- sort(unique(prov_dt$nmc_category))
+cats_present <- cats_present[cats_present > 0]
+```
+
+```{r}
+#| label: hero
+#| results: asis
+#| echo: false
+cat(sprintf(
+  '::: {.hero-intro}\n\n**%s (%s)** — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\n\n**Data through:** %s &nbsp;|&nbsp; **Population:** %s\n\n[Home](../../index.html){.btn .btn-sm .btn-primary style="margin-right:0.5rem;"} [All Provinces](../index.html){.btn .btn-sm .btn-outline-primary}\n\n:::\n',
+  PROV_NAME, PROV_CODE,
+  format(latest_date, "%d %B %Y"),
+  format(prov_pop, big.mark = ",")
+))
+```
+
+```{r}
+#| label: kpi-cards
+#| results: asis
+#| echo: false
+cat(sprintf(
+'
+::: {layout-ncol=4}
+
+::: {.card .bg-primary .text-white .p-3 .text-center}
+**Total Cases**
+
+### %s
+<span style="font-size:0.8rem;">%s</span>
+:::
+
+::: {.card .bg-info .text-white .p-3 .text-center}
+**Month Change**
+
+### %s %s%%%%
+<span style="font-size:0.8rem;">vs previous month</span>
+:::
+
+::: {.card .bg-success .text-white .p-3 .text-center}
+**Conditions**
+
+### %s
+<span style="font-size:0.8rem;">reporting this month</span>
+:::
+
+::: {.card .bg-warning .text-dark .p-3 .text-center}
+**Top Condition**
+
+### %s
+<span style="font-size:0.8rem;">highest case count</span>
+:::
+
+:::
+',
+  format(total_current, big.mark = ","),
+  format(month_start, "%%B %%Y"),
+  arrow, abs(pct_change),
+  n_conditions,
+  top_condition
+))
+```
+
+---
+
+## Category Summary
+
+```{r}
+#| label: tbl-cat-summary
+DT::datatable(
+  cat_totals[, .(Category, `Total Cases` = total_cases,
+                 `Conditions Reporting` = n_conditions,
+                 `Top Condition` = top_condition,
+                 `Top Cases` = top_cases)],
+  rownames = FALSE,
+  options = list(dom = "t", pageLength = 10, ordering = FALSE),
+  caption = paste0("NMC category summary — ", PROV_NAME, " (", format(month_start, "%B %Y"), ")")
+)
+```
+
+---
+
+## Category 1 — Immediate Notification {#cat1}
+
+::: {.callout-important collapse="true"}
+## About Category 1
+Category 1 conditions require **immediate** notification within 24 hours. These include diseases of high epidemic potential or public health emergency significance (e.g. cholera, measles, malaria, meningococcal disease).
+:::
+
+```{r}
+#| label: cat1-data
+#| include: false
+cat1_weekly  <- weekly[nmc_category == 1]
+cat1_monthly <- monthly[nmc_category == 1]
+cat1_current <- current_summary[nmc_category == 1]
+```
+
+### Cases by Condition {.tabset}
+
+#### Current Month
+
+```{r}
+#| label: fig-cat1-bar
+if (nrow(cat1_current) > 0) {
+  plot_ly(cat1_current, x = ~reorder(Condition, -cases), y = ~cases,
+          type = "bar", marker = list(color = "#d9534f"),
+          hoverinfo = "text",
+          text = ~paste0(Condition, ": ", cases, " cases")) %>%
+    layout(xaxis = list(title = "", tickangle = -45),
+           yaxis = list(title = "Cases"),
+           margin = list(b = 120))
+} else {
+  htmltools::p("No Category 1 conditions reported this month.", style = "color:gray;")
+}
+```
+
+#### Weekly Epicurve
+
+```{r}
+#| label: fig-cat1-weekly
+if (nrow(cat1_weekly) > 0) {
+  plot_ly(cat1_weekly, x = ~Week, y = ~cases, color = ~Condition,
+          type = "bar", hoverinfo = "text",
+          text = ~paste0(Condition, "<br>Week: ", format(Week, "%d %b %Y"),
+                         "<br>Cases: ", cases)) %>%
+    layout(barmode = "stack",
+           xaxis = list(title = "Week"),
+           yaxis = list(title = "Weekly cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  htmltools::p("No Category 1 data available.", style = "color:gray;")
+}
+```
+
+#### Monthly Trend
+
+```{r}
+#| label: fig-cat1-monthly
+if (nrow(cat1_monthly) > 0) {
+  plot_ly(cat1_monthly, x = ~Month, y = ~cases, color = ~Condition,
+          type = "scatter", mode = "lines+markers",
+          marker = list(size = 5),
+          hoverinfo = "text",
+          text = ~paste0(Condition, "<br>", format(Month, "%b %Y"),
+                         "<br>Cases: ", cases)) %>%
+    layout(xaxis = list(title = "Month"),
+           yaxis = list(title = "Monthly cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  htmltools::p("No Category 1 data available.", style = "color:gray;")
+}
+```
+
+#### Incidence Trend
+
+```{r}
+#| label: fig-cat1-incidence
+if (nrow(cat1_monthly) > 0) {
+  plot_ly(cat1_monthly, x = ~Month, y = ~incidence_100k, color = ~Condition,
+          type = "scatter", mode = "lines+markers",
+          marker = list(size = 5),
+          hoverinfo = "text",
+          text = ~paste0(Condition, "<br>", format(Month, "%b %Y"),
+                         "<br>Inc: ", incidence_100k, " /100k")) %>%
+    layout(xaxis = list(title = "Month"),
+           yaxis = list(title = "Incidence per 100 000"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  htmltools::p("No Category 1 incidence data available.", style = "color:gray;")
+}
+```
+
+### Data Table
+
+```{r}
+#| label: tbl-cat1
+if (nrow(cat1_current) > 0) {
+  DT::datatable(
+    cat1_current[, .(Condition, Cases = cases, `Incidence /100k` = incidence_100k)],
+    extensions = "Buttons",
+    rownames = FALSE,
+    options = list(dom = "Bfrtip", buttons = c("csv", "excel"),
+                   pageLength = 30, scrollX = TRUE,
+                   order = list(list(1, "desc")))
+  )
+} else {
+  htmltools::p("No Category 1 data to display.", style = "color:gray;")
+}
+```
+
+---
+
+## Category 2 — Routine Notification {#cat2}
+
+::: {.callout-note collapse="true"}
+## About Category 2
+Category 2 conditions require notification within **7 days**. These include conditions such as hepatitis A–E, tuberculosis variants, congenital syphilis, lead/mercury poisoning, and maternal deaths.
+:::
+
+```{r}
+#| label: cat2-data
+#| include: false
+cat2_weekly  <- weekly[nmc_category == 2]
+cat2_monthly <- monthly[nmc_category == 2]
+cat2_current <- current_summary[nmc_category == 2]
+```
+
+### Cases by Condition {.tabset}
+
+#### Current Month
+
+```{r}
+#| label: fig-cat2-bar
+if (nrow(cat2_current) > 0) {
+  plot_ly(cat2_current, x = ~reorder(Condition, -cases), y = ~cases,
+          type = "bar", marker = list(color = "#5bc0de"),
+          hoverinfo = "text",
+          text = ~paste0(Condition, ": ", cases, " cases")) %>%
+    layout(xaxis = list(title = "", tickangle = -45),
+           yaxis = list(title = "Cases"),
+           margin = list(b = 120))
+} else {
+  htmltools::p("No Category 2 conditions reported this month.", style = "color:gray;")
+}
+```
+
+#### Weekly Epicurve
+
+```{r}
+#| label: fig-cat2-weekly
+if (nrow(cat2_weekly) > 0) {
+  plot_ly(cat2_weekly, x = ~Week, y = ~cases, color = ~Condition,
+          type = "bar", hoverinfo = "text",
+          text = ~paste0(Condition, "<br>Week: ", format(Week, "%d %b %Y"),
+                         "<br>Cases: ", cases)) %>%
+    layout(barmode = "stack",
+           xaxis = list(title = "Week"),
+           yaxis = list(title = "Weekly cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  htmltools::p("No Category 2 data available.", style = "color:gray;")
+}
+```
+
+#### Monthly Trend
+
+```{r}
+#| label: fig-cat2-monthly
+if (nrow(cat2_monthly) > 0) {
+  plot_ly(cat2_monthly, x = ~Month, y = ~cases, color = ~Condition,
+          type = "scatter", mode = "lines+markers",
+          marker = list(size = 5),
+          hoverinfo = "text",
+          text = ~paste0(Condition, "<br>", format(Month, "%b %Y"),
+                         "<br>Cases: ", cases)) %>%
+    layout(xaxis = list(title = "Month"),
+           yaxis = list(title = "Monthly cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  htmltools::p("No Category 2 data available.", style = "color:gray;")
+}
+```
+
+#### Incidence Trend
+
+```{r}
+#| label: fig-cat2-incidence
+if (nrow(cat2_monthly) > 0) {
+  plot_ly(cat2_monthly, x = ~Month, y = ~incidence_100k, color = ~Condition,
+          type = "scatter", mode = "lines+markers",
+          marker = list(size = 5),
+          hoverinfo = "text",
+          text = ~paste0(Condition, "<br>", format(Month, "%b %Y"),
+                         "<br>Inc: ", incidence_100k, " /100k")) %>%
+    layout(xaxis = list(title = "Month"),
+           yaxis = list(title = "Incidence per 100 000"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  htmltools::p("No Category 2 incidence data available.", style = "color:gray;")
+}
+```
+
+### Data Table
+
+```{r}
+#| label: tbl-cat2
+if (nrow(cat2_current) > 0) {
+  DT::datatable(
+    cat2_current[, .(Condition, Cases = cases, `Incidence /100k` = incidence_100k)],
+    extensions = "Buttons",
+    rownames = FALSE,
+    options = list(dom = "Bfrtip", buttons = c("csv", "excel"),
+                   pageLength = 30, scrollX = TRUE,
+                   order = list(list(1, "desc")))
+  )
+} else {
+  htmltools::p("No Category 2 data to display.", style = "color:gray;")
+}
+```
+
+---
+
+## Category 3 — Sentinel Surveillance {#cat3}
+
+::: {.callout-tip collapse="true"}
+## About Category 3
+Category 3 conditions are monitored through **sentinel surveillance**. These include endemic arboviral diseases (Chikungunya, Sindbis, West Nile), non-endemic arbovirals (Zika, Dengue), non-typhoidal Salmonellosis, STEC, and Shigellosis.
+:::
+
+```{r}
+#| label: cat3-data
+#| include: false
+cat3_weekly  <- weekly[nmc_category == 3]
+cat3_monthly <- monthly[nmc_category == 3]
+cat3_current <- current_summary[nmc_category == 3]
+```
+
+### Cases by Condition {.tabset}
+
+#### Current Month
+
+```{r}
+#| label: fig-cat3-bar
+if (nrow(cat3_current) > 0) {
+  plot_ly(cat3_current, x = ~reorder(Condition, -cases), y = ~cases,
+          type = "bar", marker = list(color = "#5cb85c"),
+          hoverinfo = "text",
+          text = ~paste0(Condition, ": ", cases, " cases")) %>%
+    layout(xaxis = list(title = "", tickangle = -45),
+           yaxis = list(title = "Cases"),
+           margin = list(b = 120))
+} else {
+  htmltools::p("No Category 3 conditions reported this month.", style = "color:gray;")
+}
+```
+
+#### Weekly Epicurve
+
+```{r}
+#| label: fig-cat3-weekly
+if (nrow(cat3_weekly) > 0) {
+  plot_ly(cat3_weekly, x = ~Week, y = ~cases, color = ~Condition,
+          type = "bar", hoverinfo = "text",
+          text = ~paste0(Condition, "<br>Week: ", format(Week, "%d %b %Y"),
+                         "<br>Cases: ", cases)) %>%
+    layout(barmode = "stack",
+           xaxis = list(title = "Week"),
+           yaxis = list(title = "Weekly cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  htmltools::p("No Category 3 data available.", style = "color:gray;")
+}
+```
+
+#### Monthly Trend
+
+```{r}
+#| label: fig-cat3-monthly
+if (nrow(cat3_monthly) > 0) {
+  plot_ly(cat3_monthly, x = ~Month, y = ~cases, color = ~Condition,
+          type = "scatter", mode = "lines+markers",
+          marker = list(size = 5),
+          hoverinfo = "text",
+          text = ~paste0(Condition, "<br>", format(Month, "%b %Y"),
+                         "<br>Cases: ", cases)) %>%
+    layout(xaxis = list(title = "Month"),
+           yaxis = list(title = "Monthly cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  htmltools::p("No Category 3 data available.", style = "color:gray;")
+}
+```
+
+#### Incidence Trend
+
+```{r}
+#| label: fig-cat3-incidence
+if (nrow(cat3_monthly) > 0) {
+  plot_ly(cat3_monthly, x = ~Month, y = ~incidence_100k, color = ~Condition,
+          type = "scatter", mode = "lines+markers",
+          marker = list(size = 5),
+          hoverinfo = "text",
+          text = ~paste0(Condition, "<br>", format(Month, "%b %Y"),
+                         "<br>Inc: ", incidence_100k, " /100k")) %>%
+    layout(xaxis = list(title = "Month"),
+           yaxis = list(title = "Incidence per 100 000"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  htmltools::p("No Category 3 incidence data available.", style = "color:gray;")
+}
+```
+
+### Data Table
+
+```{r}
+#| label: tbl-cat3
+if (nrow(cat3_current) > 0) {
+  DT::datatable(
+    cat3_current[, .(Condition, Cases = cases, `Incidence /100k` = incidence_100k)],
+    extensions = "Buttons",
+    rownames = FALSE,
+    options = list(dom = "Bfrtip", buttons = c("csv", "excel"),
+                   pageLength = 30, scrollX = TRUE,
+                   order = list(list(1, "desc")))
+  )
+} else {
+  htmltools::p("No Category 3 data to display.", style = "color:gray;")
+}
+```
+
+---
+
+## Category 4 — AMR Organisms {#cat4}
+
+::: {.callout-warning collapse="true"}
+## About Category 4
+Category 4 covers **antimicrobial-resistant organisms**: CPE, VRE, GISA/hGISA, colistin-resistant *Pseudomonas*/*Acinetobacter*, and *C. difficile*.
+:::
+
+```{r}
+#| label: cat4-data
+#| include: false
+cat4_weekly  <- weekly[nmc_category == 4]
+cat4_monthly <- monthly[nmc_category == 4]
+cat4_current <- current_summary[nmc_category == 4]
+```
+
+### Cases by Condition {.tabset}
+
+#### Current Month
+
+```{r}
+#| label: fig-cat4-bar
+if (nrow(cat4_current) > 0) {
+  plot_ly(cat4_current, x = ~reorder(Condition, -cases), y = ~cases,
+          type = "bar", marker = list(color = "#f0ad4e"),
+          hoverinfo = "text",
+          text = ~paste0(Condition, ": ", cases, " cases")) %>%
+    layout(xaxis = list(title = "", tickangle = -45),
+           yaxis = list(title = "Cases"),
+           margin = list(b = 120))
+} else {
+  htmltools::p("No Category 4 conditions reported this month.", style = "color:gray;")
+}
+```
+
+#### Weekly Epicurve
+
+```{r}
+#| label: fig-cat4-weekly
+if (nrow(cat4_weekly) > 0) {
+  plot_ly(cat4_weekly, x = ~Week, y = ~cases, color = ~Condition,
+          type = "bar", hoverinfo = "text",
+          text = ~paste0(Condition, "<br>Week: ", format(Week, "%d %b %Y"),
+                         "<br>Cases: ", cases)) %>%
+    layout(barmode = "stack",
+           xaxis = list(title = "Week"),
+           yaxis = list(title = "Weekly cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  htmltools::p("No Category 4 data available.", style = "color:gray;")
+}
+```
+
+#### Monthly Trend
+
+```{r}
+#| label: fig-cat4-monthly
+if (nrow(cat4_monthly) > 0) {
+  plot_ly(cat4_monthly, x = ~Month, y = ~cases, color = ~Condition,
+          type = "scatter", mode = "lines+markers",
+          marker = list(size = 5),
+          hoverinfo = "text",
+          text = ~paste0(Condition, "<br>", format(Month, "%b %Y"),
+                         "<br>Cases: ", cases)) %>%
+    layout(xaxis = list(title = "Month"),
+           yaxis = list(title = "Monthly cases"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  htmltools::p("No Category 4 data available.", style = "color:gray;")
+}
+```
+
+#### Incidence Trend
+
+```{r}
+#| label: fig-cat4-incidence
+if (nrow(cat4_monthly) > 0) {
+  plot_ly(cat4_monthly, x = ~Month, y = ~incidence_100k, color = ~Condition,
+          type = "scatter", mode = "lines+markers",
+          marker = list(size = 5),
+          hoverinfo = "text",
+          text = ~paste0(Condition, "<br>", format(Month, "%b %Y"),
+                         "<br>Inc: ", incidence_100k, " /100k")) %>%
+    layout(xaxis = list(title = "Month"),
+           yaxis = list(title = "Incidence per 100 000"),
+           legend = list(orientation = "h", y = -0.2))
+} else {
+  htmltools::p("No Category 4 incidence data available.", style = "color:gray;")
+}
+```
+
+### Data Table
+
+```{r}
+#| label: tbl-cat4
+if (nrow(cat4_current) > 0) {
+  DT::datatable(
+    cat4_current[, .(Condition, Cases = cases, `Incidence /100k` = incidence_100k)],
+    extensions = "Buttons",
+    rownames = FALSE,
+    options = list(dom = "Bfrtip", buttons = c("csv", "excel"),
+                   pageLength = 30, scrollX = TRUE,
+                   order = list(list(1, "desc")))
+  )
+} else {
+  htmltools::p("No Category 4 data to display.", style = "color:gray;")
+}
+```
+
+---
+
+## All Conditions — Full Table
+
+```{r}
+#| label: tbl-all-conditions
+all_current <- current_summary[order(nmc_category, -cases)]
+DT::datatable(
+  all_current[, .(Category, Condition, Cases = cases, `Incidence /100k` = incidence_100k)],
+  extensions = "Buttons",
+  filter = "top",
+  rownames = FALSE,
+  options = list(
+    dom = "Bfrtip",
+    buttons = c("csv", "excel", "pdf"),
+    pageLength = 50,
+    scrollX = TRUE,
+    order = list(list(2, "desc"))
+  ),
+  caption = paste0("All notifiable conditions by NMC category — ", PROV_NAME,
+                   " (", format(month_start, "%B %Y"), ")")
+)
+```
+
+---
+
+## Province Navigation
+
+::: {layout-ncol=3}
+[Eastern Cape](../ec/index.html){.btn .btn-outline-primary .btn-sm}
+[Free State](../fs/index.html){.btn .btn-outline-primary .btn-sm}
+[Gauteng](../gp/index.html){.btn .btn-outline-primary .btn-sm}
+[KwaZulu-Natal](../kzn/index.html){.btn .btn-outline-primary .btn-sm}
+[Limpopo](../lp/index.html){.btn .btn-outline-primary .btn-sm}
+[Mpumalanga](../mp/index.html){.btn .btn-outline-primary .btn-sm}
+[Northern Cape](../nc/index.html){.btn .btn-outline-primary .btn-sm}
+[North West](../nw/index.html){.btn .btn-outline-primary .btn-sm}
+[Western Cape](../wc/index.html){.btn .btn-outline-primary .btn-sm}
+:::
+
+---
+
+::: {.callout-tip}
+## Related Sections
+- [By Province — Overview](../index.html) — cross-province comparison
+- [By Condition](../../by-condition/index.html) — condition-first view
+- [Trending & Signals](../../by-trending/index.html) — signal detection
+- [Forecasts](../../by-forecasts/index.html) — short-term predictive models
+:::

@@ -85,12 +85,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="predictive-modelling-update-maintenance-guide" class="level1">
 <h1>Predictive Modelling — Update &amp; Maintenance Guide</h1>
-<p>This document describes how to run, refresh, and extend the <strong>Forecasts</strong> section of the NMC Dashboard.</p>
+<p>This document describes how to run, refresh, extend, and <strong>adjust model parameters</strong> for the <strong>Forecasts</strong> section of the NMC Dashboard.</p>
 <hr>
 <section id="architecture-overview" class="level2">
 <h2 class="anchored" data-anchor-id="architecture-overview">Architecture overview</h2>
 <pre><code>R/
-├── epinow2_functions.r        ← Reusable functions: disease params, EpiNow2 wrappers
+├── epinow2_functions.r        ← Disease params + EpiNow2 wrappers (★ edit here for assumptions)
 ├── run_forecasts.r            ← Batch script that produces cached .rds forecast files
 ├── prepare_dashboard_data.r   ← Aggregates raw NMC data → agg_national / province / district
 └── data_import.r              ← Reads the master feather file
@@ -103,7 +103,8 @@ data/processed/
 ├── agg_national.rds           ← Aggregated counts by condition × date
 ├── agg_province.rds           ← By province
 ├── agg_district.rds           ← By district
-├── forecasts_&lt;condition&gt;.rds  ← Single-point EpiNow2 summaries
+├── forecasts_&lt;condition&gt;.rds  ← Single-point EpiNow2 summaries (Rt, cases, infections)
+├── forecasts_obj_&lt;condition&gt;.rds  ← Full EpiNow2 result objects (for native plot())
 ├── forecasts_rolling_&lt;condition&gt;.rds  ← Rolling snapshots for animation
 └── forecasts_meta.rds         ← Run timestamp + parameters</code></pre>
 <hr>
@@ -139,10 +140,14 @@ data/processed/
 <td><code>install.packages(c("data.table","dplyr","lubridate","purrr"))</code></td>
 </tr>
 <tr class="even">
+<td><strong>patchwork</strong></td>
+<td><code>install.packages("patchwork")</code> — for EpiNow2 native plot layout</td>
+</tr>
+<tr class="odd">
 <td><strong>gganimate + gifski</strong> (for animated GIF)</td>
 <td><code>install.packages(c("gganimate","gifski"))</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><strong>Quarto ≥ 1.4</strong></td>
 <td><a href="https://quarto.org/docs/get-started/" class="uri">https://quarto.org/docs/get-started/</a></td>
 </tr>
@@ -180,10 +185,11 @@ data/processed/
 </section>
 <section id="run-forecasts" class="level3">
 <h3 class="anchored" data-anchor-id="run-forecasts">2. Run forecasts</h3>
-<p><code>R/run_forecasts.r</code> reads <code>agg_national.rds</code>, filters to vaccine-preventable conditions, and runs EpiNow2 for each. It produces:</p>
+<p><code>R/run_forecasts.r</code> reads <code>agg_national.rds</code>, filters to forecast-eligible conditions, and runs EpiNow2 for each. It produces:</p>
 <ul>
-<li><strong>Single-point forecasts</strong> – one <code>.rds</code> per condition with Rt, cases, infections</li>
-<li><strong>Rolling forecasts</strong> – 8 weekly snapshots per condition (for animation)</li>
+<li><strong>Summary forecasts</strong> – <code>forecasts_&lt;condition&gt;.rds</code> with Rt, cases, infections</li>
+<li><strong>Full result objects</strong> – <code>forecasts_obj_&lt;condition&gt;.rds</code> for native EpiNow2 <code>plot()</code></li>
+<li><strong>Rolling forecasts</strong> – weekly snapshots per condition (for animation)</li>
 <li><strong>Metadata</strong> – run timestamp, horizon, conditions list</li>
 </ul>
 <p><strong>Tuning parameters</strong> (edit at the top of <code>run_forecasts.r</code>):</p>
@@ -198,8 +204,8 @@ data/processed/
 <tbody>
 <tr class="odd">
 <td><code>HORIZON</code></td>
-<td>21</td>
-<td>Days forecasted ahead</td>
+<td>28</td>
+<td>Days forecasted ahead (4 weeks)</td>
 </tr>
 <tr class="even">
 <td><code>LOOKBACK</code></td>
@@ -225,21 +231,275 @@ data/processed/
 <hr>
 </section>
 </section>
+<section id="adjusting-disease-parameters-model-assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="adjusting-disease-parameters-model-assumptions">Adjusting Disease Parameters (Model Assumptions)</h2>
+<p>All disease-specific assumptions are in <strong>one place</strong>: <code>R/epinow2_functions.r</code> → the <code>disease_params()</code> function.</p>
+<p>Each condition returns a named list with:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>generation_time</code></td>
+<td><code>EpiNow2::Gamma(...)</code></td>
+<td>Serial interval / generation time distribution</td>
+</tr>
+<tr class="even">
+<td><code>incubation_period</code></td>
+<td><code>EpiNow2::Gamma(...)</code></td>
+<td>Time from exposure to symptom onset</td>
+</tr>
+<tr class="odd">
+<td><code>rt_prior</code></td>
+<td><code>list(mean, sd)</code></td>
+<td>Prior for the reproduction number</td>
+</tr>
+<tr class="even">
+<td><code>reference</code></td>
+<td><code>character</code></td>
+<td>Literature citation for the values</td>
+</tr>
+</tbody>
+</table>
+<section id="how-to-change-an-existing-conditions-parameters" class="level3">
+<h3 class="anchored" data-anchor-id="how-to-change-an-existing-conditions-parameters">How to change an existing condition’s parameters</h3>
+<ol type="1">
+<li>Open <code>R/epinow2_functions.r</code> in any text editor</li>
+<li>Search for the condition name (lowercase), e.g.&nbsp;<code>"cholera"</code></li>
+<li>Modify <code>mean</code>, <code>sd</code>, or <code>max</code> inside the <code>EpiNow2::Gamma()</code> call</li>
+<li>Update the <code>reference</code> string to cite your new source</li>
+<li>Save the file</li>
+<li>Re-run: <code>Rscript R/run_forecasts.r</code></li>
+<li>Re-render: <code>quarto render by-forecasts/index.qmd</code></li>
+</ol>
+<p><strong>Example</strong> – updating cholera generation time from a new study:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># BEFORE:</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="st">"cholera"</span> <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">generation_time   =</span> EpiNow2<span class="sc">::</span><span class="fu">Gamma</span>(<span class="at">mean =</span> <span class="fl">5.0</span>, <span class="at">sd =</span> <span class="fl">2.0</span>, <span class="at">max =</span> <span class="dv">14</span>),</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">incubation_period =</span> EpiNow2<span class="sc">::</span><span class="fu">Gamma</span>(<span class="at">mean =</span> <span class="fl">1.4</span>, <span class="at">sd =</span> <span class="fl">0.6</span>, <span class="at">max =</span> <span class="dv">5</span>),</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">rt_prior          =</span> <span class="fu">list</span>(<span class="at">mean =</span> <span class="dv">2</span>, <span class="at">sd =</span> <span class="dv">1</span>),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">reference         =</span> <span class="st">"Azman et al. (2013) J Infect Dis 207(11):1698-1706"</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># AFTER:</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="st">"cholera"</span> <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">generation_time   =</span> EpiNow2<span class="sc">::</span><span class="fu">Gamma</span>(<span class="at">mean =</span> <span class="fl">4.5</span>, <span class="at">sd =</span> <span class="fl">1.8</span>, <span class="at">max =</span> <span class="dv">12</span>),</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="co">#                                   ↑ updated based on new study</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">incubation_period =</span> EpiNow2<span class="sc">::</span><span class="fu">Gamma</span>(<span class="at">mean =</span> <span class="fl">1.4</span>, <span class="at">sd =</span> <span class="fl">0.6</span>, <span class="at">max =</span> <span class="dv">5</span>),</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">rt_prior          =</span> <span class="fu">list</span>(<span class="at">mean =</span> <span class="dv">2</span>, <span class="at">sd =</span> <span class="dv">1</span>),</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">reference         =</span> <span class="st">"New Author (2026) Journal Name DOI:10.xxxx/xxxxx"</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>),</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="understanding-the-gamma-distribution-parameters" class="level3">
+<h3 class="anchored" data-anchor-id="understanding-the-gamma-distribution-parameters">Understanding the Gamma distribution parameters</h3>
+<p>EpiNow2 uses <code>EpiNow2::Gamma()</code> to define delay distributions. The mean/sd parameterisation:</p>
+<ul>
+<li><code>mean</code>: average duration in <strong>days</strong></li>
+<li><code>sd</code>: standard deviation in <strong>days</strong> (captures uncertainty / variability)</li>
+<li><code>max</code>: hard upper truncation in <strong>days</strong> (prevents extreme tail values)</li>
+</ul>
+<p><strong>Where to find values in the literature:</strong></p>
+<ul>
+<li>Check systematic reviews for “serial interval” or “generation time”</li>
+<li>Look for “incubation period” meta-analyses</li>
+<li>Common sources: Lessler et al.&nbsp;(2009), Vink et al.&nbsp;(2014), WHO disease fact sheets</li>
+<li>For newer diseases: real-time estimates from outbreak reports (e.g., Eurosurveillance, MMWR)</li>
+</ul>
+</section>
+<section id="understanding-the-rt-prior" class="level3">
+<h3 class="anchored" data-anchor-id="understanding-the-rt-prior">Understanding the Rt prior</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>rt_prior <span class="ot">=</span> <span class="fu">list</span>(<span class="at">mean =</span> <span class="dv">2</span>, <span class="at">sd =</span> <span class="dv">1</span>)   <span class="co"># weakly informative: allows Rt from ~0 to ~4</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>rt_prior <span class="ot">=</span> <span class="fu">list</span>(<span class="at">mean =</span> <span class="fl">1.5</span>, <span class="at">sd =</span> <span class="fl">0.5</span>) <span class="co"># tighter: for endemic / vector-borne diseases</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The prior is <code>Normal(mean, sd)</code> and is <strong>weakly informative</strong> — the model quickly overrides it with data. Use <code>mean=2, sd=1</code> for directly-transmitted pathogens with high R0 (measles, pertussis). Use <code>mean=1.5, sd=0.5</code> for vector-borne (malaria) or lower-R0 conditions (listeriosis).</p>
+</section>
+<section id="understanding-the-reporting-delay" class="level3">
+<h3 class="anchored" data-anchor-id="understanding-the-reporting-delay">Understanding the reporting delay</h3>
+<p>A default <code>LogNormal(mean=3, sd=2, max=15)</code> is used unless empirical delay data is available. This represents the typical NMC notification delay from symptom onset. To change it globally, edit <code>run_epinow_forecast()</code> in <code>R/epinow2_functions.r</code>.</p>
+<hr>
+</section>
+</section>
 <section id="adding-a-new-condition" class="level2">
 <h2 class="anchored" data-anchor-id="adding-a-new-condition">Adding a new condition</h2>
 <ol type="1">
 <li><p><strong>Data</strong>: ensure the condition name appears in the <code>condition</code> column of <code>agg_national.rds</code>. If it’s a new NMC category, update <code>prepare_dashboard_data.r</code> to include it.</p></li>
 <li><p><strong>Disease parameters</strong>: in <code>R/epinow2_functions.r</code>, add a new entry to the <code>disease_params()</code> switch statement:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="st">"my_new_condition"</span> <span class="ot">=</span> <span class="fu">list</span>(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">generation_time   =</span> EpiNow2<span class="sc">::</span><span class="fu">Gamma</span>(<span class="at">shape =</span> <span class="fu">Normal</span>(...), <span class="at">rate =</span> <span class="fu">Normal</span>(...), <span class="at">max =</span> ...),</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">incubation_period =</span> EpiNow2<span class="sc">::</span><span class="fu">Gamma</span>(<span class="at">mean =</span> ..., <span class="at">sd =</span> ..., <span class="at">max =</span> ...),</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">rt_prior          =</span> <span class="fu">list</span>(<span class="at">mean =</span> ..., <span class="at">sd =</span> ...)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>),</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
-<li><p><strong>Condition list</strong>: add the name to the <code>vp_conditions()</code> function in the same file.</p></li>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="st">"my new condition"</span> <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">generation_time   =</span> EpiNow2<span class="sc">::</span><span class="fu">Gamma</span>(<span class="at">mean =</span> ..., <span class="at">sd =</span> ..., <span class="at">max =</span> ...),</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">incubation_period =</span> EpiNow2<span class="sc">::</span><span class="fu">Gamma</span>(<span class="at">mean =</span> ..., <span class="at">sd =</span> ..., <span class="at">max =</span> ...),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">rt_prior          =</span> <span class="fu">list</span>(<span class="at">mean =</span> ..., <span class="at">sd =</span> ...),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">reference         =</span> <span class="st">"Author (Year) Journal Vol:Pages"</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>),</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Place the entry <strong>before</strong> the <code># Default / fallback</code> comment.</p></li>
+<li><p><strong>Condition list</strong>: add the name to <code>forecast_conditions()</code> in the same file.</p></li>
 <li><p><strong>Colour</strong>: add a colour entry in <code>by-forecasts/index.qmd</code> → <code>condition_colours</code> vector.</p></li>
 <li><p><strong>Re-run</strong> <code>Rscript R/run_forecasts.r</code> then <code>quarto render by-forecasts/index.qmd</code>.</p></li>
 </ol>
 <hr>
+</section>
+<section id="current-parameter-summary" class="level2">
+<h2 class="anchored" data-anchor-id="current-parameter-summary">Current parameter summary</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Condition</th>
+<th>Generation Time (mean d)</th>
+<th>Incubation (mean d)</th>
+<th>Rt Prior</th>
+<th>Primary Source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Measles / Fever-Rash</td>
+<td>11.7</td>
+<td>12.5</td>
+<td>N(2,1)</td>
+<td>Lessler et al.&nbsp;(2009) Lancet Infect Dis</td>
+</tr>
+<tr class="even">
+<td>Rubella</td>
+<td>18.3</td>
+<td>16.5</td>
+<td>N(2,1)</td>
+<td>Vink et al.&nbsp;(2014) Am J Epidemiol; Lessler et al.&nbsp;(2009)</td>
+</tr>
+<tr class="odd">
+<td>Pertussis</td>
+<td>22.8</td>
+<td>9.4</td>
+<td>N(2,1)</td>
+<td>Vink et al.&nbsp;(2014); Wearing &amp; Rohani (2009)</td>
+</tr>
+<tr class="even">
+<td>Diphtheria</td>
+<td>8.0</td>
+<td>3.3</td>
+<td>N(2,1)</td>
+<td>Truelove et al.&nbsp;(2020) Emerg Infect Dis; AAP Red Book</td>
+</tr>
+<tr class="odd">
+<td>Cholera</td>
+<td>5.0</td>
+<td>1.4</td>
+<td>N(2,1)</td>
+<td>Azman et al.&nbsp;(2013) J Infect Dis</td>
+</tr>
+<tr class="even">
+<td>Malaria</td>
+<td>30.0</td>
+<td>12.0</td>
+<td>N(1.5,0.5)</td>
+<td>Huber et al.&nbsp;(2016) Malar J; WHO Malaria Report</td>
+</tr>
+<tr class="odd">
+<td>COVID-19 (Omicron)</td>
+<td>3.3</td>
+<td>3.4</td>
+<td>N(1.5,0.5)</td>
+<td>Park et al.&nbsp;(2023) BMC Infect Dis; Wu et al.&nbsp;(2022) JAMA Netw Open</td>
+</tr>
+<tr class="even">
+<td>Enteric fever</td>
+<td>14.0</td>
+<td>10.2</td>
+<td>N(1.5,0.5)</td>
+<td>Pitzer et al.&nbsp;(2014) PLoS NTD; Crump et al.&nbsp;(2015)</td>
+</tr>
+<tr class="odd">
+<td>Meningococcal</td>
+<td>7.0</td>
+<td>3.7</td>
+<td>N(1.5,0.5)</td>
+<td>Trotter et al.&nbsp;(2005) Emerg Infect Dis; Rosenstein et al.&nbsp;(2001) NEJM</td>
+</tr>
+<tr class="even">
+<td>Listeriosis</td>
+<td>21.0</td>
+<td>21.0</td>
+<td>N(1.2,0.5)</td>
+<td>Goulet et al.&nbsp;(2013) Clin Infect Dis</td>
+</tr>
+<tr class="odd">
+<td>Hepatitis A</td>
+<td>24.0</td>
+<td>28.5</td>
+<td>N(1.5,0.5)</td>
+<td>Jacobsen &amp; Wiersma (2010) Clin Liver Dis; Lemon et al.&nbsp;(2018) Lancet</td>
+</tr>
+<tr class="even">
+<td>Mpox</td>
+<td>12.5</td>
+<td>8.5</td>
+<td>N(1.5,0.5)</td>
+<td>Miura et al.&nbsp;(2022) Euro Surveill; Thornhill et al.&nbsp;(2022) NEJM</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="github-contribution-workflow" class="level2">
+<h2 class="anchored" data-anchor-id="github-contribution-workflow">GitHub contribution workflow</h2>
+<p>If you’re updating parameters via a pull request on GitHub:</p>
+<section id="create-a-branch" class="level3">
+<h3 class="anchored" data-anchor-id="create-a-branch">1. Create a branch</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="at">-b</span> update/cholera-params</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="edit-the-parameters" class="level3">
+<h3 class="anchored" data-anchor-id="edit-the-parameters">2. Edit the parameters</h3>
+<p>Open <code>R/epinow2_functions.r</code> and modify the relevant entry in <code>disease_params()</code>. Always update the <code>reference</code> field with the new citation.</p>
+</section>
+<section id="validate-locally-recommended" class="level3">
+<h3 class="anchored" data-anchor-id="validate-locally-recommended">3. Validate locally (recommended)</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run a quick test for just the changed condition</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="st">  source("R/epinow2_functions.r")</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="st">  p &lt;- disease_params("cholera")</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="st">  cat("Generation time mean:", p$generation_time$parameters$mean, "\n")</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="st">  cat("Incubation mean:", p$incubation_period$parameters$mean, "\n")</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="st">  cat("Reference:", p$reference, "\n")</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="st">'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="commit-with-a-descriptive-message" class="level3">
+<h3 class="anchored" data-anchor-id="commit-with-a-descriptive-message">4. Commit with a descriptive message</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add R/epinow2_functions.r</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">"Update cholera generation time to 4.5d (New Author 2026)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="st">- Source: New Author (2026) Journal Name DOI:10.xxxx</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="st">- Changed generation_time mean from 5.0 to 4.5</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="st">- Updated reference string"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="push-and-create-a-pr" class="level3">
+<h3 class="anchored" data-anchor-id="push-and-create-a-pr">5. Push and create a PR</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push origin update/cholera-params</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Then create a pull request on GitHub</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="pr-checklist" class="level3">
+<h3 class="anchored" data-anchor-id="pr-checklist">PR checklist</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Parameter values sourced from peer-reviewed literature</label></li>
+<li><label><input type="checkbox"><code>reference</code> field updated with citation</label></li>
+<li><label><input type="checkbox">No R syntax errors (test with <code>Rscript -e 'source("R/epinow2_functions.r")'</code>)</label></li>
+<li><label><input type="checkbox">Optionally: re-ran <code>Rscript R/run_forecasts.r</code> and confirmed output</label></li>
+</ul>
+<hr>
+</section>
 </section>
 <section id="synergy-with-existing-scripts" class="level2">
 <h2 class="anchored" data-anchor-id="synergy-with-existing-scripts">Synergy with existing scripts</h2>
@@ -313,6 +573,10 @@ data/processed/
 <td>Aggregated data path wrong</td>
 <td>Check <code>data_dir</code> in <code>by-forecasts/index.qmd</code> setup chunk</td>
 </tr>
+<tr class="even">
+<td>“object ‘forecasts_obj_…’ not found”</td>
+<td>Re-run <code>R/run_forecasts.r</code> — older runs may not have saved full objects</td>
+</tr>
 </tbody>
 </table>
 <hr>
@@ -320,8 +584,8 @@ data/processed/
 <section id="scheduled-automation-optional" class="level2">
 <h2 class="anchored" data-anchor-id="scheduled-automation-optional">Scheduled automation (optional)</h2>
 <p>For production, consider a cron job or GitHub Actions workflow:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># crontab -e  (runs every Monday at 06:00)</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">0</span> 6 <span class="pp">*</span> <span class="pp">*</span> 1 cd /path/to/NMC_dashboard <span class="kw">&amp;&amp;</span> <span class="ex">Rscript</span> R/prepare_dashboard_data.r <span class="kw">&amp;&amp;</span> <span class="ex">Rscript</span> R/run_forecasts.r <span class="kw">&amp;&amp;</span> <span class="ex">quarto</span> render</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># crontab -e  (runs every Monday at 06:00)</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">0</span> 6 <span class="pp">*</span> <span class="pp">*</span> 1 cd /path/to/NMC_dashboard <span class="kw">&amp;&amp;</span> <span class="ex">Rscript</span> R/prepare_dashboard_data.r <span class="kw">&amp;&amp;</span> <span class="ex">Rscript</span> R/run_forecasts.r <span class="kw">&amp;&amp;</span> <span class="ex">quarto</span> render</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Or via GitHub Actions: trigger on push to <code>main</code>, run the three commands, and deploy to GitHub Pages.</p>
 </section>
 </section>

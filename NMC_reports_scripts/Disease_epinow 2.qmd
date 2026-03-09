@@ -1,0 +1,349 @@
+---
+title: "Forecasting disease "
+format: html
+---
+
+```{r}
+#| include: false
+#| 
+load("disease_of_the_month.rda")
+
+# Some installation notes
+#If on MacOS you will need to install brew @ https://brew.sh/
+## you will need to install "Xquarts" if you are running on MacOS A https://www.xquartz.org/
+#"brew install pandoc"
+
+## You will also need to install pandoc from the system terminal https://pandoc.org/installing.html
+
+# Install pacman if not already installed
+if (!requireNamespace("pacman", quietly = TRUE)) {
+  install.packages("pacman")
+}
+
+# Load pacman
+
+# Load pacman
+library(pacman)
+
+# Use pacman to install and load packages
+p_load(
+  tidyverse,
+  dplyr,
+  ggplot2,
+  knitr,
+  tinytex,
+  haven,
+  janitor,
+#  summarytools,
+  lubridate,
+  grates,
+  forcats,
+  flextable,
+  magrittr,
+  gtsummary, 
+  flextable,
+  #RecorLinkage,
+ openai,
+  DescTools,
+  tidyverse, dplyr, ggplot2, knitr, tinytex, haven, janitor,
+  lubridate, grates, forcats, flextable, magrittr, gtsummary,
+  readxl, officer, openxlsx,
+conflicted
+)
+
+conflicts_prefer(magrittr::extract)
+conflicts_prefer(dplyr::stats)
+
+library(NMCleaner)
+
+conflicts_prefer(dplyr::filter)
+# make a function for the gtsummary and flextable settings.
+#rm(list = ls())
+#gc()
+
+flextable::set_flextable_defaults(
+  font.family = "Century Gothic", 
+  font.size = 8, 
+  header.font.size = 8,
+  border.color = "black", 
+  padding = 0.1)
+
+
+gtsummary::theme_gtsummary_language(language = "en",big.mark = " ", decimal.mark = ".")
+
+
+knitr::opts_chunk$set(ft.align = "left",
+  echo = FALSE, warning = FALSE, message = FALSE, out.width = "100%", dpi =200)
+
+trim_tbl <- function(gt_summary_object) {
+  length_table_body <- gt_summary_object$table_body %>% nrow()
+  gt_summary_object$table_body <- gt_summary_object$table_body[2:length_table_body, ]
+  return(gt_summary_object)
+}
+
+# Make the provincial specific datasets. 
+load("~/Desktop/SAFETP/CLA/NMC_database/master/new_master.rda")
+
+# the date that the data is up to date for
+exported_date<- new_master$export_date%>%as_date%>%max() 
+new_master$export_date%>%as_date%>%unique
+
+load("reporting_month.rda")
+
+# the specific month of interest for the report
+reporting_date <- reporting_month %>%as_date()
+
+last_dat_reporting_month<- ceiling_date(as_date(reporting_date), "month")-days(1)
+
+
+gg2word_cond <- function( plot, directory_name, dims =  c(10, 6.5)) {
+  
+  #dims<- c(10, 6.5)
+  #dims[1]
+  
+  plot_name <- deparse(substitute(plot))
+  
+  ggsave(
+    paste0(as.character(directory_name),"/",as.character(plot_name),".png"),
+    suppressWarnings(plot + theme(plot.background = element_rect(fill = "white", color = "black", linewidth = 0.5))),
+    width = dims[1],
+    height = dims[2],
+    dpi = 200
+  )
+  
+  #Include the plot in the Quarto document
+  knitr::include_graphics(paste0(as.character(directory_name),"/",as.character(plot_name),".png"))
+  
+}
+
+```
+
+# Estimate disease 
+```{r}
+#| include: false 
+
+# thie idea is to now apply somekind of framework to the data.frame from the epinow package
+
+source( "scripts_and_functions/make_fever_rash.R")
+
+new_master %>% 
+    make_fever_rash() %>%
+    filter( condition %in% "Fever-Rash")-> 
+    df
+
+library(EpiNow2)
+conflicted::conflicts_prefer( EpiNow2::Gamma)
+
+# lets try with measles 
+#df %>% filter(condition %in%"Measles") -> df
+
+# Symptoms to notification 
+     difftime(as_date(df$notification_date), as_date   (df$symptom_date), units = "days")%>%as.numeric()->
+  symptoms_to_notification 
+
+    summary(symptoms_to_notification)
+    hist(symptoms_to_notification, na.rm = TRUE)
+
+    max_sample_of_reporting_delay <- 100
+    if (length(symptoms_to_notification) > max_sample_of_reporting_delay) {
+        sample_symptoms_to_notification <- 
+        sample(symptoms_to_notification, max_sample_of_reporting_delay, replace = TRUE) # to reduce run time of estimate _delay, take a random sample of max_sample_of_reporting_delay (could probably be less)
+        # probably need to test this to see the infelction point 
+        # also, we probably want to try weight it with the most recent reporting delays 
+        # this means we can get what the system usually expects by what is currently happening - essentially, 
+        # what if ht elba data goes down, or there is overburdednen health system 
+    }else{
+        sample_symptoms_to_notification <- symptoms_to_notification
+    }
+
+sample_symptoms_to_notification
+    
+    estimate_delay(
+    sample_symptoms_to_notification,
+    max_value = 15, bootstraps = 1
+    )->
+    reporting_delay
+    
+    reporting_delay
+
+# incubation period 
+    EpiNow2::Gamma(mean = 17, sd = 3, max = 21)->
+incubation_period
+
+# Generation time 
+    EpiNow2::Gamma(
+        shape = Normal(16, 3), rate = Normal(2, 1.4), max = 20
+    )->
+    generation_time
+
+# repoting time prior 
+    rt_prior <- list(mean = 2, sd = 1)
+
+
+generation_time # form literature
+reporting_delay # from surveilance system 
+incubation_period # from literature 
+rt_prior # prior reproductive number ( nto sure if thi s is the fixed or moving R0)
+
+end_date <- as_date(Sys.Date()-days(1))
+
+seq( as_date(end_date) - days(360),as_date(end_date), "day") -> dates_seq 
+
+df %>%
+    NMCleaner::epicurve_df(
+    ., 
+    date_index = "notification_date", 
+    grouping_vars = NULL)%>%
+    mutate( date = as_date(date)) %>%
+    # find only the last 20 days 
+    filter(as_date(date) %in% dates_seq)%>%
+    mutate( confirm = n)%>%
+    select( date, confirm) -> 
+df_to_plot_full
+
+#df_to_plot%>%view()
+
+if (TRUE) {
+estimates<- epinow(
+  data = df_to_plot_full,
+  generation_time = generation_time_opts(generation_time),
+  delays = delay_opts( incubation_period+ reporting_delay),
+  CrIs = c(0.9),
+  horizon = 21,
+  #rt = rt_opts(prior = rt_prior,pop = 1), # if commented out, it uses back calcualtion for this. 
+)
+
+
+estimates$estimates$summarised%>%filter( variable =="infections")->
+df_with_estimates
+
+
+plot(estimates)%>%plotly::ggplotly()
+}
+# So, we want to find a way to apply this to each condition and store it as a dataframe 
+# we also need some general incubation times. 
+plot(estimates)
+# fucntion from gpt
+library(EpiNow2)
+library(dplyr)
+library(lubridate)
+library(purrr)
+result<- NULL
+all_estimates<-NULL
+# Function to calculate CUSUM estimates over a 50-day window
+
+estimate_cusum_over_weeks <- function(df, generation_time, incubation_period, reporting_delay) {
+    
+    # Create a list to store estimates for each week
+    all_estimates <- list()
+    
+    # Loop over the past 50 days
+    for (i in seq(1, 50, 1)) {
+        
+        # Define the end date: "2 days back" for each iteration
+        end_date <- as_date(Sys.Date() - days(i))
+        
+        # Generate date sequence for the last 50 days leading up to the end date
+        dates_seq <- seq(as_date(end_date) - days(50), as_date(end_date), by = "day")
+        
+        # Filter and clean data for the selected time window
+        df_to_plot <- df %>%
+            NMCleaner::epicurve_df(
+                ., 
+                date_index = "notification_date", 
+                grouping_vars = NULL
+            ) %>%
+            mutate(date = as_date(date)) %>%
+            filter(as_date(date) %in% dates_seq) %>%
+            mutate(confirm = n) %>%
+            select(date, confirm)
+        
+        # Run epinow model on the selected data
+        estimates <- epinow(
+            data = df_to_plot,
+            generation_time = generation_time_opts(generation_time),
+            delays = delay_opts(incubation_period + reporting_delay),
+            CrIs = c(0.9),
+            horizon = 21
+        )
+        
+        # Extract the summary estimates for infections
+        df_with_estimates <- estimates$estimates$summarised %>%
+            filter(variable == "infections")
+        
+        # Store the estimates in the list
+        all_estimates[[i]] <- df_with_estimates%>%
+        mutate( day_number = i)
+    }
+
+    # Combine all daily estimates into one data frame
+    combined_estimates <- bind_rows(all_estimates, .id = "day_number") %>%
+        full_join(df_with_estimates, by = "date") 
+
+    return(combined_estimates)
+}
+
+# Example usage:
+# df is your original data frame, generation_time, incubation_period, reporting_delay are required inputs for epinow.
+if (FALSE) {
+    result <- estimate_cusum_over_weeks(df, generation_time, incubation_period, reporting_delay)
+    full_join(result, df_to_plot_full, by = "date") -> result_1
+    save(result_1, file = "result_1.rda")
+} else {
+    load("result_1.rda")
+}
+
+
+    # 1st iteration saved as result_12024-09-19.rda
+#load( "result_12024-09-20.rda")
+
+# I want to fidn the maximum date within the weeknumber and 
+result_1 %>%
+    group_by( day_number, type.x ) %>%
+    filter( date == max(date), 
+    type.x == "estimate based on partial data") ->
+max_date_for_estimate
+
+
+
+#result%>%select(-all_of(names(df_to_plot)))
+
+result_1 %>% 
+    mutate( 
+    median.x = if_else( median.x>1000, NA, median.x))%>% # this takes away the outliers from Epinow2 
+    group_by( day_number) %>%
+    #mutate( week_number = as.numeric(week_number) ) %>%
+    ggplot() +
+#plot the base data 
+    geom_bar( 
+        data = df_to_plot_full %>%
+            filter( 
+                #day_number == "1"
+                ), 
+        aes(x = date, y = confirm), stat= "identity", alpha = 0.5) +
+
+    # Back to EPinow forecasts 
+    geom_line(
+        aes(x = date, y = median.x, group = day_number, color = day_number), linewidth = 0.2) +
+    # add a vertical line at the date for the maximum type.x == "estimate based on partial data" that goes up to the geom_line for the corresponding week_number 
+    geom_linerange(
+        data = max_date_for_estimate, 
+        aes(x = date, ymin = -10, ymax = median.x, colour = day_number,),linewidth = 0.2) +
+    #add continuous scale color form dark to light for the median.x 
+    #scale_color_gradient(low = "darkblue", high = "lightblue") +
+    #geom_ribbon(aes(ymin = lower_90, ymax = upper_90), alpha = 0.3) +
+    labs(title = "Estimated infections over the past 5 weeks", x = "Date", y = "Infections") +
+    scale_y_continuous( expand = c(0,0))+
+    scale_x_date(date_breaks = "1 week", date_labels = "%d-%b") +
+    theme_classic()->
+    epinow_only_plot
+
+```
+```{r}
+#| echo: false
+#| label: fig-measles-epinow-only
+#| fig-cap: An example of outputs from the Epinow2 results applied at with the previous 50 days of data  package form 
+
+epinow_only_plot
+
+```

@@ -1,0 +1,572 @@
+---
+#html_document:
+#  code_folding: hide
+#  highlight: espresso
+#  number_sections: yes
+#  theme: journal
+#  fig_caption: yes
+#  fig_height: 3.5
+#  fig_width: 4
+#  self_contained: no
+#date: ""
+author: "the National Institute for Communicable Diseases"
+output:
+  bookdown::word_document2:
+    pandoc_args:
+#    - "--filter=pandoc-crossref"
+#    - "--reference-doc=Extras/June-report_working_reference.docx"
+    - "--reference-doc=Extras/weekly_IDSR_V2_template.docx"
+   # - "--lua-filter=extras/scholarly-metadata.lua"
+   # - "--lua-filter=extras/author-info-blocks.lua"
+#   - "--variable=geometry:\"[portrait,landscape]\""
+    fig_caption: true
+    number_sections: true
+    toc: false
+    toc_depth: 2
+    date:
+      format: '%Y%m%d'
+#    toc: yes
+title: ""
+#title: "NOTIFIABLE MEDICAL CONDITIONS SURVEILLANCE SYSTEM - IDSR Weekly reporting"
+---
+
+
+```{r setup, include =FALSE}
+
+# Some installation notes
+#If on MacOS you will need to install brew @ https://brew.sh/
+## you will need to install "Xquarts" if you are running on MacOS A https://www.xquartz.org/
+#"brew install pandoc"
+
+## You will also need to install pandoc from the system terminal https://pandoc.org/installing.html
+
+
+#source("scripts_and_functions/load_library.R")
+
+library(NMCleaner)
+
+# make a function for the gtsummary and flextable settings.
+#rm(list = ls())
+#gc()
+
+flextable::set_flextable_defaults(
+  font.family = "Century Gothic", 
+  font.size = 8, 
+  header.font.size = 8,
+  border.color = "black", 
+  padding = 0.1)
+
+
+
+gtsummary::theme_gtsummary_language(language = "en",big.mark = " ", decimal.mark = ".")
+
+gtsummary::theme_gtsummary_journal("nejm")
+
+
+knitr::opts_chunk$set(
+  echo = FALSE, warning = FALSE, message = FALSE, out.width = "100%", dpi = 150)
+
+
+# Make the provincial specific datasets. 
+
+load("~/Desktop/SAFETP/CLA/NMC_database/master/new_master.rda")
+load("~/Desktop/SAFETP/CLA/NMC_database/database_scraper_database.rda")
+export_date<- database_scraper_database$export_date[1]
+
+```
+
+```{r load packages,message= FALSE, include= FALSE}
+
+####
+# set reporting date
+####
+reporting_date <- as_date("2023-01-01")
+
+start_date <- as_date(Sys.Date()%>%as_epiweek(), origin = "1970-01-01") - 7
+
+epiweek <- floor_date(as_date(start_date), "week")%>%as_epiweek()
+file_epiweek<- epiweek%>%gsub("-", "_", .)
+
+#load("file_exp_date.rda")
+
+file_exp_date<- database_scraper_database[1,]$export_date%>%as_datetime()
+
+#load("final_reports/saved_objects/file_name.rda")
+
+file_name<- database_scraper_database[1,]$file_name
+#file_name<- paste0("nmc_for",file_epiweek , "exported_", file_exp_date)
+
+# look at how this can be saved in the scraper script and just be called from here 
+
+# change unkown in age categories
+# change to prov_ in nmc categroies x2
+# malaria map using proportions by district (notifications/all malria notifications)
+# App use per district of malaria. (app / app+paper. (exclude lab))
+```
+
+```{r, include= FALSE}
+
+
+# this is to trim the gtsummary objects
+trim_tbl <- function(gt_summary_object) {
+  length_table_body <- gt_summary_object$table_body %>% nrow()
+  gt_summary_object$table_body <- gt_summary_object$table_body[2:length_table_body, ]
+  return(gt_summary_object)
+}
+
+make_fever_rash <- function( data, fever_rash_label = "Fever-Rash"){
+data %>%
+  mutate( condition = if_else( condition%in% c("Measles", "Rubella"), "Fever-Rash", condition)) -> df 
+  return(df)
+}
+
+
+as_excel <- function(.) {
+  . +
+    theme_minimal() +
+    #scale_x_date(date_labels = "%b \n '%y", date_breaks = "6 months", limits = c(min, max)) +
+    #scale_color_viridis_d(option = "B") +
+    theme(
+      text = element_text(family = "Century Gothic", 
+                          size = 12, color = "#333333"),
+      panel.background = element_rect(fill = "#F8F8F8"),
+      plot.background = element_rect(fill = "#F8F8F8"),
+      panel.grid = element_line(color = "#DDDDDD"),
+      legend.background = element_rect(fill = "#F8F8F8"),
+      legend.text = element_text(color = "#333333"),
+      legend.title = element_text(color = "#333333", size = 10),
+      plot.title = element_text(size = 16, color = "#666666"),
+      plot.subtitle = element_text(size = 12, color = "#666666"),
+      plot.caption = element_text(size = 10, color = "#666666"),
+      #legend.position = "right",
+      #legend.direction = "vertical",
+      #legend.key = element_blank(),
+      axis.text.x = element_text(angle = 30)
+    ) #+
+  #guides(color = guide_legend(nrow = 7, size = 0.2))
+}
+
+
+
+```
+
+
+```{r loading, include = FALSE}
+# load up the excels
+# a previous list with some fuzzy merging and thinsg was done and is stored as df_list.rda
+conflicted::conflicts_prefer(magrittr::extract, dplyr::between,lubridate::isoweek, dplyr::filter,lubridate::week)
+#conflicted::conflicts_prefer(lubridate::year)
+#conflicts_prefer(dplyr::between)
+#conflicts_prefer(magrittr::extract)
+
+
+date_df<- create_date_template("2024-01-01", Sys.Date(), 1, "condition", "condition")
+
+prev_epiweek<- date_df %>%filter( as_date(date) %in% as_date(Sys.Date()))%>%select(epiweek) %>%pull %>%as.integer() - 1
+
+
+recent_full_epiweek_df<- date_df %>%
+  group_by(epiweek, year) %>%
+  mutate( row_number = row_number() ,
+          n = n()) %>%
+  filter( n == 7) %>%
+  ungroup %>%
+  filter( as.integer(year) == max(as.integer(year)))%>%
+  filter( as.integer(epiweek) == max(as.integer(epiweek)))
+
+recent_full_epiweek_df
+
+df<- new_master %>% filter( 
+  notification_date %in% recent_full_epiweek_df$date)
+
+df$notification_date%>%as_date()%>%summary()
+
+df1<- df%>%filter(Back_capture %in% c("Current", "Delayed", "unknown"))
+df2<- df%>%filter( !Back_capture %in% c("Current", "Delayed"))
+
+#df1<- df #for now, report all notifications
+
+```
+
+
+
+```{r}
+library(kableExtra)
+# Replace the URL with your desired hyperlink
+url <- "https://www.nicd.ac.za/wp-content/uploads/2022/09/NMCSS-Data-Interpretation-Infographic-final2.pdf"
+
+# Create a clickable hyperlink
+link_text <- paste0("[NMCSS Interpretation](", url, ")")
+
+# Display the hyperlink using kableExtra
+#kable(data.frame(Download_Link = link_text), escape = FALSE) %>%
+#  kable_styling()
+
+current_datetime <- Sys.time()
+
+#current_datetime
+# Format the date and time in natural language
+formatted_datetime <- format(file_exp_date%>%as_datetime, "%A, %B %d, %Y %I:%M %p")
+
+#formatted_datetime
+#format(as_date("1997-11-05"), "%A, %B %d, %Y %I:%M %p")
+
+dates_summary<- summary(as_date(df1$notification_date))
+
+# Extract the minimum and maximum dates
+start_date <- as_date(min(dates_summary))
+end_date <- as_date(max(dates_summary))
+
+# Define the Epiweek X
+# remove the W and all text before it
+
+epiweek <- floor_date(as_date(df1$notification_date), "week")%>%as_epiweek()%>%unique%>%min%>%gsub(".*W", "", .)
+
+# Construct the reporting period statement
+reporting_period <- paste0("for **Epiweek ", epiweek, "** of ", format(as_date(paste(start_date)), "%Y"),", which is from **",
+                          format(as_date(paste(start_date)), "%A, %B %d"), "** to **",
+                          format(as_date(paste(end_date)),"%A, %B %d"), "**."
+                          )
+
+# Print the reporting period statement
+
+end_date_month_year <- 
+  format(export_date, "%B, %Y")
+
+# MAKE A conditons selection to show for all parts of the report, this will require a change to the context_tables function too, 
+# Also firgureout how to make the bg colour go into the current/last complete epiweek. 
+# also add a totals column for the epitable and adjust fonts to be standard across all tables.
+
+```
+
+# Introduction {.unnumbered}
+
+This document reports the Conditions notified to Notifiable Medical Conditions and flagged for reporting to WHO as part of the Integrated Disease Surveillance and Response (IDSR). Data was exported from the NMCSS on `r formatted_datetime `. It covers conditions reported to the NMCSS for `r reporting_period`
+
+**Please note:** numbers reported are are subject to change as verification and confirmation procedures are carried out. Numbers presented here are the best representation at the time of release.
+
+For more notes on **data interpretation** please see [NMCSS interpretation](`r url`).
+
+**Category 1? Check Notification's Done!**
+
+```{r, include = FALSE}
+
+# script for the tables you make that will be referenced in the in line chunks
+
+
+df1%>%dplyr::select(nmccategories, time_to_notification) %>%
+  mutate( time_to_notification = as.numeric(time_to_notification))%>%
+  tbl_summary(data =., 
+  by= nmccategories,
+            label = list(time_to_notification ~ "Time to Notification")
+  )%>%         
+  modify_footnote(update = everything() ~ NA)->
+  tbl_notifications
+
+cat1_notif_time<- tbl_notifications[["table_body"]][["stat_1"]][[1]]%>%as.character()
+
+
+
+```
+
+
+## Category 1 Conditions at a glance {.unnumbered}
+
+```{r, evaluate = FALSE,  include = TRUE, echo = FALSE}
+# make a table and some other quick descriptive of confirmed and suspected. 
+
+#source( "nmc_contacts_list.R")
+
+# make a list of IDSR conditions 
+cat_1<-  df1%>%
+  dplyr::filter(nmccategories %in% 1)%>%select(condition) %>% unique %>%pull
+
+category_1 <- condition_df%>%dplyr::filter( nmccategories ==1 ) %>%select(condition) %>%pull
+#setdiff(cat_1, category_1)
+
+df_list <- tibble( matching = c(cat_1), 
+                   df_cat_list = c(cat_1) )
+#nrow(df_list)
+guideline_list <- tibble ( matching = c( category_1), 
+                           guide_cat_list = c(category_1))
+#nrow(guideline_list)
+
+  
+case_def_labs<- df1$case_definition%>%unique
+
+cat_1_glance<- 
+  df1%>%
+  filter(nmccategories ==1)%>%
+  mutate( condition = factor(condition, levels = c(category_1 # this will ensure that factors are complete. if factors are not complete, "unknwon" will appear on the table. 
+                                                   )),
+          case_definition = factor( case_definition, levels = c("Suspected", "Confirmed")))%>%
+  dplyr::select(condition , case_definition)%>%
+  tbl_summary(by = case_definition, 
+              percent = "row", 
+              statistic = list(all_categorical() ~ "{n}") )%>%
+  modify_header(label = "**Condition**",
+
+                all_stat_cols() ~ "**{level}**, \n N = {scales::number(n)}")%>%
+  add_overall(last = FALSE, statistic = ~"{n}", col_label = "**Total** \n N = {scales::number(n)}" )%>%
+  
+  trim_tbl()%>%
+  modify_footnote(update = everything() ~ NA
+                  ) %>% modify_footnote(all_stat_cols() ~ "Suspected and confirmed cases are independent and are not totalled - suspected and confirmed cases are distinct.") 
+
+
+ft<- cat_1_glance%>%as_flex_table%>%
+   flextable::set_caption("The number of notifications that are suspected and confirmed for category 1 conditions.") %>%# Example: making the first row (header) bold
+    fontsize(, size = 9, part = "header")%>%
+  flextable::set_table_properties(layout = "autofit", width = 0.99)
+
+
+to_bold<- which(cat_1_glance$table_body$stat_2 != 0 ) 
+
+bold(ft, i = c(to_bold)  , j = 4)%>%
+bg(, i = c(to_bold), bg = "grey90", part = "body" )
+
+```
+\newpage
+
+## Context {.unnumbered}
+
+```{r setup2, include= FALSE, echo = FALSE}
+#load("~/Desktop/SAFETP/CLA/NMC_database/master/new_master.rda")
+
+new_master$notification_date %>%max(., na.rm = TRUE)
+
+max_epitable_date<- new_master$notification_date %>%max()
+
+new_master1<-new_master
+#new_master1 <- new_master%>%dplyr::filter( notification_date <as_date( max_epitable_date))
+
+```
+
+
+### Confirmed Notifications {.unnumbered}
+
+#### Epitable {.unnumbered}
+
+```{r, fig.cap = ""}
+
+conflicted::conflicts_prefer(stats::filter)
+
+  flextable::set_flextable_defaults(
+  font.family = "Century Gothic", 
+  font.size = 8, 
+  header.font.size = 8,
+  border.color = "black", 
+  padding = 0.1)
+
+
+source("scripts_and_functions/context_table.R")
+#load("outputs/context_table.rda")
+#context_table %>%autofit()
+#new_master1$case_definition%>%unique
+
+
+#ft<-
+context_table(new_master1%>%
+                dplyr::filter(grepl("confirmed", ignore.case = TRUE, case_definition),
+                              ), 
+                #as_date("2024-02-01")
+                as_date(max_epitable_date)
+)-> 
+ft
+
+
+
+grey_column<- ft[[2]] - Sys.Date() %>%as_epiweek%>%gsub(".*W", "",.)%>%as.numeric() + 1
+
+grey_column <- 1
+
+ft[[1]] %>%
+  autofit()%>%
+  flextable::set_caption(
+    "Number of confirmed notifications on NMCSS per epiweek in 2025. The Average notifications are calculated based on notifications received in 2022 and 2024 with a confidence interval."
+  )%>%
+  fontsize( size = 7, part = "all")%>%
+bg(, j = length(ft[[1]]$col_keys)-grey_column, bg = "grey90", part = "body" )
+
+
+
+```
+
+#### Trends Plot {.unnumbered}
+
+```{r, echo = FALSE, include = FALSE}
+
+
+df_epicurve_confirmed<- 
+  new_master1%>%
+  dplyr::filter( case_definition %in% "Confirmed")%>%
+  ungroup() %>%
+  dplyr::filter( nmccategories %in% c(1:2) )%>%
+  #dplyr::filter( condition =="COVID-19") %>%
+  
+  #dplyr::filter( notification_date < as_date("2024-01-01") )%>%
+  epicurve_df(., 
+              date_index = "notification_date", 
+              grouping_vars = "condition")
+
+
+df_epicurve_confirmed1<-df_epicurve_confirmed%>%
+  dplyr::filter( year%in%2022:2026, 
+                 )%>%
+  
+  mutate( year = factor(year, levels = c(2022:2026)))
+
+condition_df$condition[grepl( "agri", condition_df$condition ,ignore.case =TRUE)] 
+
+plot_confirmed<- df_epicurve_confirmed1%>%
+  dplyr::filter( condition %in% c(
+                            "Cholera", 
+                            "Listeriosis",                                                  
+                         #  "Covid-19", 
+                           "Diphtheria", 
+                           "Malaria", 
+                           "Measles", 
+                           "Mpox", 
+                           "Pertussis", 
+                           "Rubella", 
+                           "Hepatitis A",
+                           "Agricultural or stock remedy poisoning",
+                           "Food borne illness outbreak"
+                           ))%>%
+  plot_epicurve_df(., 
+                                   x_axis_option = "epiweek", 
+                                   grouping_vars = "condition",
+                                    color_select = "olivedrab", 
+                   add_bar = TRUE, 
+                   add_rolling_avg = c(TRUE, 7 ) ,
+                   axis_text_size = 7
+                   
+                   )
+
+#plot$plot
+plot_confirmed$plot+theme(
+  strip.text.y.right = element_text(hjust  = 0))->
+  plot_confirmed_plot
+
+```
+
+
+
+```{r, fig.cap = paste0("Trend of weekly number of confirmed notifications for selected conditions reported to the NMC, in South Africa; January, 2022-", end_date_month_year) }
+source("scripts_and_functions/gg2word.R")
+gg2word(plot_confirmed_plot, "outputs", dims = c(11,6.5))
+
+
+```
+
+\newpage 
+
+### All Notifications {.unnumbered}
+
+#### Epitable {.unnumbered}
+
+```{r}
+
+conflicted::conflicts_prefer(stats::filter)
+
+flextable::set_flextable_defaults(
+  font.family = "Century Gothic", 
+  font.size = 8, 
+  header.font.size = 8,
+  border.color = "black", 
+  padding = 0.1)
+
+
+source("scripts_and_functions/context_table.R")
+#load("outputs/context_table.rda")
+#context_table %>%autofit()
+
+ft<- context_table(new_master1 %>%make_fever_rash(), 
+as_date(max_epitable_date))
+
+grey_column<- ft[[2]] - Sys.Date() %>%as_epiweek%>%gsub(".*W", "",.)%>%as.numeric() + 1
+
+grey_column <- 1
+
+ft[[1]]%>%
+  autofit()  %>%
+  flextable::set_caption(
+    "Number of notifications on NMCSS per epiweek in 2025. The Average notifications are calculated based on notifications received in 2022 and 2024 with a confidence interval."
+  )%>%
+  fontsize( size = 7, part = "all")%>%
+ bg(, j = length(ft[[1]]$col_keys)-grey_column, bg = "grey90", part = "body" )
+
+
+```
+
+
+#### Trends Plot {.unnumbered}
+
+
+```{r, echo = FALSE, include = FALSE}
+
+
+df_epicurve_all<- 
+  new_master1%>%
+  make_fever_rash() %>%
+  #dplyr::filter( notification_date > lubridate::as_date( max_epitable_date))%>%
+  ungroup() %>%
+  dplyr::filter( nmccategories %in% c(1,2)) %>%
+  #dplyr::filter( condition =="COVID-19") %>%
+  
+  #dplyr::filter( notification_date < as_date("2024-01-01") )%>%
+  epicurve_df(., 
+              date_index = "notification_date", 
+              grouping_vars = "condition")
+
+df_epicurve_all
+df_epicurve_all1<-df_epicurve_all%>%dplyr::filter( year%in%2022:2026)%>%
+  mutate( year = factor(year, levels = c(2022:2026)))
+
+df_epicurve_all1$condition %>%unique
+
+
+condition_df$condition[grepl( "bil", condition_df$condition ,ignore.case =TRUE)] 
+
+plot<- df_epicurve_all1%>%
+  dplyr::filter( condition %in% c(
+                            
+                            "Cholera", 
+                            "Listeriosis",                                                  
+                         #  "Covid-19", 
+                           "Diphtheria", 
+                           "Malaria", 
+                           "Fever-Rash",
+                           #"Measles", 
+                           "Mpox", 
+                           "Pertussis", 
+                           #"Rubella", 
+                           "Hepatitis A",
+                           "Hepatits B", 
+                                             "Hepatits C", 
+                                                               "Hepatits E", 
+                           "Bilharzia (schistosomiasis)",
+                           "Agricultural or stock remedy poisoning",
+                           "Food borne illness outbreak"
+                           ))%>%
+  plot_epicurve_df(., 
+                                   x_axis_option = "epiweek", 
+                                   grouping_vars = "condition",
+                                    color_select = "olivedrab"
+                   )
+
+plot$plot+theme(
+  strip.text.y.right = element_text(hjust  = 0)
+)-> plot_trends_notifications
+
+```
+```{r, fig.cap = paste0("Trend of weekly number of all notifications for selected conditions reported to the NMC, in South Africa, January, 2022-", end_date_month_year) }
+source("scripts_and_functions/gg2word.R")
+gg2word(plot_trends_notifications, "outputs", dims = c(11,6.5))
+
+```
+
+\newpage 
+**END**
+
+

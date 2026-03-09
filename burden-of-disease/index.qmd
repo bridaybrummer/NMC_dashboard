@@ -1,62 +1,1667 @@
 ---
 title: "Burden of Disease"
-subtitle: "Years of life lost, DALYs & age-standardised rates from NMC surveillance"
+subtitle: "Quantifying health impact through mortality, disability, and severity indicators"
+params:
+  include_tb: false          # set to false to exclude TB-related conditions
 format:
   html:
     page-layout: full
     toc: true
-    toc-depth: 2
+    toc-depth: 3
+    toc-title: "On this page"
+    code-fold: true
+    code-tools: false
+    anchor-sections: true
+    smooth-scroll: true
+execute:
+  echo: false
+  warning: false
+  message: false
+  cache: false
 ---
 
-::: {.callout-note collapse="true"}
-## Development Roadmap — Burden of Disease
+```{r}
+#| label: setup
+#| include: false
 
-| Phase | Feature | Status |
-|-------|---------|--------|
-| **v0.1** | YLL computation using SA life tables & vital stats | 🔲 Planned |
-| **v0.1** | Summary table: top conditions by YLL | 🔲 Planned |
-| **v0.2** | DALY estimation (YLL + YLD) with disability weights | 🔲 Planned |
-| **v0.2** | Ranked bar chart of DALYs by condition | 🔲 Planned |
-| **v0.3** | Age-standardised rates (ASR) using WHO standard population | 🔲 Planned |
-| **v0.3** | Province-level ASR comparison dot-plot | 🔲 Planned |
-| **v0.4** | Temporal trends in BoD indicators | 🔲 Planned |
-| **v0.5** | Downloadable BoD summary tables (CSV / PDF) | 🔲 Planned |
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+pacman::p_load(
+  data.table, dplyr, tidyr, lubridate, ggplot2, plotly,
+  DT, flextable, scales, here, purrr, htmltools, epitools, ggrepel
+)
 
-*Data pipeline:* `R/Age_Standardise_Rates.r` → `data/processed/`
+source(here::here("R", "burden_of_disease.r"))
+source(here::here("R", "plot_themes.r"))
+source(here::here("R", "asr_functions.r"))
+
+# ── Dashboard colour palette ────────────────────────────────────────────────
+pal <- list(
+  mortality  = "#b91c1c",   # deep red — YLL, deaths, CFR
+  daly       = "#dc2626",   # red — total DALY
+  disability = "#3b82f6",   # blue — YLD
+  economic   = "#7c3aed",   # purple — PYPLL
+  female     = "#45c1c0",   # teal
+  male       = "#500778",   # indigo
+  accent     = "#2563eb",   # highlight blue
+  neutral    = "grey40",    # annotations
+  gridline   = "#f1f5f9",   # light gridlines
+  text_title = "#0f172a",
+  text_sub   = "#64748b",
+  text_cap   = "#94a3b8"
+)
+sex_colours <- c(Female = pal$female, Male = pal$male)
+
+# ── Consistent dashboard ggplot theme ───────────────────────────────────────
+theme_bod <- function(base_size = 12) {
+  theme_minimal(base_size = base_size) %+replace%
+    theme(
+      plot.title       = element_text(face = "bold", size = base_size + 2,
+                                       colour = pal$text_title, margin = margin(b = 4)),
+      plot.subtitle    = element_text(colour = pal$text_sub, size = base_size - 1,
+                                       margin = margin(b = 10)),
+      plot.caption     = element_text(colour = pal$text_cap, size = base_size - 3,
+                                       hjust = 1),
+      legend.position  = "bottom",
+      legend.title     = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.grid.major.y = element_blank(),
+      panel.grid.major.x = element_line(colour = pal$gridline),
+      strip.text       = element_text(face = "bold", colour = "#334155"),
+      axis.title       = element_text(colour = "#475569"),
+      axis.text        = element_text(colour = "#64748b")
+    )
+}
+
+# ── Paths ────────────────────────────────────────────────────────────────────
+data_dir <- here::here("data", "processed")
+
+# ── Load pre-computed BoD data ───────────────────────────────────────────────
+load_rds <- function(fname) {
+  fp <- file.path(data_dir, fname)
+  if (file.exists(fp)) readRDS(fp) else NULL
+}
+
+yll_national  <- load_rds("bod_yll.rds")
+yll_prov      <- load_rds("bod_yll_province.rds")
+yll_year      <- load_rds("bod_yll_year.rds")
+yld_national  <- load_rds("bod_yld.rds")
+yld_year      <- load_rds("bod_yld_year.rds")
+daly_national <- load_rds("bod_daly.rds")
+daly_prov     <- load_rds("bod_daly_province.rds")
+daly_year     <- load_rds("bod_daly_year.rds")
+prov_summary  <- load_rds("bod_province_summary.rds")
+bod_meta      <- load_rds("bod_meta.rds")
+deaths_dt     <- load_rds("bod_deaths.rds")
+
+# ── Load pre-computed ASR data ───────────────────────────────────────────────
+asr_national      <- load_rds("asr_national.rds")
+asr_national_wide <- load_rds("asr_national_wide.rds")
+asr_national_summ <- load_rds("asr_national_summary.rds")
+asr_national_year <- load_rds("asr_national_by_year.rds")
+asr_by_condition  <- load_rds("asr_by_condition.rds")
+asr_by_province   <- load_rds("asr_by_province.rds")
+asr_comparison    <- load_rds("asr_comparison.rds")
+asr_meta          <- load_rds("asr_meta.rds")
+
+has_data <- !is.null(daly_national) && nrow(daly_national) > 0
+has_asr  <- !is.null(asr_national) && nrow(asr_national) > 0
+
+# ── Load CFR, PYPLL, pyramid, and rank data ──────────────────────────────────
+cfr_national      <- load_rds("bod_cfr.rds")
+cfr_prov          <- load_rds("bod_cfr_province.rds")
+cfr_year          <- load_rds("bod_cfr_year.rds")
+cfr_age_sex       <- load_rds("bod_cfr_age_sex.rds")
+pypll_national    <- load_rds("bod_pypll.rds")
+pypll_year        <- load_rds("bod_pypll_year.rds")
+pypll_prov        <- load_rds("bod_pypll_province.rds")
+pyramid_national  <- load_rds("bod_pyramid.rds")
+pyramid_condition <- load_rds("bod_pyramid_condition.rds")
+rank_year         <- load_rds("bod_rank_year.rds")
+
+# Province name lookup
+prov_names <- c(
+  EC = "Eastern Cape",  FS = "Free State",    GP = "Gauteng",
+  KZN = "KwaZulu-Natal", LP = "Limpopo",      MP = "Mpumalanga",
+  NC = "Northern Cape",  NW = "North West",   WC = "Western Cape"
+)
+
+# ── Condition exclusions ────────────────────────────────────────────────────
+# Always exclude maternal deaths (not a communicable disease burden)
+exclude_maternal <- "(?i)maternal"
+# TB conditions excluded when params$include_tb == FALSE
+exclude_tb <- "(?i)^tuberculosis"
+
+# Build exclusion regex
+exclude_patterns <- exclude_maternal
+if (!params$include_tb) {
+  exclude_patterns <- paste0("(", exclude_maternal, ")|(", exclude_tb, ")")
+}
+exclude_rx <- exclude_patterns
+
+# Helper: filter a data.table by condition column
+filter_conditions <- function(dt) {
+  if (is.null(dt) || !is.data.table(dt)) return(dt)
+  if (!"condition" %in% names(dt)) return(dt)
+  dt[!grepl(exclude_rx, condition)]
+}
+
+# Apply to all BoD datasets
+yll_national  <- filter_conditions(yll_national)
+yll_prov      <- filter_conditions(yll_prov)
+yll_year      <- filter_conditions(yll_year)
+yld_national  <- filter_conditions(yld_national)
+yld_year      <- filter_conditions(yld_year)
+daly_national <- filter_conditions(daly_national)
+daly_prov     <- filter_conditions(daly_prov)
+daly_year     <- filter_conditions(daly_year)
+cfr_national  <- filter_conditions(cfr_national)
+cfr_prov      <- filter_conditions(cfr_prov)
+cfr_year      <- filter_conditions(cfr_year)
+cfr_age_sex   <- filter_conditions(cfr_age_sex)
+pypll_national    <- filter_conditions(pypll_national)
+pypll_year        <- filter_conditions(pypll_year)
+pypll_prov        <- filter_conditions(pypll_prov)
+pyramid_condition <- filter_conditions(pyramid_condition)
+rank_year         <- filter_conditions(rank_year)
+deaths_dt         <- filter_conditions(deaths_dt)
+
+# Apply to ASR datasets
+asr_comparison <- filter_conditions(asr_comparison)
+if (!is.null(asr_by_condition)) {
+  drop_conds <- names(asr_by_condition)[grepl(exclude_rx, names(asr_by_condition))]
+  for (dc in drop_conds) asr_by_condition[[dc]] <- NULL
+}
+
+# Recalculate province summary from filtered daly_prov
+pop_province <- data.table(
+  prov_ = c("EC","FS","GP","KZN","LP","MP","NC","NW","WC"),
+  pop   = c(6734001, 2928903, 16098571, 11538813, 5941439,
+            4743584, 1303047, 4141774, 7187004)
+)
+if (!is.null(daly_prov) && nrow(daly_prov) > 0) {
+  prov_summary <- daly_prov[, .(
+    total_daly = sum(total_daly, na.rm = TRUE),
+    total_yll  = sum(total_yll, na.rm = TRUE),
+    total_yld  = sum(total_yld, na.rm = TRUE),
+    deaths     = sum(deaths, na.rm = TRUE),
+    cases      = sum(cases, na.rm = TRUE)
+  ), by = prov_]
+  prov_summary <- merge(prov_summary, pop_province, by = "prov_", all.x = TRUE)
+  prov_summary[, daly_rate_100k := round(total_daly / pop * 1e5, 2)]
+  prov_summary[, yll_rate_100k  := round(total_yll / pop * 1e5, 2)]
+}
+
+# Re-rank after filtering
+if (!is.null(rank_year) && nrow(rank_year) > 0) {
+  rank_year[, rank := frank(-total_daly), by = year]
+}
+
+# Track what was excluded (for meta banner)
+n_excluded <- 0L
+excluded_labels <- "Maternal deaths excluded"
+if (!is.null(bod_meta)) {
+  all_conditions_n <- bod_meta$n_conditions
+  remaining_n <- if (!is.null(daly_national)) uniqueN(daly_national$condition) else 0L
+  n_excluded <- all_conditions_n - remaining_n
+}
+if (!params$include_tb) {
+  excluded_labels <- paste0(excluded_labels, "; TB conditions excluded")
+}
+```
+
+```{r}
+#| label: meta-banner
+#| results: asis
+
+if (!is.null(bod_meta)) {
+  n_conditions_shown <- if (!is.null(daly_national)) uniqueN(daly_national$condition) else bod_meta$n_conditions
+  n_deaths_shown <- if (!is.null(deaths_dt)) nrow(deaths_dt) else bod_meta$n_deaths
+  tb_label <- if (params$include_tb) "TB included" else "TB excluded"
+  cat(sprintf(
+    "::: {.callout-tip appearance=\"minimal\"}\n**Data snapshot:** %s | %s deaths across %d conditions | %s to %s | %s | Maternal deaths excluded | Life table: %s\n:::\n",
+    format(bod_meta$run_time, "%d %b %Y"),
+    format(n_deaths_shown, big.mark = ","),
+    n_conditions_shown,
+    bod_meta$date_range[1], bod_meta$date_range[2],
+    tb_label,
+    bod_meta$life_table
+  ))
+} else {
+  cat("::: {.callout-warning}\nNo pre-computed BoD data found. Run `Rscript R/prepare_bod_data.r` from the project root.\n:::\n")
+}
+```
+
+### Data source & scope {#data-source}
+
+::: {.bod-section-intro}
+This analysis draws on **all notifications** submitted to South Africa's Notifiable Medical Conditions (NMC) surveillance system, maintained by the National Institute for Communicable Diseases (NICD). The NMC is a **passive, mandatory** surveillance system: healthcare providers are legally required to report Category 1–4 notifiable conditions within prescribed timeframes (National Health Act, 2003; Government Notice R1434/2017).
 :::
 
-## Overview
+**What is included:**
 
-The Burden of Disease section quantifies the **health impact** of notifiable conditions beyond simple case counts. Three complementary indicators are computed:
+- **Both suspected and confirmed cases** — no filtering by case definition. Notifications enter the system as either *suspected* or *confirmed*; the majority (~83%) are suspected at point of notification.
+- **Clinical and laboratory notifications** — the dataset includes clinical notifications (submitted by clinicians) and laboratory notifications (generated from positive lab results), as well as merged records where both exist for the same episode.
+- **All diagnosis methods** — laboratory-confirmed, clinical signs and symptoms, rapid tests, X-ray, and other/unknown methods are all retained.
 
-| Indicator | Meaning |
-|---|---|
-| **YLL** (Years of Life Lost) | Premature mortality impact, computed from SA life tables and vital registration data |
-| **DALYs** (Disability-Adjusted Life Years) | Combined mortality (YLL) + morbidity (YLD) burden |
-| **ASR** (Age-Standardised Rates) | Rates adjusted for population age structure to enable fair comparisons across provinces |
+**What is excluded:**
 
-::: {.callout-important}
-## Methodological Note
-All estimates depend on data quality and completeness. Assumptions, disability weights, and life table sources are documented on the [Methods](../methods.html) page.
+- **Maternal deaths** — excluded by default (not an infectious disease burden).
+- **TB-related conditions** — optionally excluded (toggle: `include_tb` parameter). TB has a dedicated national surveillance programme; including it can dominate all burden indicators.
+
+::: {.callout-important appearance="simple"}
+**Interpretation note:** The NMC is a passive surveillance system — under-reporting varies by condition, province, and notification pathway. These estimates represent the **reported** burden and are likely conservative. Case fatality ratios are based on deaths recorded in the NMC system, which may not capture all deaths (e.g. if death occurs after hospital transfer and is not updated). See [Methodology](#methods) for computation details.
 :::
 
----
+This page translates raw NMC notifications into **population-level health impact indicators**, moving beyond simple case counts to quantify the mortality, disability, and economic burden of notifiable conditions across South Africa:
 
-## Years of Life Lost (YLL) {#yll}
-
-*Coming soon — YLL computations using South African life tables (Stats SA) and vital status from NMC death notifications.*
-
----
-
-## DALYs {#dalys}
-
-*Coming soon — Disability-adjusted life years combining YLL with YLD estimates. Disability weights sourced from GBD 2019.*
+| Indicator | Question answered | Method |
+|:----------|:------------------|:-------|
+| **YLL** | How many years of life are lost to premature death? | SA life tables (Stats SA 2024) |
+| **DALYs** | What is the combined mortality + morbidity burden? | YLL + YLD (GBD 2019 disability weights) |
+| **CFR** | How severe (lethal) is each condition? | Deaths / cases with 95% Wilson CI |
+| **PYPLL** | Which conditions impact the working-age population most? | Years lost in ages 15–64 |
+| **ASR** | How do rates compare after adjusting for age structure? | WHO direct standardisation |
 
 ---
+
+## Key Indicators {#summary}
+
+```{r}
+#| label: value-boxes
+#| results: asis
+
+if (has_data) {
+  total_yll   <- round(sum(daly_national$total_yll, na.rm = TRUE))
+  total_yld   <- round(sum(daly_national$total_yld, na.rm = TRUE))
+  total_daly  <- round(sum(daly_national$total_daly, na.rm = TRUE))
+  total_deaths <- sum(daly_national$deaths, na.rm = TRUE)
+  total_cases  <- sum(daly_national$cases, na.rm = TRUE)
+  top_cond     <- daly_national$condition[1]
+  top_cfr_cond <- if (!is.null(cfr_national) && nrow(cfr_national[deaths >= 5]) > 0) {
+    cfr_national[deaths >= 5][which.max(cfr_pct)]$condition
+  } else NA
+  top_cfr_val  <- if (!is.null(cfr_national) && nrow(cfr_national[deaths >= 5]) > 0) {
+    cfr_national[deaths >= 5][which.max(cfr_pct)]$cfr_pct
+  } else NA
+
+  cat('<div class="bod-kpi-strip">\n')
+
+  cat(sprintf('<div class="bod-kpi mortality">
+  <div class="kpi-value">%s</div>
+  <div class="kpi-label">Total DALYs</div>
+  <div class="kpi-detail">Combined mortality + disability burden</div>
+</div>\n', format(total_daly, big.mark = ",")))
+
+  cat(sprintf('<div class="bod-kpi severity">
+  <div class="kpi-value">%s</div>
+  <div class="kpi-label">Years of Life Lost</div>
+  <div class="kpi-detail">Premature mortality (YLL)</div>
+</div>\n', format(total_yll, big.mark = ",")))
+
+  cat(sprintf('<div class="bod-kpi disability">
+  <div class="kpi-value">%s</div>
+  <div class="kpi-label">Years with Disability</div>
+  <div class="kpi-detail">Morbidity burden (YLD)</div>
+</div>\n', format(total_yld, big.mark = ",")))
+
+  cat(sprintf('<div class="bod-kpi highlight">
+  <div class="kpi-value">%s</div>
+  <div class="kpi-label">Deaths</div>
+  <div class="kpi-detail">From %s notified cases</div>
+</div>\n', format(total_deaths, big.mark = ","), format(total_cases, big.mark = ",")))
+
+  cat(sprintf('<div class="bod-kpi economic">
+  <div class="kpi-value">%s</div>
+  <div class="kpi-label">Conditions Tracked</div>
+  <div class="kpi-detail">Highest burden: %s</div>
+</div>\n', bod_meta$n_conditions, top_cond))
+
+  if (!is.na(top_cfr_val)) {
+    cat(sprintf('<div class="bod-kpi severity">
+  <div class="kpi-value">%s%%</div>
+  <div class="kpi-label">Highest CFR</div>
+  <div class="kpi-detail">%s</div>
+</div>\n', top_cfr_val, top_cfr_cond))
+  }
+
+  cat('</div>\n\n')
+}
+```
+
+```{r}
+#| label: headline-insight
+#| results: asis
+
+if (has_data) {
+  top3 <- head(daly_national[order(-total_daly)], 3)$condition
+  pct_top3 <- round(100 * sum(head(daly_national[order(-total_daly)], 3)$total_daly) /
+                     sum(daly_national$total_daly), 0)
+  cat(sprintf(
+    '<div class="bod-insight"><strong>Key finding:</strong> The top 3 conditions (%s) account for <strong>%d%%</strong> of all DALYs. Scroll down for detailed breakdowns by mortality, severity, demographics, and geography.</div>\n',
+    paste(top3, collapse = ", "), pct_top3
+  ))
+}
+```
+
+## Years of Life Lost {#yll}
+
+::: {.bod-section-intro}
+Premature mortality burden: for each death at age $x$, YLL $= e(x)$ where $e(x)$ is remaining life expectancy from the SA abridged life table (Stats SA 2024).
+:::
+
+::: {.panel-tabset}
+
+### Ranking
+
+```{r}
+#| label: fig-yll-ranking
+#| fig-cap: "Top 20 NMC conditions ranked by total Years of Life Lost"
+#| fig-height: 8
+
+if (has_data && !is.null(yll_national)) {
+  p <- plot_yll_ranking(yll_national, top_n = 20,
+                        title = "Top 20 Conditions — Years of Life Lost")
+  ggplotly(p, tooltip = c("y", "text"))
+}
+```
+
+### Summary Table
+
+```{r}
+#| label: tbl-yll
+#| tbl-cap: "YLL by condition — all years combined"
+
+if (has_data && !is.null(yll_national)) {
+  tbl <- yll_national %>%
+    transmute(
+      Condition          = condition,
+      Deaths             = deaths,
+      `Total YLL`        = format(total_yll, big.mark = ","),
+      `Mean YLL/death`   = mean_yll,
+      `Median age at death` = median_age_death
+    )
+
+  DT::datatable(
+    tbl,
+    options = list(
+      pageLength = 15,
+      dom = "ftip",
+      order = list(list(2, "desc"))
+    ),
+    rownames = FALSE,
+    filter = "top",
+    caption = "Sortable & filterable. Click column headers to re-sort."
+  )
+}
+```
+
+:::
+
+## Disability-Adjusted Life Years {#dalys}
+
+::: {.bod-section-intro}
+DALY $=$ YLL $+$ YLD, combining premature mortality with morbidity ($\text{YLD} = \text{cases} \times \text{disability weight} \times \text{duration}$). Disability weights from [GBD 2019](https://ghdx.healthdata.org/record/ihme-data/gbd-2019-disability-weights).
+:::
+
+::: {.panel-tabset}
+
+### Ranking
+
+```{r}
+#| label: fig-daly-ranking
+#| fig-cap: "Top 20 NMC conditions by DALY burden (YLL + YLD)"
+#| fig-height: 8
+
+if (has_data) {
+  p_daly <- plot_daly_ranking(daly_national, top_n = 20,
+                               title = "Top 20 Conditions — DALYs")
+  ggplotly(p_daly, tooltip = c("x", "y", "fill"))
+}
+```
+
+### Summary Table
+
+```{r}
+#| label: tbl-daly
+#| tbl-cap: "DALY breakdown by condition — all years combined"
+
+if (has_data) {
+  tbl_daly <- daly_national %>%
+    transmute(
+      Condition     = condition,
+      Deaths        = deaths,
+      Cases         = format(cases, big.mark = ","),
+      `Total YLL`   = format(round(total_yll), big.mark = ","),
+      `Total YLD`   = round(total_yld, 1),
+      `Total DALY`  = format(round(total_daly), big.mark = ","),
+      `% YLL`       = paste0(pct_yll, "%"),
+      `% YLD`       = paste0(pct_yld, "%"),
+      `DW`          = disability_weight,
+      `Duration (yr)` = round(duration_years, 3)
+    )
+
+  DT::datatable(
+    tbl_daly,
+    options = list(
+      pageLength = 15,
+      dom = "ftip",
+      order = list(list(5, "desc"))
+    ),
+    rownames = FALSE,
+    filter = "top",
+    caption = "DW = disability weight. Duration = average illness duration in years."
+  )
+}
+```
+
+### YLL vs YLD Composition
+
+```{r}
+#| label: fig-daly-composition
+#| fig-cap: "Proportion of DALYs from premature mortality (YLL) vs disability (YLD)"
+#| fig-height: 7
+
+if (has_data) {
+  top20 <- head(daly_national[order(-total_daly)], 20)
+  top20_long <- melt(
+    top20[, .(condition, `Premature mortality (YLL)` = pct_yll,
+              `Disability (YLD)` = pct_yld)],
+    id.vars = "condition",
+    variable.name = "Component",
+    value.name = "Percentage"
+  )
+  top20_long[, condition := factor(condition, levels = rev(top20$condition))]
+
+  p_comp <- ggplot(top20_long, aes(x = condition, y = Percentage, fill = Component)) +
+    geom_col(width = 0.7) +
+    coord_flip() +
+    scale_fill_manual(values = c(
+      "Premature mortality (YLL)" = pal$daly,
+      "Disability (YLD)" = pal$disability
+    )) +
+    scale_y_continuous(labels = function(x) paste0(x, "%")) +
+    labs(
+      title = "DALY Composition",
+      subtitle = "Proportion of DALYs from mortality (YLL) vs disability (YLD)",
+      x = NULL, y = "Percentage of DALY", fill = NULL
+    ) +
+    theme_bod()
+
+  ggplotly(p_comp, tooltip = c("x", "y", "fill"))
+}
+```
+
+:::
+
+## Case Fatality Rate {#cfr}
+
+::: {.bod-section-intro}
+CFR $= \frac{\text{Deaths}}{\text{Cases}} \times 100\%$ — a direct measure of disease severity within the surveillance system. Under-reporting of deaths means true CFRs may be higher.
+:::
+
+::: {.panel-tabset}
+
+### By Condition
+
+```{r}
+#| label: fig-cfr-ranking
+#| fig-cap: "Case fatality rate by condition (conditions with ≥5 deaths)"
+#| fig-height: 8
+
+if (!is.null(cfr_national) && nrow(cfr_national) > 0) {
+  cfr_plot <- cfr_national[deaths >= 5]
+  cfr_plot <- cfr_plot[order(-cfr_pct)]
+  cfr_plot[, condition := factor(condition, levels = rev(condition))]
+
+  p_cfr <- ggplot(cfr_plot, aes(x = condition, y = cfr_pct)) +
+    geom_col(fill = "#b91c1c", alpha = 0.8, width = 0.7) +
+    geom_errorbar(
+      aes(ymin = cfr_lower, ymax = cfr_upper),
+      width = 0.3, colour = "grey30", linewidth = 0.5
+    ) +
+    geom_text(
+      aes(label = paste0(cfr_pct, "%")),
+      hjust = -0.15, size = 3, colour = "grey30"
+    ) +
+    coord_flip() +
+    scale_y_continuous(
+      expand = expansion(mult = c(0, 0.15)),
+      labels = function(x) paste0(x, "%")
+    ) +
+    labs(
+      title = "Case Fatality Rate by Condition",
+      subtitle = "Conditions with ≥5 deaths | whiskers = 95% Wilson CI",
+      x = NULL, y = "CFR (%)"
+    ) +
+    theme_minimal(base_size = 12) +
+    theme(
+      plot.title = element_text(face = "bold", size = 14),
+      plot.subtitle = element_text(colour = "grey40"),
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor = element_blank()
+    )
+
+  ggplotly(p_cfr, tooltip = c("y", "x"))
+}
+```
+
+### Summary Table
+
+```{r}
+#| label: tbl-cfr
+#| tbl-cap: "Case fatality rate by condition — all years combined"
+
+if (!is.null(cfr_national) && nrow(cfr_national) > 0) {
+  cfr_tbl <- cfr_national[, .(
+    Condition = condition,
+    Cases     = format(cases, big.mark = ","),
+    Deaths    = deaths,
+    `CFR (%)`   = cfr_pct,
+    `95% CI`    = cfr_95ci
+  )]
+
+  DT::datatable(
+    cfr_tbl,
+    extensions = "Buttons",
+    options = list(
+      pageLength = 15,
+      dom = "Bftip",
+      buttons = c("csv", "copy", "print"),
+      order = list(list(3, "desc"))
+    ),
+    rownames = FALSE,
+    filter = "top",
+    caption = "CFR = deaths / cases × 100. 95% Wilson score CI."
+  )
+}
+```
+
+### By Age & Sex
+
+```{r}
+#| label: fig-cfr-age-sex
+#| fig-cap: "Case fatality rate by age and sex for top 6 high-CFR conditions"
+#| fig-height: 8
+
+if (!is.null(cfr_age_sex) && nrow(cfr_age_sex) > 0) {
+  # Pick top 6 conditions by national CFR that have enough deaths
+  top_cfr_conds <- cfr_national[deaths >= 10][order(-cfr_pct)][1:min(6, .N)]$condition
+
+  cfr_as <- cfr_age_sex[condition %in% top_cfr_conds &
+                          gender %in% c("Male", "Female") &
+                          !is.na(age_group)]
+  cfr_as[, age_group := factor(age_group, levels = c(
+    "<1", "1-4", "5-14", "15-24", "25-34", "35-44", "45-54", "55-64", "65+"
+  ))]
+
+  p_cfr_as <- ggplot(cfr_as, aes(x = age_group, y = cfr_pct,
+                                  colour = gender, group = gender)) +
+    geom_line(linewidth = 0.9) +
+    geom_point(size = 2) +
+    facet_wrap(~condition, ncol = 2, scales = "free_y") +
+    scale_colour_manual(values = sex_colours) +
+    scale_y_continuous(labels = function(x) paste0(x, "%")) +
+    labs(
+      title = "CFR by Age and Sex",
+      subtitle = "Top conditions by overall CFR (≥10 deaths)",
+      x = "Age group", y = "CFR (%)", colour = NULL
+    ) +
+    theme_bod(base_size = 11) +
+    theme(panel.grid.major.x = element_blank())
+
+  ggplotly(p_cfr_as, tooltip = c("x", "y", "colour"))
+}
+```
+
+### CFR Trends
+
+```{r}
+#| label: fig-cfr-trend
+#| fig-cap: "Annual CFR trends for top 6 high-fatality conditions"
+#| fig-height: 6
+
+if (!is.null(cfr_year) && nrow(cfr_year) > 0) {
+  top_cfr <- cfr_national[deaths >= 10][order(-cfr_pct)][1:min(6, .N)]$condition
+
+  cfr_yr <- cfr_year[condition %in% top_cfr]
+  cfr_yr[, year := as.numeric(year)]
+
+  p_cfr_yr <- ggplot(cfr_yr, aes(x = year, y = cfr_pct, colour = condition)) +
+    geom_line(linewidth = 0.9) +
+    geom_point(size = 2) +
+    scale_y_continuous(labels = function(x) paste0(x, "%"),
+                       expand = expansion(mult = c(0, 0.05))) +
+    scale_x_continuous(breaks = function(x) seq(floor(min(x)), ceiling(max(x)))) +
+    labs(
+      title = "CFR Trends Over Time",
+      subtitle = "Top 6 conditions by overall case fatality rate",
+      x = "Year", y = "CFR (%)", colour = NULL
+    ) +
+    theme_bod() +
+    theme(panel.grid.major.x = element_blank()) +
+    guides(colour = guide_legend(nrow = 2))
+
+  ggplotly(p_cfr_yr, tooltip = c("x", "y", "colour"))
+}
+```
+
+:::
+
+```{r}
+#| label: cfr-insight
+#| results: asis
+
+if (!is.null(cfr_national) && nrow(cfr_national[deaths >= 5]) > 0) {
+  high_cfr <- cfr_national[deaths >= 5][order(-cfr_pct)][1:min(3, .N)]
+  cat(sprintf(
+    '<div class="bod-insight warning"><strong>Severity alert:</strong> %s has the highest CFR at %s%% (95%% CI: %s). Conditions with high CFR warrant enhanced clinical surveillance and rapid response.</div>\n',
+    high_cfr$condition[1], high_cfr$cfr_pct[1], high_cfr$cfr_95ci[1]
+  ))
+}
+```
+
+## Productive Life Years Lost {#pypll}
+
+::: {.bod-section-intro}
+PYPLL focuses on the **working-age window (15–64)**: $\text{PYPLL}(x) = 65 - x$. This complements YLL by highlighting conditions that disproportionately affect the productive workforce.
+:::
+
+::: {.panel-tabset}
+
+### By Condition
+
+```{r}
+#| label: fig-pypll-ranking
+#| fig-cap: "Top 20 conditions by Potential Years of Productive Life Lost (ages 15–64)"
+#| fig-height: 8
+
+if (!is.null(pypll_national) && nrow(pypll_national) > 0) {
+  pypll_top <- head(pypll_national[order(-total_pypll)], 20)
+  pypll_top[, condition := factor(condition, levels = rev(condition))]
+
+  p_pypll <- ggplot(pypll_top, aes(x = condition, y = total_pypll)) +
+    geom_col(fill = "#7c3aed", alpha = 0.85, width = 0.7) +
+    geom_text(aes(label = deaths_productive), hjust = -0.2, size = 3, colour = "grey30") +
+    coord_flip() +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.15)),
+                       labels = scales::comma) +
+    labs(
+      title = "Top 20 Conditions — PYPLL",
+      subtitle = "Numbers = working-age deaths (15–64)",
+      x = NULL, y = "Potential Years of Productive Life Lost"
+    ) +
+    theme_bod()
+
+  ggplotly(p_pypll, tooltip = c("y", "text"))
+}
+```
+
+### YLL vs PYPLL
+
+```{r}
+#| label: fig-pypll-vs-yll
+#| fig-cap: "Comparing YLL (full life expectancy) vs PYPLL (working ages 15–64)"
+#| fig-height: 7
+
+if (!is.null(pypll_national) && has_data) {
+  # Merge YLL and PYPLL for top conditions
+  cmp <- merge(
+    yll_national[, .(condition, total_yll)],
+    pypll_national[, .(condition, total_pypll)],
+    by = "condition", all.x = TRUE
+  )
+  cmp[is.na(total_pypll), total_pypll := 0]
+  cmp[, pct_productive := round(100 * total_pypll / total_yll, 1)]
+
+  top15 <- head(cmp[order(-total_yll)], 15)
+  top15_long <- melt(
+    top15[, .(condition, `YLL (all ages)` = total_yll, `PYPLL (15–64)` = total_pypll)],
+    id.vars = "condition",
+    variable.name = "Metric",
+    value.name = "Years"
+  )
+  top15_long[, condition := factor(condition, levels = rev(top15$condition))]
+
+  p_cmp <- ggplot(top15_long, aes(x = condition, y = Years, fill = Metric)) +
+    geom_col(position = "dodge", width = 0.7) +
+    coord_flip() +
+    scale_fill_manual(values = c(
+      "YLL (all ages)" = pal$daly,
+      "PYPLL (15–64)" = pal$economic
+    )) +
+    scale_y_continuous(labels = scales::comma,
+                       expand = expansion(mult = c(0, 0.05))) +
+    labs(
+      title = "YLL vs PYPLL — Workforce Impact",
+      subtitle = "Red = all-age YLL | Purple = working-age PYPLL (15–64)",
+      x = NULL, y = "Years lost", fill = NULL
+    ) +
+    theme_bod()
+
+  ggplotly(p_cmp, tooltip = c("x", "y", "fill"))
+}
+```
+
+### Summary Table
+
+```{r}
+#| label: tbl-pypll
+#| tbl-cap: "PYPLL by condition with working-age mortality characteristics"
+
+if (!is.null(pypll_national) && has_data) {
+  # Merge with YLL for comparison
+  pypll_merged <- merge(
+    pypll_national,
+    yll_national[, .(condition, total_yll, deaths_all = deaths)],
+    by = "condition", all.x = TRUE
+  )
+  pypll_merged[, pct_of_yll := round(100 * total_pypll / total_yll, 1)]
+  pypll_merged[, pct_working_deaths := round(100 * deaths_productive / deaths_all, 1)]
+
+  tbl_pypll <- pypll_merged[order(-total_pypll), .(
+    Condition             = condition,
+    `Deaths (all ages)`   = deaths_all,
+    `Deaths (15–64)`      = deaths_productive,
+    `% working-age`       = paste0(pct_working_deaths, "%"),
+    `Total YLL`           = format(round(total_yll), big.mark = ","),
+    `Total PYPLL`         = format(round(total_pypll), big.mark = ","),
+    `PYPLL/YLL (%)`       = paste0(pct_of_yll, "%"),
+    `Mean PYPLL`          = mean_pypll,
+    `Median age at death`  = median_age_death
+  )]
+
+  DT::datatable(
+    tbl_pypll,
+    extensions = "Buttons",
+    options = list(
+      pageLength = 15,
+      dom = "Bftip",
+      buttons = c("csv", "copy", "print"),
+      order = list(list(5, "desc"))
+    ),
+    rownames = FALSE,
+    filter = "top",
+    caption = "PYPLL = Potential Years of Productive Life Lost (cap at age 65). Deaths 15–64 only."
+  )
+}
+```
+
+:::
+
+```{r}
+#| label: pypll-insight
+#| results: asis
+
+if (!is.null(pypll_national) && has_data) {
+  top_pypll <- pypll_national[order(-total_pypll)][1]
+  cat(sprintf(
+    '<div class="bod-insight"><strong>Economic impact:</strong> <strong>%s</strong> accounts for the most productive life years lost (%s PYPLL), with a median age at death of %s years. Conditions with high PYPLL merit targeted workforce-age interventions.</div>\n',
+    top_pypll$condition, format(round(top_pypll$total_pypll), big.mark = ","),
+    top_pypll$median_age_death
+  ))
+}
+```
 
 ## Age-Standardised Rates {#asr}
 
-*Coming soon — rates per 100 000 adjusted using the WHO World Standard Population, enabling province-to-province and time-period comparisons.*
+::: {.bod-section-intro}
+Direct standardisation using the WHO World Standard Population (Ahmad et al. 2001) enables fair comparison across populations with different age structures. 95% CIs use the Poisson exact method.
+:::
+
+::: {.panel-tabset}
+
+### National Rates
+
+```{r}
+#| label: fig-asr-national-line
+#| fig-cap: "Age-specific notification rates per 100,000 person-years by sex — all NMC conditions combined (2020–2024)"
+#| fig-height: 6
+
+if (has_asr) {
+  p_asr <- asr_line_plot(asr_national, condition_label = "All NMC Conditions — Age-Specific Rates by Sex")
+  ggplotly(p_asr, tooltip = c("x", "y", "colour"))
+}
+```
+
+### Summary by Sex
+
+```{r}
+#| label: tbl-asr-national-summary
+#| tbl-cap: "Age-standardised rates per 100,000 by sex — all NMC conditions combined"
+
+if (has_asr && !is.null(asr_national_summ)) {
+  summ_tbl <- as.data.table(asr_national_summ)
+  # Compute crude rate if not present
+  summ_tbl[, crude_rate := round(total_cases / total_pop * 1e5, 2)]
+  summ_display <- summ_tbl[, .(
+    Sex,
+    `Total Cases` = format(round(total_cases), big.mark = ","),
+    `Crude Rate (per 100k)` = crude_rate,
+    `ASR (per 100k)` = round(asr, 2),
+    `ASR 95% CI` = paste0(round(asr_lower, 2), " – ", round(asr_upper, 2))
+  )]
+
+  flextable(summ_display) %>%
+    theme_vanilla() %>%
+    autofit() %>%
+    bold(part = "header") %>%
+    set_caption("ASR = age-standardised rate via direct method with WHO standard population (Ahmad et al. 2001)")
+}
+```
+
+### IRR by Age
+
+```{r}
+#| label: tbl-asr-national-irr
+#| tbl-cap: "Age-specific and age-standardised incidence rates by sex with incidence rate ratio"
+
+if (has_asr && !is.null(asr_national_wide)) {
+  ft <- tryCatch(
+    asr_table(
+      asr_national_wide,
+      condition_label = "All NMC Conditions",
+      years_label     = paste0(min(asr_meta$years), "–", max(asr_meta$years)),
+      avg_years       = length(asr_meta$years)
+    ),
+    error = function(e) NULL
+  )
+  if (!is.null(ft)) ft
+}
+```
+
+::: {.callout-note collapse="true"}
+### Interpreting the IRR
+
+The **Incidence Rate Ratio (IRR)** compares female vs male age-specific incidence rates within each age band using a two-sample Poisson exact test.
+
+- **IRR > 1** → Higher incidence in females
+- **IRR < 1** → Higher incidence in males
+- **p-value** → Statistical significance of the difference (two-sided)
+:::
+
+### By Condition
+
+```{r}
+#| label: fig-asr-condition-comparison
+#| fig-cap: "Age-standardised notification rates (per 100,000) by sex — top 20 conditions"
+#| fig-height: 9
+
+if (!is.null(asr_comparison) && nrow(asr_comparison) > 0) {
+  comp_dt <- as.data.table(asr_comparison)
+
+  # Order by total ASR (sum of both sexes)
+  cond_order <- comp_dt[, .(total_asr = sum(asr, na.rm = TRUE)), by = condition]
+  setorder(cond_order, -total_asr)
+  comp_dt[, condition := factor(condition, levels = rev(cond_order$condition))]
+
+  sex_colours <- c(Female = "#45c1c0", Male = "#500778")
+
+  p_comp <- ggplot(comp_dt, aes(x = condition, y = asr, colour = Sex)) +
+    geom_point(size = 3) +
+    geom_linerange(
+      aes(ymin = asr_lower, ymax = asr_upper),
+      linewidth = 0.8
+    ) +
+    coord_flip() +
+    scale_colour_manual(values = sex_colours) +
+    scale_y_continuous(
+      "ASR per 100,000 person-years",
+      labels = scales::label_comma()
+    ) +
+    labs(
+      title = "Age-Standardised Rates by Condition and Sex",
+      subtitle = "Dot = ASR; whiskers = 95% CI (WHO direct standardisation)",
+      x = NULL, colour = NULL
+    ) +
+    theme_bod()
+
+  ggplotly(p_comp, tooltip = c("x", "y", "colour"))
+}
+```
+
+### Top 6 Line Plots
+
+```{r}
+#| label: fig-asr-top-conditions
+#| fig-cap: "Age-specific notification rates by sex for top 6 conditions"
+#| fig-height: 10
+#| results: asis
+
+if (!is.null(asr_by_condition) && length(asr_by_condition) > 0) {
+  # Pick top 6 by total cases
+  top6 <- names(asr_by_condition)[1:min(6, length(asr_by_condition))]
+
+  plots <- lapply(top6, function(cond) {
+    cond_data <- asr_by_condition[[cond]]$data
+    if (!is.null(cond_data) && nrow(cond_data) > 0) {
+      asr_line_plot(cond_data, condition_label = cond)
+    }
+  })
+  plots <- plots[!sapply(plots, is.null)]
+
+  if (length(plots) > 0) {
+    combined <- patchwork::wrap_plots(plots, ncol = 2) +
+      patchwork::plot_annotation(
+        title    = "Age-Specific Rates by Sex — Top 6 Conditions",
+        subtitle = "Shaded area = 95% CI | Rates per 100,000 person-years",
+        theme    = theme(
+          plot.title    = element_text(face = "bold", size = 15),
+          plot.subtitle = element_text(colour = "grey40")
+        )
+      )
+    print(combined)
+  }
+}
+```
+
+### Condition Table
+
+```{r}
+#| label: tbl-asr-conditions
+#| tbl-cap: "ASR per 100,000 by sex for top 20 conditions — with incidence rate ratio"
+
+if (!is.null(asr_comparison) && nrow(asr_comparison) > 0) {
+  comp_wide <- dcast(
+    asr_comparison,
+    condition ~ Sex,
+    value.var = c("total_cases", "asr",
+                  "asr_lower", "asr_upper")
+  )
+
+  # Add IRR (Female / Male)
+  comp_wide[, IRR := round(asr_Female / asr_Male, 2)]
+
+  display_tbl <- comp_wide[, .(
+    Condition       = condition,
+    `Cases (F)`     = format(round(total_cases_Female), big.mark = ","),
+    `ASR (F)`       = round(asr_Female, 2),
+    `95% CI (F)`    = paste0(round(asr_lower_Female, 2), "–", round(asr_upper_Female, 2)),
+    `Cases (M)`     = format(round(total_cases_Male), big.mark = ","),
+    `ASR (M)`       = round(asr_Male, 2),
+    `95% CI (M)`    = paste0(round(asr_lower_Male, 2), "–", round(asr_upper_Male, 2)),
+    `IRR (F/M)`     = IRR
+  )][order(-`ASR (F)` - `ASR (M)`)]
+
+  DT::datatable(
+    display_tbl,
+    extensions = "Buttons",
+    options = list(
+      pageLength = 20,
+      dom = "Bftip",
+      buttons = c("csv", "copy", "print"),
+      order = list(list(2, "desc"))
+    ),
+    rownames = FALSE,
+    filter = "top",
+    caption = "F = Female, M = Male. ASR = age-standardised rate per 100,000. IRR = incidence rate ratio (Female/Male)."
+  )
+}
+```
+
+### Province ASR
+
+```{r}
+#| label: fig-asr-province
+#| fig-cap: "Age-standardised notification rates per 100,000 by province and sex"
+#| fig-height: 6
+
+if (!is.null(asr_by_province) && length(asr_by_province) > 0) {
+  prov_summ_list <- rbindlist(lapply(names(asr_by_province), function(p) {
+    s <- asr_by_province[[p]]$summary
+    if (!is.null(s) && nrow(s) > 0) {
+      s[, prov_ := p]
+      s[, Province := prov_names[p]]
+      return(s)
+    }
+    NULL
+  }), fill = TRUE)
+
+  if (nrow(prov_summ_list) > 0) {
+    sex_colours <- c(Female = "#45c1c0", Male = "#500778")
+
+    # Order provinces by total ASR
+    prov_order <- prov_summ_list[, .(total = sum(asr)), by = Province]
+    setorder(prov_order, total)
+    prov_summ_list[, Province := factor(Province, levels = prov_order$Province)]
+
+    p_prov_asr <- ggplot(prov_summ_list, aes(x = Province, y = asr, colour = Sex)) +
+      geom_point(size = 3.5) +
+      geom_linerange(
+        aes(ymin = asr_lower, ymax = asr_upper),
+        linewidth = 0.8
+      ) +
+      coord_flip() +
+      scale_colour_manual(values = sex_colours) +
+      scale_y_continuous(
+        "ASR per 100,000 person-years",
+        labels = scales::label_comma()
+      ) +
+      labs(
+        title = "ASR by Province and Sex",
+        subtitle = "Dot = ASR | whiskers = 95% CI (WHO direct standardisation)",
+        x = NULL, colour = NULL
+      ) +
+      theme_bod()
+
+    ggplotly(p_prov_asr, tooltip = c("x", "y", "colour"))
+  }
+}
+```
+
+### Province Table
+
+```{r}
+#| label: tbl-asr-province
+#| tbl-cap: "Province-level ASR per 100,000 by sex"
+
+if (!is.null(asr_by_province) && length(asr_by_province) > 0) {
+  prov_tbl <- rbindlist(lapply(names(asr_by_province), function(p) {
+    s <- asr_by_province[[p]]$summary
+    if (!is.null(s) && nrow(s) > 0) {
+      s[, Province := prov_names[p]]
+      return(s)
+    }
+    NULL
+  }), fill = TRUE)
+
+  if (nrow(prov_tbl) > 0) {
+    prov_wide <- dcast(prov_tbl, Province ~ Sex,
+                       value.var = c("total_cases", "asr",
+                                     "asr_lower", "asr_upper"))
+    prov_wide[, IRR := round(asr_Female / asr_Male, 2)]
+
+    display_prov <- prov_wide[, .(
+      Province,
+      `Cases (F)` = format(round(total_cases_Female), big.mark = ","),
+      `ASR (F)`   = round(asr_Female, 2),
+      `95% CI (F)` = paste0(round(asr_lower_Female, 2), "–", round(asr_upper_Female, 2)),
+      `Cases (M)` = format(round(total_cases_Male), big.mark = ","),
+      `ASR (M)`   = round(asr_Male, 2),
+      `95% CI (M)` = paste0(round(asr_lower_Male, 2), "–", round(asr_upper_Male, 2)),
+      `IRR (F/M)` = IRR
+    )][order(-`ASR (F)` - `ASR (M)`)]
+
+    flextable(display_prov) %>%
+      theme_vanilla() %>%
+      autofit() %>%
+      bold(part = "header") %>%
+      set_caption("ASR = age-standardised rate per 100,000 (WHO direct). IRR = Female/Male rate ratio.")
+  }
+}
+```
+
+:::
+
+## Geographic Variation {#province}
+
+::: {.bod-section-intro}
+Crude DALY and YLL rates per 100,000 population by province. For age-adjusted comparisons, see the [ASR section](#asr) above.
+:::
+
+::: {.panel-tabset}
+
+### DALY Rate
+
+```{r}
+#| label: fig-province-daly
+#| fig-cap: "Total DALYs per 100,000 population by province (all NMC conditions)"
+#| fig-height: 5
+
+if (!is.null(prov_summary) && nrow(prov_summary) > 0) {
+  ps <- copy(prov_summary)
+  ps[, province_name := prov_names[prov_]]
+
+  p_prov_daly <- plot_province_comparison(
+    ps, metric_col = "daly_rate_100k",
+    title = "Total NMC DALY Rate by Province"
+  )
+  ggplotly(p_prov_daly, tooltip = c("y"))
+}
+```
+
+### YLL Rate
+
+```{r}
+#| label: fig-province-yll
+#| fig-cap: "Total YLL per 100,000 population by province (all NMC conditions)"
+#| fig-height: 5
+
+if (!is.null(prov_summary) && nrow(prov_summary) > 0) {
+  p_prov_yll <- plot_province_comparison(
+    prov_summary, metric_col = "yll_rate_100k",
+    title = "Total NMC YLL Rate by Province"
+  )
+  ggplotly(p_prov_yll, tooltip = c("y"))
+}
+```
+
+### Summary Table
+
+```{r}
+#| label: tbl-province
+#| tbl-cap: "Province-level BoD summary (all NMC conditions combined)"
+
+if (!is.null(prov_summary) && nrow(prov_summary) > 0) {
+  ps <- copy(prov_summary)
+  ps[, Province := prov_names[prov_]]
+
+  tbl_prov <- ps[, .(
+    Province,
+    Population    = format(pop, big.mark = ","),
+    Deaths        = format(deaths, big.mark = ","),
+    Cases         = format(cases, big.mark = ","),
+    `Total YLL`   = format(round(total_yll), big.mark = ","),
+    `Total YLD`   = round(total_yld, 1),
+    `Total DALY`  = format(round(total_daly), big.mark = ","),
+    `DALY/100k`   = daly_rate_100k,
+    `YLL/100k`    = yll_rate_100k
+  )][order(-`DALY/100k`)]
+
+  flextable(tbl_prov) %>%
+    theme_vanilla() %>%
+    autofit() %>%
+    fontsize(size = 10, part = "all") %>%
+    bold(part = "header") %>%
+    color(i = ~ `DALY/100k` > median(tbl_prov$`DALY/100k`),
+          j = "DALY/100k", color = "#b91c1c") %>%
+    set_caption("Provinces above the median DALY rate are highlighted in red")
+}
+```
+
+### Condition × Province Heatmap
+
+```{r}
+#| label: fig-province-heatmap
+#| fig-cap: "Top 10 conditions: DALY rate per 100,000 by province"
+#| fig-height: 7
+
+if (!is.null(daly_prov) && nrow(daly_prov) > 0) {
+  # Get top 10 conditions nationally
+  top10_conds <- head(daly_national[order(-total_daly)], 10)$condition
+
+  heat_dt <- daly_prov[condition %in% top10_conds & !is.na(pop) & pop > 0]
+  heat_dt[, daly_rate := round(total_daly / pop * 1e5, 2)]
+  heat_dt[, province_name := prov_names[prov_]]
+  heat_dt[, condition := factor(condition, levels = rev(top10_conds))]
+
+  p_heat <- ggplot(heat_dt, aes(x = province_name, y = condition, fill = daly_rate)) +
+    geom_tile(colour = "white", linewidth = 0.5) +
+    geom_text(aes(label = round(daly_rate, 1)), size = 3, colour = "white") +
+    scale_fill_gradient(low = "#fed7aa", high = "#dc2626", name = "DALY/100k") +
+    labs(
+      title    = "DALY Rate per 100,000 — Province × Condition",
+      subtitle = "Top 10 conditions by national DALY burden",
+      x = NULL, y = NULL
+    ) +
+    theme_bod(base_size = 11) +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      panel.grid  = element_blank()
+    )
+
+  ggplotly(p_heat, tooltip = c("x", "y", "fill"))
+}
+```
+
+:::
+
+## Temporal Trends {#trends}
+
+::: {.bod-section-intro}
+Year-over-year trends in burden indicators reveal emerging and declining conditions.
+:::
+
+::: {.panel-tabset}
+
+### DALY Trends
+
+```{r}
+#| label: fig-daly-trends
+#| fig-cap: "Annual DALY trends for top 10 NMC conditions"
+#| fig-height: 7
+
+if (!is.null(daly_year) && nrow(daly_year) > 0) {
+  p_trend <- plot_bod_trend(
+    daly_year,
+    metric_col = "total_daly",
+    title = "Annual DALY Trends",
+    top_n = 10
+  )
+  ggplotly(p_trend, tooltip = c("x", "y", "colour"))
+}
+```
+
+### YLL Trends
+
+```{r}
+#| label: fig-yll-trends
+#| fig-cap: "Annual YLL trends for top 10 NMC conditions"
+#| fig-height: 7
+
+if (!is.null(yll_year) && nrow(yll_year) > 0) {
+  p_yll_trend <- plot_bod_trend(
+    yll_year,
+    metric_col = "total_yll",
+    title = "Annual YLL Trends",
+    top_n = 10
+  )
+  ggplotly(p_yll_trend, tooltip = c("x", "y", "colour"))
+}
+```
+
+### Deaths by Age
+
+```{r}
+#| label: fig-age-deaths
+#| fig-cap: "Age distribution of NMC deaths (top 10 conditions)"
+#| fig-height: 6
+
+if (!is.null(deaths_dt) && nrow(deaths_dt) > 0) {
+  top10 <- head(daly_national[order(-total_daly)], 10)$condition
+  age_dt <- deaths_dt[condition %in% top10 & !is.na(age_at_death)]
+
+  # Age bins
+  age_dt[, age_group := cut(age_at_death,
+    breaks = c(0, 1, 5, 15, 25, 35, 45, 55, 65, Inf),
+    labels = c("<1", "1-4", "5-14", "15-24", "25-34", "35-44", "45-54", "55-64", "65+"),
+    right = FALSE
+  )]
+
+  age_summary <- age_dt[, .(deaths = .N), by = .(condition, age_group)]
+  age_summary[, condition := factor(condition, levels = top10)]
+
+  p_age <- ggplot(age_summary, aes(x = age_group, y = deaths, fill = condition)) +
+    geom_col(position = "dodge", width = 0.7) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+    scale_fill_brewer(palette = "Paired") +
+    labs(
+      title    = "Age Distribution of Deaths — Top 10 Conditions",
+      subtitle = "Grouped by standard age bands",
+      x = "Age group", y = "Deaths", fill = NULL
+    ) +
+    theme_bod() +
+    guides(fill = guide_legend(nrow = 2))
+
+  ggplotly(p_age, tooltip = c("x", "y", "fill"))
+}
+```
+
+:::
+
+## Demographics {#pyramids}
+
+::: {.bod-section-intro}
+Age-sex pyramids reveal which demographic groups bear the greatest notification burden — useful for targeting surveillance and intervention.
+:::
+
+::: {.panel-tabset}
+
+### National Pyramid
+
+```{r}
+#| label: fig-pyramid-national
+#| fig-cap: "Age-sex pyramid of all notified NMC cases"
+#| fig-height: 6
+
+if (!is.null(pyramid_national) && nrow(pyramid_national) > 0) {
+  pyr <- copy(pyramid_national)
+  pyr[, age_band := factor(age_band, levels = c(
+    "0-1", "1-4", "5-9", "10-14", "15-19", "20-24", "25-29",
+    "30-34", "35-39", "40-44", "45-49", "50-54", "55-59", "60-64", "65+"
+  ))]
+  pyr[gender == "Male", plot_cases := -cases]
+  pyr[gender == "Female", plot_cases := cases]
+
+  max_val <- max(abs(pyr$plot_cases), na.rm = TRUE)
+
+  sex_colours <- c(Female = pal$female, Male = pal$male)
+
+  p_pyr <- ggplot(pyr, aes(x = age_band, y = plot_cases, fill = gender)) +
+    geom_col(width = 0.85) +
+    coord_flip() +
+    scale_fill_manual(values = sex_colours) +
+    scale_y_continuous(
+      limits = c(-max_val * 1.1, max_val * 1.1),
+      labels = function(x) format(abs(x), big.mark = ","),
+      expand = c(0, 0)
+    ) +
+    labs(
+      title = "National Age-Sex Pyramid",
+      subtitle = paste0("All NMC cases | N = ", format(sum(abs(pyr$plot_cases)), big.mark = ",")),
+      x = NULL, y = "Number of cases", fill = NULL
+    ) +
+    theme_bod()
+
+  ggplotly(p_pyr, tooltip = c("x", "y", "fill"))
+}
+```
+
+### By Condition
+
+```{r}
+#| label: fig-pyramid-conditions
+#| fig-cap: "Age-sex pyramids for the top 6 conditions by case volume"
+#| fig-height: 10
+
+if (!is.null(pyramid_condition) && nrow(pyramid_condition) > 0) {
+  top6 <- pyramid_condition[, .(total = sum(cases)), by = condition][order(-total)][1:min(6, .N)]$condition
+  pyr_c <- pyramid_condition[condition %in% top6]
+  pyr_c[, age_band := factor(age_band, levels = c(
+    "0-1", "1-4", "5-9", "10-14", "15-19", "20-24", "25-29",
+    "30-34", "35-39", "40-44", "45-49", "50-54", "55-59", "60-64", "65+"
+  ))]
+  pyr_c[gender == "Male", plot_cases := -cases]
+  pyr_c[gender == "Female", plot_cases := cases]
+
+  p_pyr_c <- ggplot(pyr_c, aes(x = age_band, y = plot_cases, fill = gender)) +
+    geom_col(width = 0.85) +
+    coord_flip() +
+    facet_wrap(~condition, ncol = 2, scales = "free_x") +
+    scale_fill_manual(values = sex_colours) +
+    scale_y_continuous(labels = function(x) format(abs(x), big.mark = ",")) +
+    labs(
+      title = "Age-Sex Pyramids — Top 6 Conditions",
+      x = NULL, y = "Cases (Male ← 0 → Female)", fill = NULL
+    ) +
+    theme_bod(base_size = 11)
+
+  ggplotly(p_pyr_c, tooltip = c("x", "y", "fill"))
+}
+```
+
+:::
+
+## Condition Rankings Over Time {#bump-chart}
+
+::: {.bod-section-intro}
+Tracking year-over-year rank changes in DALY burden identifies emerging threats and declining conditions.
+:::
+
+::: {.panel-tabset}
+
+### Bump Chart
+
+```{r}
+#| label: fig-bump-chart
+#| fig-cap: "Year-over-year DALY ranking for top 10 conditions"
+#| fig-height: 7
+
+if (!is.null(rank_year) && nrow(rank_year) > 0) {
+  rank_year[, year := as.numeric(year)]
+
+  # Keep only top 10 in any year
+  top_conds <- rank_year[rank <= 10, unique(condition)]
+  bump_dt <- rank_year[condition %in% top_conds]
+
+  # Assign stable colours
+  cond_colours <- setNames(
+    scales::hue_pal()(length(top_conds)),
+    sort(top_conds)
+  )
+
+  p_bump <- ggplot(bump_dt, aes(x = year, y = rank, colour = condition, group = condition)) +
+    geom_line(linewidth = 1.2, alpha = 0.8) +
+    geom_point(size = 3) +
+    ggrepel::geom_text_repel(
+      data = bump_dt[year == max(year)],
+      aes(label = condition),
+      direction = "y",
+      nudge_x = 0.3,
+      segment.size = 0.3,
+      size = 3,
+      hjust = 0,
+      max.overlaps = 20
+    ) +
+    scale_y_reverse(breaks = 1:max(bump_dt$rank)) +
+    scale_x_continuous(
+      breaks = function(x) seq(floor(min(x)), ceiling(max(x))),
+      expand = expansion(mult = c(0.05, 0.25))
+    ) +
+    scale_colour_manual(values = cond_colours) +
+    labs(
+      title = "Condition Ranking Over Time (by DALY)",
+      subtitle = "Lower rank = higher burden | Conditions ever in top 10",
+      x = "Year", y = "Rank"
+    ) +
+    theme_bod() +
+    theme(legend.position = "none")
+
+  p_bump
+}
+```
+
+### Ranking Table
+
+```{r}
+#| label: tbl-rank-change
+#| tbl-cap: "DALY ranking change from earliest to latest year"
+
+if (!is.null(rank_year) && nrow(rank_year) > 0) {
+  rank_year[, year := as.numeric(year)]
+  min_yr <- min(rank_year$year)
+  max_yr <- max(rank_year$year)
+
+  rank_wide <- dcast(rank_year[year %in% c(min_yr, max_yr)],
+                     condition ~ year, value.var = "rank")
+  setnames(rank_wide, as.character(c(min_yr, max_yr)),
+           c("rank_first", "rank_last"))
+  rank_wide[, change := rank_first - rank_last]
+  rank_wide[, direction := fifelse(change > 0, paste0("\u2191 ", change),
+                            fifelse(change < 0, paste0("\u2193 ", abs(change)),
+                                    "\u2194 0"))]
+  setorder(rank_wide, rank_last)
+
+  daly_latest <- rank_year[year == max_yr, .(condition, total_daly)]
+  rank_wide <- merge(rank_wide, daly_latest, by = "condition", all.x = TRUE)
+
+  tbl_rank <- rank_wide[, .(
+    Condition      = condition,
+    `Rank (first)` = rank_first,
+    `Rank (last)`  = rank_last,
+    Change         = direction,
+    `DALYs (latest)` = format(round(total_daly), big.mark = ",")
+  )]
+
+  DT::datatable(
+    tbl_rank,
+    extensions = "Buttons",
+    options = list(
+      pageLength = 20,
+      dom = "Bftip",
+      buttons = c("csv", "copy", "print"),
+      order = list(list(2, "asc"))
+    ),
+    rownames = FALSE,
+    filter = "top",
+    caption = paste0("Ranking change: ", min_yr, " → ", max_yr, ". ↑ = improved (lower burden), ↓ = worsened")
+  )
+}
+```
+
+:::
+
+## Data Exports {#downloads}
+
+```{r}
+#| label: download-buttons
+#| results: asis
+
+if (has_data) {
+  cat("### DALY Summary — All Conditions\n\n")
+  cat("Use the search box and column filters below, then use the **CSV** or **Copy** buttons to export.\n\n")
+}
+```
+
+```{r}
+#| label: tbl-download-daly
+
+if (has_data) {
+  dl_daly <- daly_national %>%
+    transmute(
+      Condition        = condition,
+      Deaths           = deaths,
+      Cases            = cases,
+      Total_YLL        = round(total_yll, 1),
+      Total_YLD        = round(total_yld, 2),
+      Total_DALY       = round(total_daly, 1),
+      Pct_YLL          = pct_yll,
+      Pct_YLD          = pct_yld,
+      DW               = disability_weight,
+      Duration_yr      = round(duration_years, 3),
+      Mean_YLL_per_death = mean_yll,
+      Median_age_death = median_age_death
+    )
+
+  DT::datatable(
+    dl_daly,
+    extensions = "Buttons",
+    options = list(
+      pageLength = 20,
+      dom = "Bftip",
+      buttons = c("csv", "copy", "print"),
+      order = list(list(5, "desc"))
+    ),
+    rownames = FALSE,
+    filter = "top",
+    caption = "Full BoD DALY table — click CSV to download"
+  )
+}
+```
+
+```{r}
+#| label: tbl-download-province
+#| results: asis
+
+if (!is.null(prov_summary) && nrow(prov_summary) > 0) {
+  cat("\n### Province Summary\n\n")
+}
+```
+
+```{r}
+#| label: tbl-download-prov
+
+if (!is.null(prov_summary) && nrow(prov_summary) > 0) {
+  dl_prov <- prov_summary[, .(
+    Province     = prov_names[prov_],
+    Population   = pop,
+    Deaths       = deaths,
+    Cases        = cases,
+    Total_YLL    = round(total_yll, 1),
+    Total_YLD    = round(total_yld, 2),
+    Total_DALY   = round(total_daly, 1),
+    DALY_per_100k = daly_rate_100k,
+    YLL_per_100k  = yll_rate_100k
+  )][order(-DALY_per_100k)]
+
+  DT::datatable(
+    dl_prov,
+    extensions = "Buttons",
+    options = list(
+      pageLength = 10,
+      dom = "Bftip",
+      buttons = c("csv", "copy", "print")
+    ),
+    rownames = FALSE,
+    caption = "Province-level summary — click CSV to download"
+  )
+}
+```
+
+---
+
+## Methodology & Assumptions {#methods}
+
+::: {.callout-note collapse="true"}
+### Technical details (click to expand)
+
+**YLL calculation:**
+For each death at age $x$:
+$$\text{YLL}(x) = e(x)$$
+where $e(x)$ is the remaining life expectancy at age $x$ from the Stats SA 2024 abridged life table (both sexes combined). Total YLL per condition = $\sum \text{YLL}(x_i)$ across all deaths $i$.
+
+**YLD calculation:**
+$$\text{YLD} = N \times \text{DW} \times D$$
+where $N$ = incident cases, $\text{DW}$ = GBD 2019 disability weight, and $D$ = average illness duration (years).
+
+**DALY:**
+$$\text{DALY} = \text{YLL} + \text{YLD}$$
+
+**Life table:** Stats SA 2024 mid-year population estimates (P0302, Table 6), both sexes combined. An alternative GBD 2019 reference life table (aspirational / global benchmark) is available in the functions but not used by default.
+
+**Disability weights:** GBD 2019 (Salomon et al. *Lancet* 2015; GBD 2019 Diseases and Injuries Collaborators). Where a condition-specific weight is not available, a default of DW = 0.01 with 14-day duration is used.
+
+**Death identification:** A case is counted as a death if `patient_vital_status == "Deceased"` OR `patientoutcome ∈ {"Died", "Died (non-Covid)"}`. Cases missing both fields are assumed surviving.
+
+**Province rates:** Per-capita rates use Stats SA 2024 mid-year estimates. Rates are crude (not age-standardised) at the province level — for full age-standardised rates, see the ASR functions in `R/asr_functions.r`.
+
+**Age-standardised rates (ASR):**
+Direct standardisation using the WHO World Standard Population (Ahmad et al. 2001, modified Segi). The 0-4 band is split into 0-1 / 1-4 using a 1:4 ratio; bands 65-69 through 85+ are collapsed into 65+. For each age band $a$ and sex $s$:
+$$\text{ASR} = \sum_a w_a \times \frac{c_{a,s}}{n_{a,s}}$$
+where $w_a$ = WHO standard weight, $c_{a,s}$ = cases, $n_{a,s}$ = population. 95% CIs use the Poisson exact method (via `epitools::pois.exact`). The **Incidence Rate Ratio (IRR)** compares female vs male rates using a two-sample Poisson exact test.
+
+Population denominators are from `NMCleaner::pop` (sourced from Stats SA Mid-Year Population Estimates).
+
+**Limitations:**
+
+- The NMC is a *passive* surveillance system; substantial under-reporting is expected for most conditions.
+- Death ascertainment depends on vital status being correctly recorded — many cases have `Unknown` vital status.
+- Disability weights are global averages and may not perfectly reflect the South African disease profile.
+- Duration estimates assume uncomplicated disease in most cases.
+
+:::
+
+### Disability Weight Reference Table
+
+```{r}
+#| label: tbl-dw
+#| tbl-cap: "Disability weights and durations used for YLD calculations"
+
+dw_ref <- nmc_disability_weights()
+dw_tbl <- dw_ref[, .(
+  Pattern          = condition_pattern,
+  `Disability Weight` = disability_weight,
+  `Duration (days)`   = round(duration_years * 365, 0),
+  Source              = source
+)]
+# Clean up regex patterns for display
+dw_tbl[, Pattern := gsub("\\(\\?i\\)", "", Pattern)]
+dw_tbl[, Pattern := gsub("\\\\s\\*", " ", Pattern)]
+
+flextable(dw_tbl) %>%
+  theme_vanilla() %>%
+  autofit() %>%
+  fontsize(size = 9, part = "all") %>%
+  bold(part = "header") %>%
+  set_caption("Conditions matched by pattern; DW = disability weight (0-1 scale)")
+```
+
+---
+
+## Updating BoD Data {#updating}
+
+::: {.callout-important}
+### Step-by-step instructions
+
+1. **Ensure the master data is up to date** — the feather file at `~/Desktop/SAFETP/CLA/NMC_database/master/new_master.feather`
+
+2. **Run the BoD preparation script:**
+```bash
+cd /Users/briday/Desktop/SAFETP/CLA/NMC_website/NMC_dashboard
+Rscript R/prepare_bod_data.r
+```
+
+3. **Run the ASR preparation script:**
+```bash
+Rscript R/prepare_asr_data.r
+```
+
+4. **Re-render this page:**
+```bash
+quarto render burden-of-disease/index.qmd
+```
+
+**To adjust disability weights or life table:** edit `R/burden_of_disease.r` → `nmc_disability_weights()` or `sa_life_table()` functions.
+:::
 
 ---
 
@@ -65,5 +1670,9 @@ All estimates depend on data quality and completeness. Assumptions, disability w
 - [By Condition](../by-condition/index.html) — national trend lines for each condition
 - [Trending](../by-trending/index.html) — real-time signal detection
 - [Data Quality](../quality.html) — completeness and timeliness of underlying data
-- [Methods](../methods.html) — full technical documentation of BoD calculations
+- [Methods](../methods.html) — full technical documentation
 :::
+
+<footer>
+*Source code:* [`R/burden_of_disease.r`](../R/burden_of_disease.r) · [`R/prepare_bod_data.r`](../R/prepare_bod_data.r) · [`R/asr_functions.r`](../R/asr_functions.r) · [`R/prepare_asr_data.r`](../R/prepare_asr_data.r)
+</footer>
