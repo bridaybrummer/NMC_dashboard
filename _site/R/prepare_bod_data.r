@@ -171,8 +171,10 @@ saveRDS(cfr_year, file.path(out_dir, "bod_cfr_year.rds"))
 
 # Age-group for CFR stratification
 dt[, age_group := cut(as.numeric(Age_years),
-  breaks = c(0, 1, 5, 15, 25, 35, 45, 55, 65, Inf),
-  labels = c("<1", "1-4", "5-14", "15-24", "25-34", "35-44", "45-54", "55-64", "65+"),
+  breaks = c(0, 1, 5, seq(10, 65, 5), Inf),
+  labels = c("<1", "1-4", "5-9", "10-14", "15-19", "20-24", "25-29",
+             "30-34", "35-39", "40-44", "45-49", "50-54", "55-59",
+             "60-64", "65+"),
   right = FALSE
 )]
 

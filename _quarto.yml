@@ -24,6 +24,8 @@ project:
     - by-forecasts/index.qmd
     - explorer/index.qmd
     - burden-of-disease/index.qmd
+    - special-reports/index.qmd
+    - special-reports/agricultural-poisoning/index.qmd
   #pre-render: Rscript R/prepare_dashboard_data.r
 
 website:
@@ -79,6 +81,14 @@ website:
       - text: Explorer
         href: explorer/index.html
         icon: search
+      - text: "In Focus"
+        icon: journal-richtext
+        menu:
+          - text: "Special Reports — Overview"
+            href: special-reports/index.html
+          - text: "---"
+          - text: "Agricultural & Stock Remedy Poisoning"
+            href: special-reports/agricultural-poisoning/index.html
       - text: Data Quality
         href: quality.html
         icon: clipboard-check
@@ -121,6 +131,17 @@ website:
         - by-trending/index.qmd
         - burden-of-disease/index.qmd
         - by-forecasts/index.qmd
+    - id: special-reports
+      title: "Special Reports"
+      style: floating
+      collapse-level: 1
+      contents:
+        - text: "All Special Reports"
+          href: special-reports/index.qmd
+        - text: "---"
+        - section: "Poisoning"
+          contents:
+            - special-reports/agricultural-poisoning/index.qmd
     - id: docs
       title: "Documentation"
       style: floating

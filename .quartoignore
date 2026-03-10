@@ -1,0 +1,5 @@
+# Ignore macOS duplicate files (Finder "Duplicate" creates "filename 2.qmd" etc.)
+*[0-9].qmd
+* [0-9].qmd
+* [0-9][0-9].qmd
+NMC_reports_scripts/

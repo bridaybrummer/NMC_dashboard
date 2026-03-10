@@ -231,28 +231,7 @@ if (!is.null(bod_meta)) {
 }
 ```
 
-### Data source & scope {#data-source}
-
-::: {.bod-section-intro}
-This analysis draws on **all notifications** submitted to South Africa's Notifiable Medical Conditions (NMC) surveillance system, maintained by the National Institute for Communicable Diseases (NICD). The NMC is a **passive, mandatory** surveillance system: healthcare providers are legally required to report Category 1–4 notifiable conditions within prescribed timeframes (National Health Act, 2003; Government Notice R1434/2017).
-:::
-
-**What is included:**
-
-- **Both suspected and confirmed cases** — no filtering by case definition. Notifications enter the system as either *suspected* or *confirmed*; the majority (~83%) are suspected at point of notification.
-- **Clinical and laboratory notifications** — the dataset includes clinical notifications (submitted by clinicians) and laboratory notifications (generated from positive lab results), as well as merged records where both exist for the same episode.
-- **All diagnosis methods** — laboratory-confirmed, clinical signs and symptoms, rapid tests, X-ray, and other/unknown methods are all retained.
-
-**What is excluded:**
-
-- **Maternal deaths** — excluded by default (not an infectious disease burden).
-- **TB-related conditions** — optionally excluded (toggle: `include_tb` parameter). TB has a dedicated national surveillance programme; including it can dominate all burden indicators.
-
-::: {.callout-important appearance="simple"}
-**Interpretation note:** The NMC is a passive surveillance system — under-reporting varies by condition, province, and notification pathway. These estimates represent the **reported** burden and are likely conservative. Case fatality ratios are based on deaths recorded in the NMC system, which may not capture all deaths (e.g. if death occurs after hospital transfer and is not updated). See [Methodology](#methods) for computation details.
-:::
-
-This page translates raw NMC notifications into **population-level health impact indicators**, moving beyond simple case counts to quantify the mortality, disability, and economic burden of notifiable conditions across South Africa:
+This page translates raw NMC case notifications into **population-level health impact indicators**, moving beyond simple case counts to quantify the mortality, disability, and economic burden of notifiable conditions across South Africa. Each metric answers a different policy question:
 
 | Indicator | Question answered | Method |
 |:----------|:------------------|:-------|
@@ -261,6 +240,10 @@ This page translates raw NMC notifications into **population-level health impact
 | **CFR** | How severe (lethal) is each condition? | Deaths / cases with 95% Wilson CI |
 | **PYPLL** | Which conditions impact the working-age population most? | Years lost in ages 15–64 |
 | **ASR** | How do rates compare after adjusting for age structure? | WHO direct standardisation |
+
+::: {.callout-important appearance="simple"}
+Estimates depend on data quality and reporting completeness. The NMC is a passive surveillance system — under-reporting varies by condition and province. See [Methodology](#methods) for full details.
+:::
 
 ---
 
@@ -333,8 +316,8 @@ if (has_data) {
 #| results: asis
 
 if (has_data) {
-  top3 <- head(daly_national[order(-total_daly)], 3)$condition
-  pct_top3 <- round(100 * sum(head(daly_national[order(-total_daly)], 3)$total_daly) /
+  top3 <- head(daly_national[order(-as.numeric(daly_national$total_daly))], 3)$condition
+  pct_top3 <- round(100 * sum(head(daly_national[order(-as.numeric(daly_national$total_daly))], 3)$total_daly) /
                      sum(daly_national$total_daly), 0)
   cat(sprintf(
     '<div class="bod-insight"><strong>Key finding:</strong> The top 3 conditions (%s) account for <strong>%d%%</strong> of all DALYs. Scroll down for detailed breakdowns by mortality, severity, demographics, and geography.</div>\n',
@@ -462,7 +445,7 @@ if (has_data) {
 #| fig-height: 7
 
 if (has_data) {
-  top20 <- head(daly_national[order(-total_daly)], 20)
+  top20 <- head(daly_national[order(-as.numeric(daly_national$total_daly))], 20)
   top20_long <- melt(
     top20[, .(condition, `Premature mortality (YLL)` = pct_yll,
               `Disability (YLD)` = pct_yld)],
@@ -591,7 +574,9 @@ if (!is.null(cfr_age_sex) && nrow(cfr_age_sex) > 0) {
                           gender %in% c("Male", "Female") &
                           !is.na(age_group)]
   cfr_as[, age_group := factor(age_group, levels = c(
-    "<1", "1-4", "5-14", "15-24", "25-34", "35-44", "45-54", "55-64", "65+"
+    "<1", "1-4", "5-9", "10-14", "15-19", "20-24", "25-29",
+    "30-34", "35-39", "40-44", "45-49", "50-54", "55-59",
+    "60-64", "65+"
   ))]
 
   p_cfr_as <- ggplot(cfr_as, aes(x = age_group, y = cfr_pct,
@@ -1177,7 +1162,7 @@ if (!is.null(prov_summary) && nrow(prov_summary) > 0) {
 
 if (!is.null(daly_prov) && nrow(daly_prov) > 0) {
   # Get top 10 conditions nationally
-  top10_conds <- head(daly_national[order(-total_daly)], 10)$condition
+  top10_conds <- head(daly_national[order(-as.numeric(daly_national$total_daly))], 10)$condition
 
   heat_dt <- daly_prov[condition %in% top10_conds & !is.na(pop) & pop > 0]
   heat_dt[, daly_rate := round(total_daly / pop * 1e5, 2)]
@@ -1199,7 +1184,7 @@ if (!is.null(daly_prov) && nrow(daly_prov) > 0) {
       panel.grid  = element_blank()
     )
 
-  ggplotly(p_heat, tooltip = c("x", "y", "fill"))
+  p_heat
 }
 ```
 
@@ -1257,13 +1242,15 @@ if (!is.null(yll_year) && nrow(yll_year) > 0) {
 #| fig-height: 6
 
 if (!is.null(deaths_dt) && nrow(deaths_dt) > 0) {
-  top10 <- head(daly_national[order(-total_daly)], 10)$condition
+  top10 <- head(daly_national[order(-as.numeric(daly_national$total_daly))], 10)$condition
   age_dt <- deaths_dt[condition %in% top10 & !is.na(age_at_death)]
 
   # Age bins
   age_dt[, age_group := cut(age_at_death,
-    breaks = c(0, 1, 5, 15, 25, 35, 45, 55, 65, Inf),
-    labels = c("<1", "1-4", "5-14", "15-24", "25-34", "35-44", "45-54", "55-64", "65+"),
+    breaks = c(0, 1, 5, seq(10, 65, 5), Inf),
+    labels = c("<1", "1-4", "5-9", "10-14", "15-19", "20-24", "25-29",
+               "30-34", "35-39", "40-44", "45-49", "50-54", "55-59",
+               "60-64", "65+"),
     right = FALSE
   )]
 
