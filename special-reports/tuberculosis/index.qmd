@@ -1,0 +1,815 @@
+---
+title: "Tuberculosis Surveillance"
+subtitle: "Epidemiological Description of TB Notifications · NMC Surveillance, South Africa"
+date: today
+sidebar: special-reports
+execute:
+  echo: false
+  warning: false
+  message: false
+  error: false
+  cache: false
+---
+
+::: {.callout-important appearance="minimal"}
+**Priority condition** — Tuberculosis remains a leading cause of morbidity and mortality in South Africa. This report describes the epidemiology of notifiable TB forms based on NMC surveillance data, 2020–present, including drug-resistant TB (MDR-TB and XDR-TB).
+:::
+
+```{r setup}
+#| label: setup
+#| include: false
+#| cache: false
+
+pacman::p_load(
+  ggplot2, gtsummary, tidyverse, magrittr,
+  conflicted, scales, data.table, lubridate,
+  flextable, gt, ggrepel, zoo,
+  janitor
+)
+
+conflicted::conflicts_prefer(dplyr::filter)
+conflicted::conflicts_prefer(dplyr::lag)
+conflicted::conflicts_prefer(tidyr::extract)
+conflicted::conflicts_prefer(dplyr::first)
+conflicted::conflicts_prefer(lubridate::year)
+conflicted::conflicts_prefer(lubridate::month)
+conflicted::conflicts_prefer(lubridate::quarter)
+
+library(NMCleaner)
+
+# ── Load master dataset ───────────────────────────────────────────────────────
+load("~/Desktop/SAFETP/CLA/NMC_database/master/new_master.rda")
+
+# ── Define TB conditions ──────────────────────────────────────────────────────
+TB_CONDITIONS <- c(
+  "Tuberculosis:pulmonary",
+  "Tuberculosis:extra-pulmonary",
+  "Tuberculosis: multidrug- resistant (MDR -TB)",
+  "Tuberculosis: extensively drug -resistant (XDR -TB)"
+)
+
+# Shorter labels for display
+TB_LABELS <- c(
+  "Tuberculosis:pulmonary"                              = "Pulmonary TB",
+  "Tuberculosis:extra-pulmonary"                        = "Extra-pulmonary TB",
+  "Tuberculosis: multidrug- resistant (MDR -TB)"        = "MDR-TB",
+  "Tuberculosis: extensively drug -resistant (XDR -TB)" = "XDR-TB"
+)
+
+# ── Filter to TB conditions only ──────────────────────────────────────────────
+new_master %>%
+  filter(
+    condition %in% TB_CONDITIONS,
+    as.integer(Year_notification) %in% 2020:year(Sys.Date()),
+    !is.na(prov_)
+  ) %>%
+  mutate(
+    Year_notification = as.integer(Year_notification),
+    patient_vital_status = if_else(
+      patient_vital_status %like% "Unknown", "Alive", patient_vital_status
+    ),
+    Age_years = as.numeric(Age_years),
+    age_group = cut(
+      Age_years,
+      breaks = c(-Inf, 1, 5, 15, 25, 35, 45, 55, 65, Inf),
+      labels = c("<1", "1–4", "5–14", "15–24", "25–34",
+                 "35–44", "45–54", "55–64", "65+"),
+      right  = FALSE
+    ),
+    sex = case_when(
+      patient_gender %in% c("Male", "M")   ~ "Male",
+      patient_gender %in% c("Female", "F") ~ "Female",
+      TRUE                                  ~ NA_character_
+    ),
+    deceased = patient_vital_status %in% "Deceased",
+    tb_type = recode(condition, !!!TB_LABELS),
+    # Drug resistance category
+    dr_category = case_when(
+      condition == "Tuberculosis: extensively drug -resistant (XDR -TB)" ~ "XDR-TB",
+      condition == "Tuberculosis: multidrug- resistant (MDR -TB)"        ~ "MDR-TB",
+      TRUE                                                                ~ "Drug-susceptible/Unknown"
+    ),
+    # Site category
+    site_category = case_when(
+      condition == "Tuberculosis:extra-pulmonary" ~ "Extra-pulmonary",
+      TRUE                                        ~ "Pulmonary"
+    )
+  ) -> tb
+
+# ── Shared theme ──────────────────────────────────────────────────────────────
+theme_nmc <- function(...) {
+  theme_classic() +
+    theme(
+      text              = element_text(family = "Century Gothic", size = 10, color = "#333333"),
+      panel.background  = element_rect(fill = "#F8F8F8"),
+      plot.background   = element_rect(fill = "#F8F8F8"),
+      panel.grid.major  = element_blank(),
+      panel.grid.minor  = element_blank(),
+      axis.ticks        = element_line(linewidth = 0.15, color = "grey40"),
+      legend.background = element_rect(fill = "#F8F8F8", linewidth = 0.25,
+                                       linetype = "solid", colour = "grey50"),
+      legend.key        = element_blank(),
+      strip.background  = element_rect(color = NA, fill = NA),
+      ...
+    )
+}
+
+# TB-specific colour palette
+tb_cols <- c(
+  "Pulmonary TB"       = "#1565C0",
+  "Extra-pulmonary TB" = "#7B1FA2",
+  "MDR-TB"             = "#E65100",
+  "XDR-TB"             = "#B71C1C"
+)
+```
+
+::: {.callout-note appearance="minimal" collapse="true"}
+## Report metadata
+| | |
+|---|---|
+| **Conditions** | `r paste(TB_CONDITIONS, collapse = "; ")` |
+| **Years** | 2020 – `r lubridate::year(Sys.Date())` |
+| **Data source** | NMC Notifiable Medical Conditions surveillance database |
+| **Generated** | `r format(Sys.Date(), "%d %B %Y")` |
+| **Note** | This report covers **notifiable TB forms** only (pulmonary, extra-pulmonary, MDR-TB, XDR-TB). Routine TB case data is managed separately through the ETR.Net system. |
+:::
+
+---
+
+# Situation Update for Policy Makers {#sec-executive}
+
+```{r exec-setup}
+#| label: exec-setup
+#| include: false
+
+# ── Current year and comparison calculations ──────────────────────────────────
+current_year <- year(Sys.Date())
+prev_year    <- current_year - 1
+current_month <- month(Sys.Date())
+
+# Year-to-date (Jan 1 to current date) for current and previous year
+ytd_current <- tb %>%
+  filter(Year_notification == current_year,
+         month(as_date(notification_date)) <= current_month)
+ytd_prev <- tb %>%
+  filter(Year_notification == prev_year,
+         month(as_date(notification_date)) <= current_month)
+
+n_ytd_current   <- nrow(ytd_current)
+n_ytd_prev      <- nrow(ytd_prev)
+deaths_ytd_curr <- sum(ytd_current$deceased, na.rm = TRUE)
+deaths_ytd_prev <- sum(ytd_prev$deceased, na.rm = TRUE)
+cfr_ytd_curr    <- round(deaths_ytd_curr / max(n_ytd_current, 1) * 100, 1)
+cfr_ytd_prev    <- round(deaths_ytd_prev / max(n_ytd_prev, 1) * 100, 1)
+
+pct_change_n      <- round((n_ytd_current - n_ytd_prev) / max(n_ytd_prev, 1) * 100)
+pct_change_deaths <- round((deaths_ytd_curr - deaths_ytd_prev) / max(deaths_ytd_prev, 1) * 100)
+
+# Direction arrows and colours
+arrow_n      <- if (pct_change_n > 0) "↑" else if (pct_change_n < 0) "↓" else "→"
+arrow_deaths <- if (pct_change_deaths > 0) "↑" else if (pct_change_deaths < 0) "↓" else "→"
+col_n        <- if (pct_change_n > 10) "#C62828" else if (pct_change_n < -10) "#2E7D32" else "#F57C00"
+col_deaths   <- if (pct_change_deaths > 10) "#C62828" else if (pct_change_deaths < -10) "#2E7D32" else "#F57C00"
+
+# Drug-resistant TB counts
+mdr_ytd_curr <- sum(ytd_current$dr_category == "MDR-TB")
+mdr_ytd_prev <- sum(ytd_prev$dr_category == "MDR-TB")
+xdr_ytd_curr <- sum(ytd_current$dr_category == "XDR-TB")
+xdr_ytd_prev <- sum(ytd_prev$dr_category == "XDR-TB")
+pct_change_mdr <- round((mdr_ytd_curr - mdr_ytd_prev) / max(mdr_ytd_prev, 1) * 100)
+pct_change_xdr <- round((xdr_ytd_curr - xdr_ytd_prev) / max(xdr_ytd_prev, 1) * 100)
+arrow_mdr <- if (pct_change_mdr > 0) "↑" else if (pct_change_mdr < 0) "↓" else "→"
+arrow_xdr <- if (pct_change_xdr > 0) "↑" else if (pct_change_xdr < 0) "↓" else "→"
+
+# Extra-pulmonary proportion
+eptb_ytd_curr <- sum(ytd_current$site_category == "Extra-pulmonary")
+eptb_pct_curr <- round(eptb_ytd_curr / max(n_ytd_current, 1) * 100, 1)
+
+# Top 3 provinces this year
+top3_prov <- ytd_current %>%
+  count(prov_, sort = TRUE) %>%
+  slice(1:3) %>%
+  pull(prov_) %>%
+  paste(collapse = ", ")
+```
+
+::: {.panel-tabset}
+
+## Key Metrics
+
+```{r exec-metrics}
+#| label: tbl-exec-metrics
+#| tbl-cap: !expr 'paste0("Year-to-date comparison: Jan–", format(Sys.Date(), "%b %Y"), " vs same period ", prev_year)'
+
+tibble(
+  Indicator = c(
+    "All TB notifications (YTD)",
+    "Deaths (YTD)",
+    "Case Fatality Ratio",
+    "MDR-TB notifications",
+    "XDR-TB notifications",
+    "Extra-pulmonary TB (%)",
+    "Top 3 provinces (by case count)"
+  ),
+  `Current Year` = c(
+    scales::comma(n_ytd_current),
+    scales::comma(deaths_ytd_curr),
+    paste0(cfr_ytd_curr, "%"),
+    scales::comma(mdr_ytd_curr),
+    scales::comma(xdr_ytd_curr),
+    paste0(eptb_pct_curr, "%"),
+    top3_prov
+  ),
+  `Same Period Last Year` = c(
+    scales::comma(n_ytd_prev),
+    scales::comma(deaths_ytd_prev),
+    paste0(cfr_ytd_prev, "%"),
+    scales::comma(mdr_ytd_prev),
+    scales::comma(xdr_ytd_prev),
+    "—",
+    "—"
+  ),
+  `Change` = c(
+    paste0(arrow_n, " ", ifelse(pct_change_n >= 0, "+", ""), pct_change_n, "%"),
+    paste0(arrow_deaths, " ", ifelse(pct_change_deaths >= 0, "+", ""), pct_change_deaths, "%"),
+    paste0(ifelse(cfr_ytd_curr >= cfr_ytd_prev, "↑", "↓"), " ",
+           ifelse(cfr_ytd_curr - cfr_ytd_prev >= 0, "+", ""),
+           round(cfr_ytd_curr - cfr_ytd_prev, 1), " pp"),
+    paste0(arrow_mdr, " ", ifelse(pct_change_mdr >= 0, "+", ""), pct_change_mdr, "%"),
+    paste0(arrow_xdr, " ", ifelse(pct_change_xdr >= 0, "+", ""), pct_change_xdr, "%"),
+    "—",
+    "—"
+  )
+) %>%
+  flextable() %>%
+  bold(part = "header") %>%
+  bold(i = 1:3, j = 1) %>%
+  color(i = 1, j = 4, color = col_n) %>%
+  color(i = 2, j = 4, color = col_deaths) %>%
+  bg(i = 4:5, bg = "#FFF3E0") %>%
+  set_table_properties(layout = "autofit", width = 1) %>%
+  fontsize(size = 11, part = "all") %>%
+  align(j = 2:4, align = "center", part = "all") %>%
+  add_footer_lines(paste0("Data extracted: ", format(Sys.Date(), "%d %B %Y"),
+                          ". YTD = Year-to-date (Jan 1 – ", format(Sys.Date(), "%d %b"), "). pp = percentage points."))
+```
+
+## 12-Month Trend by TB Type
+
+```{r exec-trend}
+#| label: fig-exec-trend
+#| fig-cap: "Monthly TB notification trend by type — last 12 months. Drug-resistant TB forms highlighted."
+#| fig-height: 5
+
+# Last 12 complete months
+end_date   <- floor_date(Sys.Date(), "month") - days(1)
+start_date <- floor_date(end_date - months(11), "month")
+
+tb %>%
+  filter(!is.na(notification_date)) %>%
+  mutate(month_date = floor_date(as_date(notification_date), "month")) %>%
+  filter(month_date >= start_date, month_date <= end_date) %>%
+  count(month_date, tb_type) %>%
+  complete(month_date, tb_type, fill = list(n = 0)) -> trend12_df
+
+ggplot(trend12_df, aes(x = month_date, y = n, fill = tb_type)) +
+  geom_col(width = 22) +
+  geom_text(aes(label = ifelse(n > 0, n, "")), 
+            position = position_stack(vjust = 0.5),
+            size = 2.5, colour = "white", fontface = "bold") +
+  scale_x_date(date_labels = "%b\n%Y", date_breaks = "1 month", expand = expansion(add = c(10, 10))) +
+  scale_y_continuous(name = "Notifications", expand = expansion(mult = c(0, 0.1))) +
+  scale_fill_manual(values = tb_cols, name = "TB Type") +
+  labs(x = NULL) +
+  theme_nmc() +
+  theme(axis.text.x = element_text(size = 8), legend.position = "bottom")
+```
+
+## Provincial Burden
+
+```{r exec-prov-heatmap}
+#| label: fig-exec-prov
+#| fig-cap: "Provincial burden heatmap — quarterly TB notifications by type, last 2 years."
+#| fig-height: 6
+
+# Get provincial population for incidence calculation
+prov_pop <- NMCleaner::pop %>%
+  filter(as.integer(Year) == year(Sys.Date())) %>%
+  group_by(prov) %>%
+  summarise(population = sum(Population), .groups = "drop")
+
+# Last 8 quarters
+tb %>%
+  filter(!is.na(notification_date)) %>%
+  mutate(
+    nd  = as_date(notification_date),
+    qtr = paste0(year(nd), " Q", quarter(nd))
+  ) %>%
+  filter(nd >= (Sys.Date() - years(2))) %>%
+  group_by(prov_, qtr) %>%
+  summarise(
+    n      = n(),
+    deaths = sum(deceased, na.rm = TRUE),
+    n_mdr  = sum(dr_category == "MDR-TB"),
+    n_xdr  = sum(dr_category == "XDR-TB"),
+    .groups = "drop"
+  ) %>%
+  complete(prov_, qtr, fill = list(n = 0, deaths = 0, n_mdr = 0, n_xdr = 0)) %>%
+  left_join(prov_pop, by = c("prov_" = "prov")) %>%
+  mutate(
+    inc       = round(n / population * 1e5 * 4, 1),  # annualized
+    dr_pct    = round((n_mdr + n_xdr) / pmax(n, 1) * 100, 0)
+  ) -> prov_qtr_df
+
+# Order quarters chronologically
+qtr_order <- prov_qtr_df %>% distinct(qtr) %>% arrange(qtr) %>% pull(qtr)
+prov_qtr_df$qtr <- factor(prov_qtr_df$qtr, levels = qtr_order)
+
+ggplot(prov_qtr_df, aes(x = qtr, y = prov_, fill = inc)) +
+  geom_tile(color = "white", linewidth = 0.5) +
+  geom_text(aes(label = paste0(n, ifelse(deaths > 0, paste0(" (", deaths, "†)"), ""),
+                               "\n", dr_pct, "% DR")),
+            size = 2.3, colour = "black", lineheight = 0.85) +
+  scale_fill_gradient(low = "#E3F2FD", high = "#0D47A1", name = "Incidence\n(per 100k/yr)") +
+  labs(x = "Quarter", y = NULL,
+       caption = "Top = notifications (†deaths); bottom = % drug-resistant (MDR + XDR).") +
+  theme_nmc() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 9),
+    legend.position = "right",
+    panel.grid = element_blank()
+  )
+```
+
+:::
+
+---
+
+# Summary Statistics {#sec-summary}
+
+```{r summary-stats}
+#| label: tbl-summary
+#| tbl-cap: "Summary of TB notifications by type, South Africa, 2020–present."
+
+total_n      <- nrow(tb)
+total_deaths <- sum(tb$deceased, na.rm = TRUE)
+overall_cfr  <- round(total_deaths / total_n * 100, 1)
+
+tb %>%
+  group_by(tb_type) %>%
+  summarise(
+    n      = n(),
+    deaths = sum(deceased, na.rm = TRUE),
+    cfr    = round(deaths / n * 100, 1),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(n)) -> type_summary
+
+tibble(
+  Metric = c(
+    "Total TB notifications",
+    "Total deaths reported",
+    "Overall case fatality ratio",
+    "",
+    type_summary$tb_type,
+    "",
+    "Provinces affected",
+    "Districts affected",
+    "Unique reporting facilities",
+    "Date range"
+  ),
+  Value = c(
+    scales::comma(total_n),
+    scales::comma(total_deaths),
+    paste0(overall_cfr, "%"),
+    "--- By TB type ---",
+    paste0(scales::comma(type_summary$n), " (CFR ", type_summary$cfr, "%)"),
+    "",
+    as.character(tb$prov_ %>% na.omit() %>% n_distinct()),
+    as.character(tb$district %>% na.omit() %>% n_distinct()),
+    as.character(tb$facility %>% na.omit() %>% n_distinct()),
+    paste(
+      format(as_date(min(tb$notification_date, na.rm = TRUE)), "%d %b %Y"),
+      "to",
+      format(as_date(max(tb$notification_date, na.rm = TRUE)), "%d %b %Y")
+    )
+  )
+) %>%
+  flextable() %>%
+  bold(part = "header") %>%
+  bold(i = c(1, 4, 5:8), j = 1) %>%
+  set_table_properties(layout = "autofit") %>%
+  fontsize(size = 10, part = "all")
+```
+
+---
+
+# Temporal Trends {#sec-trends}
+
+## Annual notifications by TB type
+
+```{r annual-trend}
+#| label: fig-annual-trend
+#| fig-cap: "Annual TB notifications by type and case fatality ratio, South Africa, 2020–present."
+#| fig-height: 5
+
+tb %>%
+  group_by(year = Year_notification, tb_type) %>%
+  summarise(n = n(), deaths = sum(deceased, na.rm = TRUE), .groups = "drop") -> annual_type
+
+tb %>%
+  group_by(year = Year_notification) %>%
+  summarise(total = n(), deaths = sum(deceased, na.rm = TRUE),
+            cfr = deaths / total * 100, .groups = "drop") -> annual_cfr
+
+sf_ax <- max(annual_type %>% group_by(year) %>% summarise(n = sum(n)) %>% pull(n)) / 
+         max(annual_cfr$cfr, na.rm = TRUE) * 1.3
+
+ggplot(annual_type, aes(x = year, y = n, fill = tb_type)) +
+  geom_col(width = 0.65) +
+  geom_line(data = annual_cfr, aes(x = year, y = cfr * sf_ax, fill = NULL),
+            colour = "#C62828", linewidth = 1.2, group = 1) +
+  geom_point(data = annual_cfr, aes(x = year, y = cfr * sf_ax, fill = NULL),
+             colour = "#C62828", size = 3) +
+  geom_text(data = annual_cfr, aes(x = year, y = cfr * sf_ax + max(cfr * sf_ax) * 0.05,
+                                   label = paste0(round(cfr, 1), "%"), fill = NULL),
+            size = 3, colour = "#C62828") +
+  scale_y_continuous(
+    name     = "Notifications (n)",
+    sec.axis = sec_axis(~ . / sf_ax, name = "CFR (%)", breaks = pretty_breaks(4))
+  ) +
+  scale_fill_manual(values = tb_cols, name = "TB Type") +
+  scale_x_continuous(breaks = unique(annual_type$year)) +
+  labs(x = "Year", caption = "Red line = overall case fatality ratio") +
+  theme_nmc() +
+  theme(legend.position = "bottom")
+```
+
+## Monthly epicurve
+
+```{r epicurve-monthly}
+#| label: fig-epicurve-monthly
+#| fig-cap: "Monthly TB notification counts by type, South Africa, 2020–present."
+#| fig-height: 5
+
+tb %>%
+  filter(!is.na(notification_date)) %>%
+  mutate(month_date = floor_date(as_date(notification_date), "month")) %>%
+  count(month_date, tb_type) %>%
+  complete(month_date, tb_type, fill = list(n = 0)) -> epicurve_df
+
+ggplot(epicurve_df, aes(x = month_date, y = n, fill = tb_type)) +
+  geom_col(width = 25) +
+  scale_x_date(date_labels = "%b\n%Y", date_breaks = "6 months",
+               date_minor_breaks = "3 months", expand = expansion(add = c(0, 0))) +
+  scale_y_continuous(name = "Notifications (n)", breaks = pretty_breaks(5)) +
+  scale_fill_manual(values = tb_cols, name = "TB Type") +
+  labs(x = "Date") +
+  theme_nmc() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 8),
+        legend.position = "bottom")
+```
+
+## Drug-resistant TB proportion over time
+
+```{r dr-trend}
+#| label: fig-dr-trend
+#| fig-cap: "Monthly proportion of TB notifications that are drug-resistant (MDR + XDR), South Africa."
+#| fig-height: 4
+
+tb %>%
+  filter(!is.na(notification_date)) %>%
+  mutate(month_date = floor_date(as_date(notification_date), "month")) %>%
+  group_by(month_date) %>%
+  summarise(
+    n_total = n(),
+    n_dr    = sum(dr_category %in% c("MDR-TB", "XDR-TB")),
+    pct_dr  = n_dr / n_total * 100,
+    .groups = "drop"
+  ) %>%
+  mutate(rolling3 = zoo::rollmean(pct_dr, k = 3, fill = NA, align = "right")) -> dr_trend
+
+ggplot(dr_trend, aes(x = month_date)) +
+  geom_col(aes(y = pct_dr), fill = "#E65100", alpha = 0.4, width = 25) +
+  geom_line(aes(y = rolling3), colour = "#B71C1C", linewidth = 1.2, na.rm = TRUE) +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "6 months") +
+  scale_y_continuous(name = "% Drug-resistant", limits = c(0, NA)) +
+  labs(x = NULL, caption = "Red line = 3-month rolling average") +
+  theme_nmc()
+```
+
+---
+
+# Age & Sex Demographics {#sec-demographics}
+
+## Population pyramid
+
+```{r age-sex-pyramid}
+#| label: fig-age-sex-pyramid
+#| fig-cap: "Age–sex population pyramid of TB notifications, South Africa, 2020–present."
+#| fig-height: 5
+
+tb %>%
+  filter(!is.na(age_group), !is.na(sex)) %>%
+  count(age_group, sex) %>%
+  mutate(n_plot = if_else(sex == "Male", -n, n)) -> pyramid_df
+
+max_n <- max(abs(pyramid_df$n))
+step  <- ifelse(max_n > 500, 200, ifelse(max_n > 200, 50, 25))
+br    <- seq(0, ceiling(max_n / step) * step, step)
+
+ggplot(pyramid_df, aes(x = age_group, y = n_plot, fill = sex)) +
+  geom_col(width = 0.8) +
+  coord_flip() +
+  scale_y_continuous(breaks = c(-br, br), labels = abs(c(-br, br))) +
+  scale_fill_manual(values = c("Male" = "#1565C0", "Female" = "#C62828"), name = NULL) +
+  geom_hline(yintercept = 0, colour = "white", linewidth = 0.5) +
+  annotate("text", x = nlevels(pyramid_df$age_group) + 0.4,
+           y = -max_n * 0.5, label = "Male",   color = "#1565C0", fontface = "bold", size = 3.5) +
+  annotate("text", x = nlevels(pyramid_df$age_group) + 0.4,
+           y =  max_n * 0.5, label = "Female", color = "#C62828", fontface = "bold", size = 3.5) +
+  labs(x = "Age group (years)", y = "Number of notifications") +
+  theme_nmc() +
+  theme(legend.position = "none",
+        panel.grid.major.x = element_line(color = "#DDDDDD", linewidth = 0.3))
+```
+
+## Age distribution by TB type
+
+```{r age-by-type}
+#| label: fig-age-by-type
+#| fig-cap: "Age distribution of TB notifications by TB type, South Africa, 2020–present."
+#| fig-height: 5
+
+tb %>%
+  filter(!is.na(age_group)) %>%
+  count(age_group, tb_type) %>%
+  group_by(tb_type) %>%
+  mutate(pct = n / sum(n) * 100) -> age_type_df
+
+ggplot(age_type_df, aes(x = age_group, y = pct, fill = tb_type)) +
+  geom_col(position = "dodge", width = 0.7) +
+  scale_fill_manual(values = tb_cols, name = "TB Type") +
+  labs(x = "Age group (years)", y = "% within TB type") +
+  theme_nmc() +
+  theme(legend.position = "bottom")
+```
+
+## Case fatality ratio by age group and TB type
+
+```{r cfr-age-type}
+#| label: fig-cfr-age-type
+#| fig-cap: "Case fatality ratio (%) by age group and TB type, South Africa, 2020–present."
+#| fig-height: 5
+
+tb %>%
+  filter(!is.na(age_group)) %>%
+  group_by(age_group, tb_type) %>%
+  summarise(n = n(), deaths = sum(deceased, na.rm = TRUE),
+            cfr = deaths / n * 100, .groups = "drop") -> cfr_df
+
+ggplot(cfr_df, aes(x = age_group, y = cfr, fill = tb_type)) +
+  geom_col(position = "dodge", width = 0.7) +
+  geom_text(aes(label = ifelse(cfr > 0, paste0(round(cfr, 1), "%"), "")),
+            position = position_dodge(width = 0.7),
+            vjust = -0.4, size = 2.5, color = "#333333") +
+  scale_fill_manual(values = tb_cols, name = "TB Type") +
+  scale_y_continuous(limits = c(0, max(cfr_df$cfr, na.rm = TRUE) * 1.3)) +
+  labs(x = "Age group (years)", y = "Case fatality ratio (%)") +
+  theme_nmc() +
+  theme(legend.position = "bottom")
+```
+
+## Summary demographics table
+
+```{r demo-table}
+#| label: tbl-demographics
+#| tbl-cap: "Summary demographics of TB notifications by TB type and vital status, South Africa, 2020–present."
+
+tb %>%
+  select(tb_type, sex, age_group, Age_years, patient_vital_status, prov_) %>%
+  tbl_strata(
+    strata   = tb_type,
+    .tbl_fun = ~ .x %>%
+      tbl_summary(
+        by        = patient_vital_status,
+        missing   = "no",
+        label     = list(sex ~ "Sex", age_group ~ "Age group",
+                         Age_years ~ "Age (years)", prov_ ~ "Province"),
+        type      = list(Age_years ~ "continuous"),
+        statistic = list(Age_years ~ "{median} ({p25}–{p75})")
+      ) %>%
+      bold_labels()
+  ) %>%
+  as_flex_table()
+```
+
+---
+
+# Geographical Distribution {#sec-geo}
+
+```{r geo-setup}
+#| include: false
+
+# ── Provincial incidence ──────────────────────────────────────────────────────
+NMCleaner::pop %>%
+  mutate(Year = as.integer(Year)) %>%
+  group_by(prov, Year) %>%
+  summarise(population = sum(Population), .groups = "drop") -> pop_prov
+
+tb %>%
+  group_by(prov_, year = Year_notification) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  left_join(pop_prov, by = c("prov_" = "prov", "year" = "Year")) %>%
+  mutate(incidence = n / population * 1e5) -> incidence_prov_df
+
+# ── District incidence ────────────────────────────────────────────────────────
+NMCleaner::pop %>%
+  filter(as.integer(Year) %in% 2020:year(Sys.Date())) %>%
+  group_by(district_standard) %>%
+  summarise(pop_total = sum(Population), .groups = "drop") -> pop_dist
+
+tb %>%
+  filter(!district %in% c("Unknown", "Isazi Import", "Not Applicable"),
+         !is.na(district)) %>%
+  mutate_district_name("district") %>%
+  group_by(Province = prov_, district_standard) %>%
+  summarise(
+    Notifications = n(),
+    Deaths        = sum(deceased, na.rm = TRUE),
+    CFR           = round(Deaths / Notifications * 100, 1),
+    n_mdr         = sum(dr_category == "MDR-TB"),
+    n_xdr         = sum(dr_category == "XDR-TB"),
+    .groups = "drop"
+  ) %>%
+  left_join(pop_dist, by = "district_standard") %>%
+  mutate(
+    Incidence = round(Notifications / pop_total * 1e5, 1),
+    DR_pct    = round((n_mdr + n_xdr) / Notifications * 100, 1),
+    pop_total = round(pop_total / 1e3, 1)
+  ) -> incidence_dist_df
+```
+
+## Provincial incidence over time
+
+```{r prov-incidence-line}
+#| label: fig-prov-incidence-line
+#| fig-cap: "TB notification incidence per 100,000 population by province and year, South Africa."
+#| fig-height: 5.5
+
+incidence_prov_df %>%
+  group_by(prov_) %>%
+  filter(incidence == max(incidence, na.rm = TRUE)) %>%
+  ungroup() -> peak_prov_df
+
+ggplot(incidence_prov_df, aes(x = year, y = incidence, colour = prov_, group = prov_)) +
+  geom_line(linewidth = 1.1) +
+  geom_point(size = 2.5) +
+  ggrepel::geom_label_repel(data = peak_prov_df, aes(label = prov_),
+    size = 2.8, show.legend = FALSE, label.size = 0.15, max.overlaps = 20) +
+  scale_colour_brewer(palette = "Paired", name = "Province") +
+  scale_x_continuous(breaks = unique(incidence_prov_df$year)) +
+  labs(x = "Year", y = "Incidence per 100,000 population") +
+  theme_nmc() +
+  theme(legend.position = "none")
+```
+
+## Drug-resistant TB by province
+
+```{r dr-by-prov}
+#| label: fig-dr-by-prov
+#| fig-cap: "Proportion of TB notifications that are drug-resistant (MDR + XDR) by province, South Africa, 2020–present."
+#| fig-height: 4.5
+
+tb %>%
+  group_by(prov_) %>%
+  summarise(
+    n_total = n(),
+    n_dr    = sum(dr_category %in% c("MDR-TB", "XDR-TB")),
+    pct_dr  = n_dr / n_total * 100,
+    .groups = "drop"
+  ) %>%
+  mutate(prov_ = fct_reorder(prov_, pct_dr)) -> dr_prov
+
+ggplot(dr_prov, aes(x = prov_, y = pct_dr)) +
+  geom_col(fill = "#E65100", width = 0.7) +
+  geom_text(aes(label = paste0(round(pct_dr, 1), "%")), hjust = -0.2, size = 3.2) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, max(dr_prov$pct_dr) * 1.2)) +
+  labs(x = NULL, y = "% Drug-resistant TB (MDR + XDR)") +
+  theme_nmc()
+```
+
+## Top 20 districts by notification count
+
+```{r top-districts}
+#| label: tbl-top-districts
+#| tbl-cap: "Top 20 districts by total TB notification count, South Africa, 2020–present."
+
+incidence_dist_df %>%
+  arrange(desc(Notifications)) %>%
+  slice(1:20) %>%
+  rename(District = district_standard, `Pop (k)` = pop_total,
+         `DR %` = DR_pct) %>%
+  select(Province, District, Notifications, Deaths, `CFR (%)` = CFR,
+         `Incidence per 100k` = Incidence, `DR %`, `Pop (k)`) %>%
+  flextable() %>%
+  bold(part = "header") %>%
+  bg(i = ~ `CFR (%)` > 5, j = "CFR (%)", bg = "#FFCDD2") %>%
+  bg(i = ~ `DR %` > 10, j = "DR %", bg = "#FFF3E0") %>%
+  set_table_properties(layout = "autofit") %>%
+  fontsize(size = 9, part = "all") %>%
+  add_footer_lines("Pink = CFR > 5%. Orange = DR > 10%.")
+```
+
+---
+
+# Mortality Profile {#sec-mortality}
+
+## Deaths by TB type and year
+
+```{r deaths-type}
+#| label: fig-deaths-type
+#| fig-cap: "Annual TB deaths by TB type, South Africa."
+#| fig-height: 5
+
+tb %>%
+  filter(deceased) %>%
+  count(year = Year_notification, tb_type) %>%
+  ggplot(aes(x = factor(year), y = n, fill = tb_type)) +
+  geom_col(position = "stack", width = 0.75) +
+  scale_fill_manual(values = tb_cols, name = "TB Type") +
+  labs(x = "Year", y = "Deaths (n)") +
+  theme_nmc() +
+  theme(legend.position = "bottom")
+```
+
+## CFR by TB type over time
+
+```{r cfr-type-time}
+#| label: fig-cfr-type-time
+#| fig-cap: "Case fatality ratio (%) by TB type and year, South Africa."
+#| fig-height: 5
+
+tb %>%
+  group_by(year = Year_notification, tb_type) %>%
+  summarise(n = n(), deaths = sum(deceased, na.rm = TRUE),
+            cfr = deaths / n * 100, .groups = "drop") %>%
+  ggplot(aes(x = factor(year), y = cfr, fill = tb_type)) +
+  geom_col(position = "dodge", width = 0.85) +
+  geom_text(aes(label = paste0(round(cfr, 1), "%")),
+            position = position_dodge(width = 0.85),
+            vjust = -0.3, size = 2.5) +
+  scale_fill_manual(values = tb_cols, name = "TB Type") +
+  labs(x = "Year", y = "CFR (%)") +
+  theme_nmc() +
+  theme(legend.position = "bottom")
+```
+
+---
+
+# Reporting & Facility Analysis {#sec-facilities}
+
+## Unique reporting facilities per year
+
+```{r facilities-trend}
+#| label: fig-facilities
+#| fig-cap: "Number of unique health facilities reporting at least one TB notification per year, South Africa."
+#| fig-height: 4
+
+tb %>%
+  filter(!is.na(facility)) %>%
+  group_by(Year_notification) %>%
+  summarise(n_facilities = n_distinct(facility), .groups = "drop") -> fac_df
+
+ggplot(fac_df, aes(x = factor(Year_notification))) +
+  geom_col(aes(y = n_facilities, fill = "Unique facilities"), width = 0.6, alpha = 0.85) +
+  geom_text(aes(y = n_facilities, label = n_facilities), vjust = -0.4, size = 3.5) +
+  scale_fill_manual(values = c("Unique facilities" = "#4CAF50"), name = NULL) +
+  labs(x = "Year", y = "Unique reporting facilities (n)") +
+  theme_nmc() +
+  theme(legend.position = "bottom")
+```
+
+---
+
+::: {.callout-note}
+## Interpretation Notes
+
+**Drug-resistant TB (DR-TB):**
+
+- **MDR-TB** = Multidrug-resistant TB, resistant to at least isoniazid and rifampicin
+- **XDR-TB** = Extensively drug-resistant TB, MDR-TB plus resistance to fluoroquinolones and at least one injectable second-line drug
+
+**Data limitations:**
+
+- This report covers notifiable TB forms reported through NMC only
+- Routine TB case data is managed through the ETR.Net electronic TB register system
+- Case fatality reflects deaths among notified cases; actual mortality may differ
+
+See [Data Quality](../../quality.html) for reporting completeness and [Methods](../../methods.html) for full definitions.
+:::
+
+---
+
+*Report generated: `r format(Sys.Date(), "%d %B %Y")` | NMC Surveillance Unit*

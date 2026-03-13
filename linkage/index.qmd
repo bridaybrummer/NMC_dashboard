@@ -1,0 +1,964 @@
+---
+title: "Opportunities for Linkage"
+subtitle: "Completeness of patient identifiers and SA ID number validity across NMC notifications"
+format:
+  html:
+    toc: true
+---
+
+::: {.callout-note collapse="true"}
+## About this Page
+
+This page reports on the quality of patient identifier fields that enable record linkage across health information systems.
+
+| Identifier | Column | Purpose |
+|---|---|---|
+| **SA ID Number** | `patient_id_no` | Links to Home Affairs, NHLS, vital registration |
+| **Hospital Folder No.** | `folder_no` | Links to facility-level clinical records |
+| **MRN** | `mrn` (if present) | Medical Record Number from facility HIS |
+
+**Completeness classification:**
+
+- **Present** — a non-empty value was recorded (excluding "Unknown")
+- **Missing** — field is NA, empty string, whitespace-only, or recorded as "Unknown"
+
+**SA ID validation** applies two sequential checks to IDs classified as "present":
+
+1. *Correct length* — a valid SA ID is exactly **13 numeric digits**. IDs with letters, spaces, or wrong length fail this check.
+2. *Luhn checksum* — the last digit is a checksum computed from the first 12; IDs that fail this are likely transcription errors (digit swaps, typos).
+
+*Data pipeline:* `R/prepare_dashboard_data.r` → `data/processed/agg_linkage_*.rds`
+:::
+
+```{r}
+#| label: setup
+#| include: false
+#| message: false
+#| warning: false
+
+suppressPackageStartupMessages({
+  library(data.table)
+  library(plotly)
+  library(DT)
+  library(lubridate)
+})
+
+# Load aggregated linkage data
+lnk_prov <- readRDS("data/processed/agg_linkage_prov.rds")
+lnk_cond <- readRDS("data/processed/agg_linkage_cond.rds")
+id_lens   <- readRDS("data/processed/agg_id_lengths.rds")
+meta      <- readRDS("data/processed/linkage_meta.rds")
+
+# Load source data for case_type (lab vs clinical) if available
+agg_source_path <- "data/processed/agg_source.rds"
+if (file.exists(agg_source_path)) {
+  agg_source <- readRDS(agg_source_path)
+  setDT(agg_source)
+  source_available <- TRUE
+} else {
+  agg_source <- NULL
+  source_available <- FALSE
+}
+setDT(lnk_prov); setDT(lnk_cond); setDT(id_lens)
+
+mrn_available <- isTRUE(meta$mrn_col_found)
+
+latest_month <- max(lnk_prov$month)
+
+# Helper: aggregate over all time for latest 12 months
+recent <- lnk_prov[month >= (latest_month - 365)]
+
+# National totals (last 12 months)
+nat <- recent[, .(
+  n_total          = sum(n_total),
+  n_id_present     = sum(n_id_present),
+  n_folder_present = sum(n_folder_present),
+  n_mrn_present    = sum(n_mrn_present),
+  n_id_correct_len = sum(n_id_correct_len),
+  n_id_luhn_pass   = sum(n_id_luhn_pass)
+)]
+
+pct <- function(num, den) round(100 * num / pmax(den, 1), 1)
+
+pct_id     <- pct(nat$n_id_present,     nat$n_total)
+pct_folder <- pct(nat$n_folder_present, nat$n_total)
+pct_mrn    <- if (mrn_available) pct(nat$n_mrn_present, nat$n_total) else NA_real_
+pct_len    <- pct(nat$n_id_correct_len, nat$n_id_present)
+pct_luhn   <- pct(nat$n_id_luhn_pass,  nat$n_id_present)
+
+traffic_light <- function(p) {
+  if (is.na(p)) "⬜ N/A"
+  else if (p >= 80) paste0("🟢 ", p, "%")
+  else if (p >= 50) paste0("🟡 ", p, "%")
+  else paste0("🔴 ", p, "%")
+}
+```
+
+**Reporting period:** last 12 months to `r format(latest_month, "%B %Y")` — `r format(nat$n_total, big.mark = ",")` notifications
+
+---
+
+## Summary
+
+| Identifier | Completeness (national) | Status |
+|---|---|---|
+| SA ID Number (`patient_id_no`) | `r pct_id`% | `r traffic_light(pct_id)` |
+| Hospital Folder No. (`folder_no`) | `r pct_folder`% | `r traffic_light(pct_folder)` |
+| MRN | `r ifelse(mrn_available, paste0(pct_mrn, "%"), "Column not found in data")` | `r traffic_light(pct_mrn)` |
+
+*Among cases **with** an SA ID recorded:*
+
+| Check | Pass rate | Status |
+|---|---|---|
+| Correct length (13 digits) | `r pct_len`% | `r traffic_light(pct_len)` |
+| Passes Luhn algorithm | `r pct_luhn`% | `r traffic_light(pct_luhn)` |
+
+---
+
+## SA ID Number Processing Pipeline
+
+The following breakdown shows how notifications flow through the SA ID validation pipeline:
+
+```{r}
+#| label: id-pipeline
+#| echo: false
+
+# Calculate pipeline numbers
+n_start         <- nat$n_total
+n_missing       <- nat$n_total - nat$n_id_present
+n_present       <- nat$n_id_present
+n_wrong_len     <- nat$n_id_present - nat$n_id_correct_len
+n_correct_len   <- nat$n_id_correct_len
+n_luhn_fail     <- nat$n_id_correct_len - nat$n_id_luhn_pass
+n_luhn_pass     <- nat$n_id_luhn_pass
+```
+
+::: {.callout-note collapse="false"}
+### What counts as "Missing"?
+
+A SA ID is classified as **missing** if the `patient_id_no` field is:
+
+- `NA` (null / not recorded)
+- Empty string (`""`)
+- Contains only whitespace
+- Recorded as `"Unknown"` (case-insensitive)
+
+This category includes both cases where **no attempt was made** to capture the ID and cases where capture was attempted but the value was **not available** or **deliberately withheld**. The NMC system does not distinguish between these scenarios, so all are grouped as "missing".
+:::
+
+### Data Flow Summary (Last 12 Months)
+  
+| Stage | Count | Description |
+|:------|------:|:------------|
+| **1. Total notifications** | `r format(n_start, big.mark = ",")` | All notifications received in reporting period |
+| **2. ID missing** | `r format(n_missing, big.mark = ",")` (`r round(100 * n_missing / n_start, 1)`%) | Field is NA, empty, whitespace-only, or "Unknown" |
+| **3. ID present (entered)** | `r format(n_present, big.mark = ",")` (`r round(100 * n_present / n_start, 1)`%) | Some value was recorded in `patient_id_no` |
+| **4. Wrong length** | `r format(n_wrong_len, big.mark = ",")` (`r round(100 * n_wrong_len / n_present, 1)`% of entered) | Present but not exactly 13 numeric digits |
+| **5. Correct length (13 digits)** | `r format(n_correct_len, big.mark = ",")` (`r round(100 * n_correct_len / n_present, 1)`% of entered) | Exactly 13 numeric digits — eligible for Luhn check |
+| **6. Luhn check fails** | `r format(n_luhn_fail, big.mark = ",")` (`r round(100 * n_luhn_fail / n_correct_len, 1)`% of 13-digit) | Checksum invalid — likely transcription error |
+| **7. Luhn check passes** | `r format(n_luhn_pass, big.mark = ",")` (`r round(100 * n_luhn_pass / n_correct_len, 1)`% of 13-digit) | Valid SA ID format — suitable for linkage |
+
+```{r}
+#| label: fig-pipeline-sankey
+#| fig-cap: "SA ID validation pipeline — data flow from total notifications to validated IDs"
+#| fig-height: 4
+
+# Simple horizontal bar showing pipeline attrition
+pipeline_df <- data.frame(
+  stage = factor(c("Total notifications", "ID present", "Correct length (13)", "Luhn valid"),
+                 levels = c("Total notifications", "ID present", "Correct length (13)", "Luhn valid")),
+  n     = c(n_start, n_present, n_correct_len, n_luhn_pass),
+  pct   = round(100 * c(n_start, n_present, n_correct_len, n_luhn_pass) / n_start, 1)
+)
+
+plot_ly(pipeline_df, x = ~n, y = ~stage, type = "bar", orientation = "h",
+        marker = list(color = c("#6b7280", "#3b82f6", "#f59e0b", "#16a34a")),
+        text = ~paste0(format(n, big.mark = ","), " (", pct, "%)"),
+        textposition = "outside",
+        hovertemplate = "<b>%{y}</b><br>%{x:,.0f} notifications<br>%{text}<extra></extra>") |>
+  layout(
+    xaxis = list(title = "Number of notifications"),
+    yaxis = list(title = "", autorange = "reversed", automargin = TRUE),
+    margin = list(l = 150, r = 80)
+  )
+```
+
+---
+
+## Linkage by Condition: Summary Table
+
+```{r}
+#| label: cond-setup
+#| include: false
+
+# Pre-compute condition-level aggregates needed for summary table and scatter plots
+cond_recent <- lnk_cond[month >= (latest_month - 365)]
+cond_sum <- cond_recent[, .(
+  n_total          = sum(n_total),
+  n_id_present     = sum(n_id_present),
+  n_folder_present = sum(n_folder_present),
+  n_mrn_present    = sum(n_mrn_present),
+  n_id_correct_len = sum(n_id_correct_len),
+  n_id_luhn_pass   = sum(n_id_luhn_pass)
+), by = condition]
+cond_sum[, `:=`(
+  pct_id     = pct(n_id_present,     n_total),
+  pct_folder = pct(n_folder_present, n_total),
+  pct_mrn    = pct(n_mrn_present,    n_total)
+)]
+```
+
+```{r}
+#| label: tbl-linkage-summary
+
+# Helper to format n/N (%)
+fmt_nN <- function(n, N) {
+
+  paste0(format(n, big.mark = ","), "/", format(N, big.mark = ","), 
+         " (", round(100 * n / pmax(N, 1), 1), "%)")
+}
+
+cond_sum[, `:=`(
+  `SA ID`        = fmt_nN(n_id_present,     n_total),
+  `Folder No.`   = fmt_nN(n_folder_present, n_total),
+  `MRN`          = fmt_nN(n_mrn_present,    n_total),
+  `ID length OK` = fmt_nN(n_id_correct_len, n_id_present),
+  `ID Luhn OK`   = fmt_nN(n_id_luhn_pass,   n_id_present),
+  `Linkable`     = fmt_nN(n_id_luhn_pass,   n_total)
+)]
+
+cols_to_show <- c("condition", "n_total", "SA ID", "Linkable", "Folder No.",
+                  "ID length OK", "ID Luhn OK")
+if (mrn_available) cols_to_show <- append(cols_to_show, "MRN", after = 5)
+
+DT::datatable(
+  setnames(copy(cond_sum)[order(-n_total), .SD, .SDcols = cols_to_show],
+           c("Condition", "Total", "SA ID", "Linkable",  "Folder No.",
+             if (mrn_available) c("MRN", "ID length OK", "ID Luhn OK")
+             else c("ID length OK", "ID Luhn OK"))),
+  rownames = FALSE,
+  options  = list(pageLength = 15, dom = "ftp"),
+  caption  = paste("Linkage completeness by condition — last 12 months to",
+                   format(latest_month, "%B %Y"),
+                   ". 'Linkable' = Luhn-valid IDs as % of all notifications.")
+)
+```
+
+---
+
+## Key Findings & Interpretation
+
+```{r}
+#| label: key-findings-calc
+#| include: false
+
+# Calculate condition-level metrics for interpretation
+cond_metrics <- lnk_cond[month >= (latest_month - 365), .(
+  n_total          = sum(n_total),
+  n_id_present     = sum(n_id_present),
+  n_id_correct_len = sum(n_id_correct_len),
+  n_id_luhn_pass   = sum(n_id_luhn_pass)
+), by = condition]
+
+cond_metrics[, `:=`(
+  pct_id_present = round(100 * n_id_present / pmax(n_total, 1), 1),
+  pct_id_missing = round(100 * (n_total - n_id_present) / pmax(n_total, 1), 1),
+  pct_luhn_valid = round(100 * n_id_luhn_pass / pmax(n_id_present, 1), 1)
+)]
+
+# Filter to conditions with meaningful volume (>100 cases)
+cond_vol <- cond_metrics[n_total >= 100]
+
+# Top 5 conditions by Luhn validity (among those with IDs present)
+top_luhn <- cond_vol[n_id_present >= 50][order(-pct_luhn_valid)][1:min(5, .N)]
+
+# Bottom 5 conditions by ID completeness (most missing)
+bottom_complete <- cond_vol[order(pct_id_present)][1:min(5, .N)]
+
+# Get predominant case_type per condition if available
+if (source_available) {
+  cond_source <- agg_source[, .(count = sum(count)), by = .(condition, case_type)]
+  cond_source[, total := sum(count), by = condition]
+  cond_source[, pct := round(100 * count / total, 0)]
+  # Get dominant type per condition
+  dominant_type <- cond_source[, .SD[which.max(count)], by = condition][, .(condition, case_type, pct)]
+  setnames(dominant_type, "case_type", "dominant_type")
+  bottom_complete <- merge(bottom_complete, dominant_type, by = "condition", all.x = TRUE)
+}
+
+# Overall linkage feasibility assessment
+overall_luhn_pct <- round(100 * sum(cond_metrics$n_id_luhn_pass) / 
+                          pmax(sum(cond_metrics$n_id_present), 1), 1)
+overall_id_pct   <- round(100 * sum(cond_metrics$n_id_present) / 
+                          pmax(sum(cond_metrics$n_total), 1), 1)
+
+# Identify conditions ready for linkage (≥50% completeness AND ≥80% Luhn validity)
+# Also calculate net linkage rate per condition
+cond_metrics[, net_linkage_pct := round(100 * n_id_luhn_pass / pmax(n_total, 1), 1)]
+ready_conditions <- cond_vol[pct_id_present >= 50 & pct_luhn_valid >= 80][order(-n_id_luhn_pass)]
+ready_conditions[, net_linkage := round(100 * n_id_luhn_pass / pmax(n_total, 1), 1)]
+n_ready <- nrow(ready_conditions)
+```
+
+### Bottom Line: Is Linkage Feasible?
+
+::: {.callout-important}
+## Linkage Readiness Assessment
+
+**Overall SA ID completeness:** `r overall_id_pct`% of notifications have an SA ID recorded.
+
+**Of those with SA IDs:** `r overall_luhn_pct`% pass Luhn validation (valid format for linkage).
+
+**Net linkage-ready records:** `r round(overall_id_pct * overall_luhn_pct / 100, 1)`% of all notifications have a valid, linkable SA ID.
+
+```{r}
+#| echo: false
+#| results: asis
+
+net_pct <- round(overall_id_pct * overall_luhn_pct / 100, 1)
+
+if (net_pct >= 70) {
+  cat("\n**Assessment:** 🟢 **Feasible for population-level linkage.** The majority of records can be linked to external data sources (Home Affairs, NHLS, vital registration).\n")
+} else if (net_pct >= 50) {
+  cat("\n**Assessment:** 🟡 **Partially feasible.** Linkage is possible but will have substantial data loss. Results should be interpreted with caution for representativeness.\n")
+} else {
+  cat("\n**Assessment:** 🔴 **Not currently feasible for robust linkage.** Fewer than half of notifications can be reliably linked. Priority: improve ID capture at point of notification.\n")
+}
+
+# List conditions ready for linkage
+if (n_ready > 0) {
+  cat("\n\n**Conditions ready for linkage** (≥50% ID completeness AND ≥80% Luhn validity):\n\n")
+  for (i in seq_len(min(n_ready, 10))) {
+    cond <- ready_conditions$condition[i]
+    n_valid <- format(ready_conditions$n_id_luhn_pass[i], big.mark = ",")
+    net_pct_cond <- ready_conditions$net_linkage[i]
+    cat(paste0("- **", cond, "**: ", n_valid, " linkable IDs (", net_pct_cond, "% of notifications)\n"))
+  }
+  if (n_ready > 10) {
+    cat(paste0("\n...and ", n_ready - 10, " more conditions.\n"))
+  }
+} else {
+  cat("\n\n**No conditions currently meet the threshold** for recommended linkage (≥50% ID completeness AND ≥80% Luhn validity). See the matrices below to identify priority improvements.\n")
+}
+```
+:::
+
+### Completeness vs Validity Trade-off
+
+This matrix shows the **trade-off between ID completeness and ID validity**. The ideal conditions are in the upper-right (high completeness AND high validity):
+
+```{r}
+#| label: fig-completeness-validity
+#| fig-cap: "ID Completeness vs Validity matrix. Quadrants help identify intervention priorities: improve capture (left), improve quality (bottom), or ready for linkage (upper-right)."
+#| fig-height: 6
+
+# Calculate composite score for conditions
+score_data <- cond_vol[n_id_present >= 10][, .(
+  condition,
+  n_total,
+  n_id_present,
+  n_id_luhn_pass,
+  pct_id_present,
+  pct_luhn_valid
+)]
+
+# Normalize volume to 0-100 scale (log-transformed for better spread)
+score_data[, vol_norm := round(100 * (log10(n_id_luhn_pass + 1) - min(log10(n_id_luhn_pass + 1))) / 
+                               (max(log10(n_id_luhn_pass + 1)) - min(log10(n_id_luhn_pass + 1)) + 0.01), 1)]
+
+# Composite score: weighted average
+score_data[, linkage_score := round(0.4 * pct_id_present + 0.3 * pct_luhn_valid + 0.3 * vol_norm, 1)]
+
+# Use same score_data
+matrix_data <- score_data[!is.na(pct_id_present) & !is.na(pct_luhn_valid)]
+
+# Label for hover
+matrix_data[, hover_label := paste0(
+  "<b>", condition, "</b><br>",
+  "Total cases: ", format(n_total, big.mark = ","), "<br>",
+  "ID completeness: ", pct_id_present, "%<br>",
+  "Luhn validity: ", pct_luhn_valid, "%<br>",
+  "Valid IDs: ", format(n_id_luhn_pass, big.mark = ","), "<br>",
+  "<b>Linkage score: ", linkage_score, "</b>"
+)]
+
+# Quadrant thresholds
+comp_thresh <- 50  # ID completeness threshold
+valid_thresh <- 80 # Validity threshold
+
+# Assign quadrant colors
+matrix_data[, quadrant := fcase(
+  pct_id_present >= comp_thresh & pct_luhn_valid >= valid_thresh, "Ready for linkage",
+  pct_id_present >= comp_thresh & pct_luhn_valid < valid_thresh,  "Improve ID quality",
+  pct_id_present < comp_thresh & pct_luhn_valid >= valid_thresh,  "Improve ID capture",
+  default = "Needs both improvements"
+)]
+
+quad_colors <- c(
+ "Ready for linkage" = "#16a34a",
+ "Improve ID quality" = "#f59e0b", 
+ "Improve ID capture" = "#3b82f6",
+ "Needs both improvements" = "#ef4444"
+)
+
+plot_ly(matrix_data, 
+        x = ~pct_id_present, 
+        y = ~pct_luhn_valid,
+        size = ~n_id_luhn_pass,
+        sizes = c(8, 50),
+        type = "scatter",
+        mode = "markers",
+        color = ~quadrant,
+        colors = quad_colors,
+        text = ~condition,
+        hovertemplate = ~hover_label,
+        marker = list(
+          line = list(color = "#333", width = 0.5),
+          opacity = 0.8
+        )) |>
+  layout(
+    xaxis = list(
+      title = "ID Completeness (% with ID recorded)",
+      range = c(0, 105),
+      gridcolor = "#e5e7eb"
+    ),
+    yaxis = list(
+      title = "ID Validity (% of recorded IDs passing Luhn)",
+      range = c(0, 105),
+      gridcolor = "#e5e7eb"
+    ),
+    shapes = list(
+      # Vertical line at 50% completeness
+      list(type = "line", x0 = comp_thresh, x1 = comp_thresh, y0 = 0, y1 = 100,
+           line = list(dash = "dash", color = "#9ca3af", width = 1)),
+      # Horizontal line at 80% validity
+      list(type = "line", x0 = 0, x1 = 100, y0 = valid_thresh, y1 = valid_thresh,
+           line = list(dash = "dash", color = "#9ca3af", width = 1))
+    ),
+    annotations = list(
+      # Quadrant labels
+      list(x = 75, y = 95, text = "✓ READY FOR LINKAGE", showarrow = FALSE,
+           font = list(size = 11, color = "#16a34a", weight = "bold")),
+      list(x = 25, y = 95, text = "↑ Improve capture", showarrow = FALSE,
+           font = list(size = 10, color = "#3b82f6")),
+      list(x = 75, y = 40, text = "↑ Improve quality", showarrow = FALSE,
+           font = list(size = 10, color = "#f59e0b")),
+      list(x = 25, y = 40, text = "Needs work", showarrow = FALSE,
+           font = list(size = 10, color = "#ef4444"))
+    ),
+    legend = list(orientation = "h", y = -0.15),
+    plot_bgcolor = "#fafafa"
+  )
+```
+
+::: {.callout-tip}
+**Using this matrix to prioritize:**
+
+| Quadrant | Action |
+|:---------|:-------|
+| **Ready for linkage** (upper-right, green) | Proceed with linkage studies — sufficient data quality |
+| **Improve ID quality** (lower-right, orange) | IDs captured but often invalid — implement Luhn validation at entry |
+| **Improve ID capture** (upper-left, blue) | Good quality when captured, but too many missing — training/workflow focus |
+| **Needs both** (lower-left, red) | Fundamental notification quality issues — start with capture, then quality |
+
+Bubble size = number of valid IDs available for linkage.
+:::
+
+### Linkage Priority Matrix
+
+This scatter plot helps identify conditions that are **both high-volume AND have good ID quality** — the "sweet spot" for impactful linkage studies (upper-right quadrant):
+
+```{r}
+#| label: fig-linkage-priority
+#| fig-cap: "Linkage priority matrix: N valid IDs vs % Luhn validity by condition. Bubble size = total notifications. Conditions in the upper-right offer the best combination of volume and data quality for linkage."
+#| fig-height: 6
+
+# Use cond_metrics from key-findings-calc chunk (filtered to n_total >= 100)
+scatter_data <- cond_vol[n_id_present >= 10]  # need at least some IDs to calculate %
+
+# Add readable labels for hover
+scatter_data[, label := paste0(
+  "<b>", condition, "</b><br>",
+  "Total notifications: ", format(n_total, big.mark = ","), "<br>",
+  "IDs recorded: ", format(n_id_present, big.mark = ","), " (", pct_id_present, "%)<br>",
+  "Luhn-valid IDs: ", format(n_id_luhn_pass, big.mark = ","), " (", pct_luhn_valid, "% of recorded)"
+)]
+
+# Identify "sweet spot" threshold
+median_n <- median(scatter_data$n_id_luhn_pass, na.rm = TRUE)
+median_pct <- median(scatter_data$pct_luhn_valid, na.rm = TRUE)
+
+plot_ly(scatter_data, 
+        x = ~n_id_luhn_pass, 
+        y = ~pct_luhn_valid,
+        size = ~n_total,
+        sizes = c(10, 60),
+        type = "scatter",
+        mode = "markers",
+        marker = list(
+          color = ~pct_luhn_valid,
+          colorscale = list(c(0, "#ef4444"), c(0.5, "#fbbf24"), c(1, "#16a34a")),
+          showscale = TRUE,
+          colorbar = list(title = "% Valid"),
+          line = list(color = "#333", width = 0.5),
+          opacity = 0.8
+        ),
+        text = ~condition,
+        hovertemplate = ~label) |>
+  layout(
+    xaxis = list(
+      title = "Number of Luhn-valid IDs (log scale)",
+      type = "log",
+      gridcolor = "#e5e7eb"
+    ),
+    yaxis = list(
+      title = "% of recorded IDs that pass Luhn validation",
+      range = c(0, 105),
+      gridcolor = "#e5e7eb"
+    ),
+    # Add quadrant lines at medians
+    shapes = list(
+      list(type = "line", x0 = median_n, x1 = median_n, y0 = 0, y1 = 100,
+           line = list(dash = "dot", color = "#9ca3af", width = 1)),
+      list(type = "line", x0 = min(scatter_data$n_id_luhn_pass, na.rm = TRUE), 
+           x1 = max(scatter_data$n_id_luhn_pass, na.rm = TRUE), y0 = 80, y1 = 80,
+           line = list(dash = "dash", color = "#16a34a", width = 1))
+    ),
+    annotations = list(
+      list(x = log10(max(scatter_data$n_id_luhn_pass, na.rm = TRUE)), y = 82,
+           text = "80% target", showarrow = FALSE, xanchor = "right",
+           font = list(size = 10, color = "#16a34a")),
+      list(x = log10(max(scatter_data$n_id_luhn_pass, na.rm = TRUE) * 0.9), y = 95,
+           text = "← High volume, high quality", showarrow = FALSE, xanchor = "right",
+           font = list(size = 11, color = "#16a34a", weight = "bold"))
+    ),
+    plot_bgcolor = "#fafafa"
+  )
+```
+
+::: {.callout-note}
+**Interpreting this plot:**
+
+- **Upper-right quadrant** (high volume + high validity): Best candidates for linkage — enough cases for statistical power with good data quality.
+- **Upper-left** (low volume + high validity): Good data quality but small numbers may limit study power.
+- **Lower-right** (high volume + low validity): Priority for data quality improvement — high public health relevance but ID quality limits linkage.
+- **Lower-left** (low volume + low validity): May need fundamental improvements in notification practices.
+
+Bubble size represents total notifications (larger = more cases reported).
+:::
+
+### Linkage Candidate Score
+
+This plot ranks conditions by a **composite linkage score** that balances three key factors:
+
+1. **ID Completeness** (40%) — What proportion of cases have an ID recorded? Higher = more representative linked dataset.
+2. **ID Validity** (30%) — Of recorded IDs, what proportion pass Luhn? Higher = fewer linkage failures.
+3. **Volume** (30%) — How many linkable cases are available? Higher = greater statistical power and public health impact.
+
+```{r}
+#| label: fig-linkage-score
+#| fig-cap: "Conditions ranked by composite linkage candidate score. Higher scores indicate better candidates for linkage studies."
+#| fig-height: 7
+
+# Sort by score
+setorder(score_data, -linkage_score)
+
+# Top 20 for display
+top_score <- score_data[1:min(20, .N)]
+setorder(top_score, linkage_score)  # reverse for horizontal bars
+
+# Create stacked bar showing score components
+plot_ly(top_score, y = ~condition, orientation = "h") |>
+  add_bars(x = ~(0.4 * pct_id_present), name = "ID Completeness (40%)",
+           marker = list(color = "#3b82f6"),
+           hovertemplate = "<b>%{y}</b><br>Completeness contribution: %{x:.1f}<extra></extra>") |>
+  add_bars(x = ~(0.3 * pct_luhn_valid), name = "ID Validity (30%)",
+           marker = list(color = "#16a34a"),
+           hovertemplate = "<b>%{y}</b><br>Validity contribution: %{x:.1f}<extra></extra>") |>
+  add_bars(x = ~(0.3 * vol_norm), name = "Volume (30%)",
+           marker = list(color = "#f59e0b"),
+           hovertemplate = "<b>%{y}</b><br>Volume contribution: %{x:.1f}<extra></extra>") |>
+  add_annotations(
+    x = ~linkage_score + 2,
+    y = ~condition,
+    text = ~paste0(linkage_score),
+    showarrow = FALSE,
+    font = list(size = 10, color = "#374151")
+  ) |>
+  layout(
+    barmode = "stack",
+    xaxis = list(title = "Linkage Candidate Score (0–100)", range = c(0, 110)),
+    yaxis = list(title = "", automargin = TRUE),
+    legend = list(orientation = "h", y = -0.15),
+    margin = list(l = 180)
+  )
+```
+
+### Conditions with Highest Luhn Validity
+
+These conditions have the **best quality SA ID numbers** — highest proportion of recorded IDs that pass Luhn validation (among conditions with ≥50 recorded IDs):
+
+```{r}
+#| label: tbl-top-luhn
+#| echo: false
+
+if (nrow(top_luhn) > 0) {
+  display_top <- top_luhn[, .(
+    Condition = condition,
+    `Total cases` = format(n_total, big.mark = ","),
+    `ID recorded` = paste0(pct_id_present, "%"),
+    `Luhn valid` = paste0(pct_luhn_valid, "%")
+  )]
+  knitr::kable(display_top, align = c("l", "r", "r", "r"))
+} else {
+  cat("Insufficient data for analysis.")
+}
+```
+
+### Conditions with Lowest ID Completeness
+
+These conditions have the **most missing SA ID numbers** — priority targets for improving capture:
+
+```{r}
+#| label: tbl-bottom-complete
+#| echo: false
+
+if (nrow(bottom_complete) > 0) {
+  if (source_available && "dominant_type" %in% names(bottom_complete)) {
+    display_bottom <- bottom_complete[, .(
+      Condition = condition,
+      `Total cases` = format(n_total, big.mark = ","),
+      `ID missing` = paste0(pct_id_missing, "%"),
+      `Notification type` = paste0(dominant_type, " (", pct, "%)")
+    )]
+  } else {
+    display_bottom <- bottom_complete[, .(
+      Condition = condition,
+      `Total cases` = format(n_total, big.mark = ","),
+      `ID missing` = paste0(pct_id_missing, "%")
+    )]
+  }
+  knitr::kable(display_bottom, align = c("l", "r", "r", if (source_available) "l" else NULL))
+} else {
+  cat("Insufficient data for analysis.")
+}
+```
+
+```{r}
+#| echo: false
+#| results: asis
+
+if (source_available && "dominant_type" %in% names(bottom_complete)) {
+  n_lab <- sum(grepl("[Ll]ab", bottom_complete$dominant_type, ignore.case = TRUE))
+  n_clin <- nrow(bottom_complete) - n_lab
+  
+  if (n_lab > n_clin) {
+    cat("\n::: {.callout-note}\n")
+    cat("**Observation:** Most conditions with low ID completeness are predominantly **laboratory-notified**. ")
+    cat("This is expected — laboratory notifications often lack patient identifiers when specimens are submitted without full demographic data. ")
+    cat("Interventions should focus on improving specimen submission forms and laboratory-clinician communication.\n")
+    cat(":::\n")
+  } else if (n_clin > n_lab) {
+    cat("\n::: {.callout-warning}\n")
+    cat("**Observation:** Most conditions with low ID completeness are predominantly **clinically-notified**. ")
+    cat("This suggests data entry gaps at the facility level. ")
+    cat("Priority: work with facility IPC practitioners to ensure ID capture at time of clinical notification.\n")
+    cat(":::\n")
+  }
+}
+```
+
+---
+
+::: {.callout-tip}
+## Improving Linkage Quality
+
+- **SA ID not captured**: Priority issue — work with facility IPC practitioners to ensure ID capture at time of notification.
+- **Wrong-length IDs**: Likely transcription errors; consider validation at point of entry in the NMC system.
+- **Luhn failures on 13-digit IDs**: Transposition errors (e.g. digit swap) — Luhn validation at point of entry would catch these immediately.
+- **Folder number missing**: Critical for linking back to facility clinical records; should be mandatory for hospitalised cases.
+
+See [Data Quality](../quality.html) for reporting completeness and [Methods](../methods.html) for full definitions.
+:::
+
+---
+
+# Supporting Analysis {#sec-supporting}
+
+The following sections provide additional exploratory breakdowns by province, time, and condition.
+
+## Completeness by Province
+
+Proportion of notifications in the last 12 months where each identifier was recorded (non-missing, non-"Unknown").
+
+```{r}
+#| label: fig-completeness-prov
+#| fig-cap: "Identifier completeness by province (last 12 months)"
+
+prov_sum <- recent[, .(
+  n_total          = sum(n_total),
+  n_id_present     = sum(n_id_present),
+  n_folder_present = sum(n_folder_present),
+  n_mrn_present    = sum(n_mrn_present)
+), by = prov_]
+
+prov_sum[, `:=`(
+  pct_id     = pct(n_id_present,     n_total),
+  pct_folder = pct(n_folder_present, n_total),
+  pct_mrn    = pct(n_mrn_present,    n_total)
+)]
+
+fig_prov <- plot_ly(prov_sum, x = ~prov_) |>
+  add_bars(y = ~pct_id,     name = "SA ID",          marker = list(color = "#1d4ed8"),
+           hovertemplate = "<b>%{x}</b><br>SA ID: %{y}%<extra></extra>") |>
+  add_bars(y = ~pct_folder, name = "Folder No.",      marker = list(color = "#065f46"),
+           hovertemplate = "<b>%{x}</b><br>Folder: %{y}%<extra></extra>")
+
+if (mrn_available) {
+  fig_prov <- fig_prov |>
+    add_bars(y = ~pct_mrn, name = "MRN", marker = list(color = "#b45309"),
+             hovertemplate = "<b>%{x}</b><br>MRN: %{y}%<extra></extra>")
+}
+
+fig_prov |>
+  layout(
+    barmode  = "group",
+    yaxis    = list(title = "% Complete", range = c(0, 100)),
+    xaxis    = list(title = "Province"),
+    shapes   = list(
+      list(type = "line", x0 = -0.5, x1 = 8.5,
+           y0 = 80, y1 = 80,
+           line = list(dash = "dash", color = "#6b7280", width = 1))
+    ),
+    legend   = list(orientation = "h", y = -0.2),
+    annotations = list(list(
+      x = 8.5, y = 81, text = "80% target", showarrow = FALSE,
+      font = list(size = 10, color = "#6b7280"), xanchor = "right"
+    ))
+  )
+```
+
+---
+
+## Completeness Over Time (National Trend)
+
+Monthly completeness across all provinces for each identifier.
+
+```{r}
+#| label: fig-trend
+#| fig-cap: "Monthly identifier completeness — national"
+
+trend <- lnk_prov[, .(
+  n_total          = sum(n_total),
+  n_id_present     = sum(n_id_present),
+  n_folder_present = sum(n_folder_present),
+  n_mrn_present    = sum(n_mrn_present)
+), by = month]
+trend[, `:=`(
+  pct_id     = pct(n_id_present,     n_total),
+  pct_folder = pct(n_folder_present, n_total),
+  pct_mrn    = pct(n_mrn_present,    n_total)
+)]
+
+fig_trend <- plot_ly(trend, x = ~month) |>
+  add_lines(y = ~pct_id,     name = "SA ID",     line = list(color = "#1d4ed8", width = 2),
+            hovertemplate = "<b>%{x|%b %Y}</b><br>SA ID: %{y}%<extra></extra>") |>
+  add_lines(y = ~pct_folder, name = "Folder No.", line = list(color = "#065f46", width = 2),
+            hovertemplate = "<b>%{x|%b %Y}</b><br>Folder: %{y}%<extra></extra>")
+
+if (mrn_available) {
+  fig_trend <- fig_trend |>
+    add_lines(y = ~pct_mrn, name = "MRN", line = list(color = "#b45309", width = 2),
+              hovertemplate = "<b>%{x|%b %Y}</b><br>MRN: %{y}%<extra></extra>")
+}
+
+fig_trend |>
+  layout(
+    yaxis  = list(title = "% Complete", range = c(0, 100)),
+    xaxis  = list(title = ""),
+    shapes = list(list(type = "line", x0 = min(trend$month), x1 = max(trend$month),
+                       y0 = 80, y1 = 80,
+                       line = list(dash = "dash", color = "#6b7280", width = 1))),
+    legend = list(orientation = "h", y = -0.2)
+  )
+```
+
+---
+
+## Completeness by Condition (Bar Chart)
+
+```{r}
+#| label: fig-completeness-cond
+#| fig-cap: "Identifier completeness by condition (last 12 months)"
+
+setorder(cond_sum, -pct_id)
+# Limit to top 20 by volume to avoid clutter
+top20 <- cond_sum[order(-n_total)][1:min(20, .N)]
+setorder(top20, pct_id)
+
+fig_cond <- plot_ly(top20, y = ~condition) |>
+  add_bars(x = ~pct_id,     name = "SA ID",     orientation = "h",
+           marker = list(color = "#1d4ed8"),
+           hovertemplate = "<b>%{y}</b><br>SA ID: %{x}%<extra></extra>") |>
+  add_bars(x = ~pct_folder, name = "Folder No.", orientation = "h",
+           marker = list(color = "#065f46"),
+           hovertemplate = "<b>%{y}</b><br>Folder: %{x}%<extra></extra>")
+
+if (mrn_available) {
+  fig_cond <- fig_cond |>
+    add_bars(x = ~pct_mrn, name = "MRN", orientation = "h",
+             marker = list(color = "#b45309"),
+             hovertemplate = "<b>%{y}</b><br>MRN: %{x}%<extra></extra>")
+}
+
+fig_cond |>
+  layout(
+    barmode = "group",
+    xaxis   = list(title = "% Complete", range = c(0, 100)),
+    yaxis   = list(title = "", automargin = TRUE),
+    height  = 550,
+    legend  = list(orientation = "h", y = -0.15),
+    shapes  = list(list(type = "line", y0 = -0.5, y1 = nrow(top20) - 0.5,
+                        x0 = 80, x1 = 80,
+                        line = list(dash = "dash", color = "#6b7280", width = 1)))
+  )
+```
+
+---
+
+## SA ID Number — Deep Dive
+
+This section provides provincial breakdowns of the SA ID validation pipeline described above.
+
+### Quality Breakdown by Province
+
+```{r}
+#| label: fig-id-breakdown
+#| fig-cap: "SA ID quality breakdown by province (last 12 months)"
+
+# Build a stacked 4-category breakdown per province:
+# Missing | Present but wrong length | Present & correct length but Luhn fail | Valid (correct length + Luhn pass)
+id_q <- recent[, .(
+  n_total          = sum(n_total),
+  n_missing        = sum(n_total) - sum(n_id_present),
+  n_wrong_len      = sum(n_id_present) - sum(n_id_correct_len),
+  n_right_len_fail = sum(n_id_correct_len) - sum(n_id_luhn_pass),
+  n_valid          = sum(n_id_luhn_pass)
+), by = prov_]
+
+id_q[, `:=`(
+  pct_missing        = pct(n_missing,        n_total),
+  pct_wrong_len      = pct(n_wrong_len,      n_total),
+  pct_right_len_fail = pct(n_right_len_fail, n_total),
+  pct_valid          = pct(n_valid,          n_total)
+)]
+
+plot_ly(id_q, x = ~prov_) |>
+  add_bars(y = ~pct_missing,        name = "Missing",
+           marker = list(color = "#d1d5db"),
+           hovertemplate = "<b>%{x}</b><br>Missing: %{y}%<extra></extra>") |>
+  add_bars(y = ~pct_wrong_len,      name = "Wrong length (≠13 digits)",
+           marker = list(color = "#fca5a5"),
+           hovertemplate = "<b>%{x}</b><br>Wrong length: %{y}%<extra></extra>") |>
+  add_bars(y = ~pct_right_len_fail, name = "13 digits but Luhn fail",
+           marker = list(color = "#fbbf24"),
+           hovertemplate = "<b>%{x}</b><br>13 digits, Luhn fail: %{y}%<extra></extra>") |>
+  add_bars(y = ~pct_valid,          name = "Valid (13 digits + Luhn pass)",
+           marker = list(color = "#16a34a"),
+           hovertemplate = "<b>%{x}</b><br>Valid: %{y}%<extra></extra>") |>
+  layout(
+    barmode = "stack",
+    yaxis   = list(title = "% of notifications", range = c(0, 100)),
+    xaxis   = list(title = "Province"),
+    legend  = list(orientation = "h", y = -0.25)
+  )
+```
+
+### SA ID Length Distribution
+
+Histogram of the character length of all recorded `patient_id_no` values — valid IDs should all be exactly 13 digits.
+
+```{r}
+#| label: fig-id-length
+#| fig-cap: "Distribution of recorded SA ID number lengths"
+
+plot_ly(id_lens, x = ~id_length, y = ~n,
+        type  = "bar",
+        marker = list(color = ~ifelse(id_length == 13, "#16a34a", "#ef4444")),
+        hovertemplate = "Length %{x}: %{y} records<extra></extra>") |>
+  layout(
+    xaxis = list(title = "Character length of ID string", dtick = 1),
+    yaxis = list(title = "Number of records"),
+    shapes = list(list(
+      type = "line", x0 = 12.5, x1 = 13.5, y0 = 0, y1 = max(id_lens$n) * 1.05,
+      line = list(color = "#16a34a", dash = "dot", width = 2)
+    )),
+    annotations = list(list(
+      x = 13, y = max(id_lens$n) * 1.07, text = "Valid length",
+      showarrow = FALSE, font = list(color = "#16a34a", size = 11)
+    ))
+  )
+```
+
+### Luhn Validity Trend Over Time
+
+Monthly proportion of **recorded** SA IDs (those that are not missing) that:
+
+- have exactly 13 digits, and
+- pass the Luhn checksum
+
+```{r}
+#| label: fig-luhn-trend
+#| fig-cap: "SA ID: proportion correct length and Luhn-valid over time"
+
+luhn_trend <- lnk_prov[, .(
+  n_id_present     = sum(n_id_present),
+  n_id_correct_len = sum(n_id_correct_len),
+  n_id_luhn_pass   = sum(n_id_luhn_pass)
+), by = month]
+luhn_trend[, `:=`(
+  pct_correct_len = pct(n_id_correct_len, n_id_present),
+  pct_luhn_pass   = pct(n_id_luhn_pass,   n_id_present)
+)]
+
+plot_ly(luhn_trend, x = ~month) |>
+  add_lines(y = ~pct_correct_len, name = "Correct length (13 digits)",
+            line = list(color = "#3b82f6", width = 2),
+            hovertemplate = "<b>%{x|%b %Y}</b><br>Correct length: %{y}%<extra></extra>") |>
+  add_lines(y = ~pct_luhn_pass,   name = "Luhn-valid",
+            line = list(color = "#16a34a", width = 2),
+            hovertemplate = "<b>%{x|%b %Y}</b><br>Luhn pass: %{y}%<extra></extra>") |>
+  layout(
+    yaxis  = list(title = "% of recorded IDs", range = c(0, 100)),
+    xaxis  = list(title = ""),
+    legend = list(orientation = "h", y = -0.2)
+  )
+```
+  )
+```
+
+::: {.callout-tip}
+**Using these matrices to prioritize:**
+
+| Quadrant | Action |
+|:---------|:-------|
+| **Ready for linkage** (upper-right, green) | Proceed with linkage studies — sufficient data quality |
+| **Improve ID quality** (lower-right, orange) | IDs captured but often invalid — implement Luhn validation at entry |
+| **Improve ID capture** (upper-left, blue) | Good quality when captured, but too many missing — training/workflow focus |
+| **Needs both** (lower-left, red) | Fundamental notification quality issues — start with capture, then quality |
+
+Bubble size = number of valid IDs available for linkage.
+:::
+
+---
+
+::: {.callout-tip}
+## Improving Linkage Quality
+
+- **SA ID not captured**: Priority issue — work with facility IPC practitioners to ensure ID capture at time of notification.
+- **Wrong-length IDs**: Likely transcription errors; consider validation at point of entry in the NMC system.
+- **Luhn failures on 13-digit IDs**: Transposition errors (e.g. digit swap) — Luhn validation at point of entry would catch these immediately.
+- **Folder number missing**: Critical for linking back to facility clinical records; should be mandatory for hospitalised cases.
+
+See [Data Quality](../quality.html) for reporting completeness and [Methods](../methods.html) for full definitions.
+:::

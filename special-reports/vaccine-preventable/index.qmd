@@ -1,0 +1,814 @@
+---
+title: "Vaccine-Preventable Diseases"
+subtitle: "Epidemiological Description of VPD Notifications · NMC Surveillance, South Africa"
+date: today
+sidebar: special-reports
+execute:
+  echo: false
+  warning: false
+  message: false
+  error: false
+  cache: false
+---
+
+::: {.callout-important appearance="minimal"}
+**Priority surveillance** — Vaccine-preventable diseases (VPDs) are critical indicators of immunisation programme performance. This report describes the epidemiology of notifiable VPDs based on NMC surveillance data, 2020–present.
+:::
+
+```{r setup}
+#| label: setup
+#| include: false
+#| cache: false
+
+pacman::p_load(
+  ggplot2, gtsummary, tidyverse, magrittr,
+  conflicted, scales, data.table, lubridate,
+  flextable, gt, ggrepel, zoo,
+  janitor
+)
+
+conflicted::conflicts_prefer(dplyr::filter)
+conflicted::conflicts_prefer(dplyr::lag)
+conflicted::conflicts_prefer(tidyr::extract)
+conflicted::conflicts_prefer(dplyr::first)
+conflicted::conflicts_prefer(lubridate::year)
+conflicted::conflicts_prefer(lubridate::month)
+conflicted::conflicts_prefer(lubridate::quarter)
+
+library(NMCleaner)
+
+# ── Load master dataset ───────────────────────────────────────────────────────
+load("~/Desktop/SAFETP/CLA/NMC_database/master/new_master.rda")
+
+# ── Define VPD conditions ─────────────────────────────────────────────────────
+# Core EPI-targeted VPDs
+VPD_EPI <- c(
+
+  "Measles",
+  "Rubella",
+  "Congenital rubella syndrome",
+  "Diphtheria",
+  "Pertussis",
+  "Tetanus",
+  "Poliomyelitis",
+  "Acute flaccid paralysis",
+  "Haemophilus influenzae type B"
+)
+
+# Other vaccine-preventable conditions
+VPD_OTHER <- c(
+  "Hepatitis A",
+  "Hepatitis B",
+  "Rabies",
+  "Yellow fever"
+)
+
+VPD_CONDITIONS <- c(VPD_EPI, VPD_OTHER)
+
+# Categorisation for analysis
+VPD_CATEGORY <- c(
+  "Measles"                      = "Measles/Rubella",
+  "Rubella"                      = "Measles/Rubella",
+  "Congenital rubella syndrome"  = "Measles/Rubella",
+  "Diphtheria"                   = "DTP diseases",
+  "Pertussis"                    = "DTP diseases",
+  "Tetanus"                      = "DTP diseases",
+  "Poliomyelitis"                = "Polio surveillance",
+  "Acute flaccid paralysis"      = "Polio surveillance",
+  "Haemophilus influenzae type B" = "Hib",
+  "Hepatitis A"                  = "Hepatitis",
+  "Hepatitis B"                  = "Hepatitis",
+  "Rabies"                       = "Rabies",
+  "Yellow fever"                 = "Yellow fever"
+)
+
+# ── Filter to VPD conditions only ─────────────────────────────────────────────
+new_master %>%
+  filter(
+    condition %in% VPD_CONDITIONS,
+    as.integer(Year_notification) %in% 2020:year(Sys.Date()),
+    !is.na(prov_)
+  ) %>%
+  mutate(
+    Year_notification = as.integer(Year_notification),
+    patient_vital_status = if_else(
+      patient_vital_status %like% "Unknown", "Alive", patient_vital_status
+    ),
+    Age_years = as.numeric(Age_years),
+    age_group = cut(
+      Age_years,
+      breaks = c(-Inf, 1, 5, 10, 15, 20, 30, 40, 50, 65, Inf),
+      labels = c("<1", "1–4", "5–9", "10–14", "15–19",
+                 "20–29", "30–39", "40–49", "50–64", "65+"),
+      right  = FALSE
+    ),
+    # Pediatric age groups for EPI analysis
+    age_group_peds = cut(
+      Age_years,
+      breaks = c(-Inf, 1, 5, 10, 15, Inf),
+      labels = c("<1 year", "1–4 years", "5–9 years", "10–14 years", "15+ years"),
+      right  = FALSE
+    ),
+    sex = case_when(
+      patient_gender %in% c("Male", "M")   ~ "Male",
+      patient_gender %in% c("Female", "F") ~ "Female",
+      TRUE                                  ~ NA_character_
+    ),
+    deceased = patient_vital_status %in% "Deceased",
+    vpd_category = recode(condition, !!!VPD_CATEGORY),
+    is_epi_vpd   = condition %in% VPD_EPI
+  ) -> vpd
+
+# ── Shared theme ──────────────────────────────────────────────────────────────
+theme_nmc <- function(...) {
+  theme_classic() +
+    theme(
+      text              = element_text(family = "Century Gothic", size = 10, color = "#333333"),
+      panel.background  = element_rect(fill = "#F8F8F8"),
+      plot.background   = element_rect(fill = "#F8F8F8"),
+      panel.grid.major  = element_blank(),
+      panel.grid.minor  = element_blank(),
+      axis.ticks        = element_line(linewidth = 0.15, color = "grey40"),
+      legend.background = element_rect(fill = "#F8F8F8", linewidth = 0.25,
+                                       linetype = "solid", colour = "grey50"),
+      legend.key        = element_blank(),
+      strip.background  = element_rect(color = NA, fill = NA),
+      ...
+    )
+}
+
+# VPD colour palette
+vpd_cols <- c(
+  "Measles/Rubella"    = "#E53935",
+  "DTP diseases"       = "#1E88E5",
+  "Polio surveillance" = "#43A047",
+  "Hib"                = "#8E24AA",
+  "Hepatitis"          = "#FB8C00",
+  "Rabies"             = "#546E7A",
+  "Yellow fever"       = "#FDD835"
+)
+
+condition_cols <- c(
+  "Measles"                       = "#E53935",
+  "Rubella"                       = "#F48FB1",
+  "Congenital rubella syndrome"   = "#AD1457",
+  "Diphtheria"                    = "#1565C0",
+  "Pertussis"                     = "#42A5F5",
+  "Tetanus"                       = "#0D47A1",
+  "Poliomyelitis"                 = "#2E7D32",
+  "Acute flaccid paralysis"       = "#81C784",
+  "Haemophilus influenzae type B" = "#8E24AA",
+  "Hepatitis A"                   = "#FB8C00",
+  "Hepatitis B"                   = "#EF6C00",
+  "Rabies"                        = "#546E7A",
+  "Yellow fever"                  = "#FDD835"
+)
+```
+
+::: {.callout-note appearance="minimal" collapse="true"}
+## Report metadata
+| | |
+|---|---|
+| **Conditions** | `r paste(VPD_CONDITIONS, collapse = "; ")` |
+| **Years** | 2020 – `r lubridate::year(Sys.Date())` |
+| **Data source** | NMC Notifiable Medical Conditions surveillance database |
+| **Generated** | `r format(Sys.Date(), "%d %B %Y")` |
+:::
+
+---
+
+# Situation Update for Policy Makers {#sec-executive}
+
+```{r exec-setup}
+#| label: exec-setup
+#| include: false
+
+# ── Current year and comparison calculations ──────────────────────────────────
+current_year <- year(Sys.Date())
+prev_year    <- current_year - 1
+current_month <- month(Sys.Date())
+
+# Year-to-date for current and previous year
+ytd_current <- vpd %>%
+  filter(Year_notification == current_year,
+         month(as_date(notification_date)) <= current_month)
+ytd_prev <- vpd %>%
+  filter(Year_notification == prev_year,
+         month(as_date(notification_date)) <= current_month)
+
+n_ytd_current   <- nrow(ytd_current)
+n_ytd_prev      <- nrow(ytd_prev)
+deaths_ytd_curr <- sum(ytd_current$deceased, na.rm = TRUE)
+deaths_ytd_prev <- sum(ytd_prev$deceased, na.rm = TRUE)
+
+pct_change_n      <- round((n_ytd_current - n_ytd_prev) / max(n_ytd_prev, 1) * 100)
+pct_change_deaths <- round((deaths_ytd_curr - deaths_ytd_prev) / max(deaths_ytd_prev, 1) * 100)
+
+arrow_n      <- if (pct_change_n > 0) "↑" else if (pct_change_n < 0) "↓" else "→"
+arrow_deaths <- if (pct_change_deaths > 0) "↑" else if (pct_change_deaths < 0) "↓" else "→"
+col_n        <- if (pct_change_n > 10) "#C62828" else if (pct_change_n < -10) "#2E7D32" else "#F57C00"
+col_deaths   <- if (pct_change_deaths > 10) "#C62828" else if (pct_change_deaths < -10) "#2E7D32" else "#F57C00"
+
+# Key condition metrics
+measles_ytd_curr  <- sum(ytd_current$condition == "Measles")
+measles_ytd_prev  <- sum(ytd_prev$condition == "Measles")
+pertussis_ytd_curr <- sum(ytd_current$condition == "Pertussis")
+pertussis_ytd_prev <- sum(ytd_prev$condition == "Pertussis")
+afp_ytd_curr      <- sum(ytd_current$condition == "Acute flaccid paralysis")
+afp_ytd_prev      <- sum(ytd_prev$condition == "Acute flaccid paralysis")
+
+pct_change_measles  <- round((measles_ytd_curr - measles_ytd_prev) / max(measles_ytd_prev, 1) * 100)
+pct_change_pertussis <- round((pertussis_ytd_curr - pertussis_ytd_prev) / max(pertussis_ytd_prev, 1) * 100)
+arrow_measles    <- if (pct_change_measles > 0) "↑" else if (pct_change_measles < 0) "↓" else "→"
+arrow_pertussis  <- if (pct_change_pertussis > 0) "↑" else if (pct_change_pertussis < 0) "↓" else "→"
+
+# Under 5 burden
+under5_ytd_curr <- ytd_current %>% filter(Age_years < 5)
+under5_ytd_prev <- ytd_prev %>% filter(Age_years < 5)
+pct_under5_curr <- round(nrow(under5_ytd_curr) / max(n_ytd_current, 1) * 100, 1)
+
+# Top 3 provinces
+top3_prov <- ytd_current %>%
+  count(prov_, sort = TRUE) %>%
+  slice(1:3) %>%
+  pull(prov_) %>%
+  paste(collapse = ", ")
+```
+
+::: {.panel-tabset}
+
+## Key Metrics
+
+```{r exec-metrics}
+#| label: tbl-exec-metrics
+#| tbl-cap: !expr 'paste0("Year-to-date comparison: Jan–", format(Sys.Date(), "%b %Y"), " vs same period ", prev_year)'
+
+tibble(
+  Indicator = c(
+    "All VPD notifications (YTD)",
+    "Deaths (YTD)",
+    "Measles cases",
+    "Pertussis cases",
+    "AFP cases (polio surveillance)",
+    "Children <5 years (%)",
+    "Top 3 provinces"
+  ),
+  `Current Year` = c(
+    scales::comma(n_ytd_current),
+    scales::comma(deaths_ytd_curr),
+    scales::comma(measles_ytd_curr),
+    scales::comma(pertussis_ytd_curr),
+    scales::comma(afp_ytd_curr),
+    paste0(pct_under5_curr, "%"),
+    top3_prov
+  ),
+  `Same Period Last Year` = c(
+    scales::comma(n_ytd_prev),
+    scales::comma(deaths_ytd_prev),
+    scales::comma(measles_ytd_prev),
+    scales::comma(pertussis_ytd_prev),
+    scales::comma(afp_ytd_prev),
+    "—",
+    "—"
+  ),
+  `Change` = c(
+    paste0(arrow_n, " ", ifelse(pct_change_n >= 0, "+", ""), pct_change_n, "%"),
+    paste0(arrow_deaths, " ", ifelse(pct_change_deaths >= 0, "+", ""), pct_change_deaths, "%"),
+    paste0(arrow_measles, " ", ifelse(pct_change_measles >= 0, "+", ""), pct_change_measles, "%"),
+    paste0(arrow_pertussis, " ", ifelse(pct_change_pertussis >= 0, "+", ""), pct_change_pertussis, "%"),
+    "—",
+    "—",
+    "—"
+  )
+) %>%
+  flextable() %>%
+  bold(part = "header") %>%
+  bold(i = 1:2, j = 1) %>%
+  color(i = 1, j = 4, color = col_n) %>%
+  color(i = 2, j = 4, color = col_deaths) %>%
+  bg(i = 3:5, bg = "#FFF3E0") %>%
+  set_table_properties(layout = "autofit", width = 1) %>%
+  fontsize(size = 11, part = "all") %>%
+  align(j = 2:4, align = "center", part = "all") %>%
+  add_footer_lines(paste0("Data extracted: ", format(Sys.Date(), "%d %B %Y"),
+                          ". YTD = Year-to-date (Jan 1 – ", format(Sys.Date(), "%d %b"), ")."))
+```
+
+## 12-Month Trend by Category
+
+```{r exec-trend}
+#| label: fig-exec-trend
+#| fig-cap: "Monthly VPD notification trend by disease category — last 12 months."
+#| fig-height: 5
+
+# Last 12 complete months
+end_date   <- floor_date(Sys.Date(), "month") - days(1)
+start_date <- floor_date(end_date - months(11), "month")
+
+vpd %>%
+  filter(!is.na(notification_date)) %>%
+  mutate(month_date = floor_date(as_date(notification_date), "month")) %>%
+  filter(month_date >= start_date, month_date <= end_date) %>%
+  count(month_date, vpd_category) %>%
+  complete(month_date, vpd_category, fill = list(n = 0)) -> trend12_df
+
+ggplot(trend12_df, aes(x = month_date, y = n, fill = vpd_category)) +
+  geom_col(width = 22) +
+  scale_x_date(date_labels = "%b\n%Y", date_breaks = "1 month", expand = expansion(add = c(10, 10))) +
+  scale_y_continuous(name = "Notifications", expand = expansion(mult = c(0, 0.1))) +
+  scale_fill_manual(values = vpd_cols, name = "Category") +
+  labs(x = NULL) +
+  theme_nmc() +
+  theme(axis.text.x = element_text(size = 8), legend.position = "bottom",
+        legend.key.size = unit(0.4, "cm"))
+```
+
+## Provincial Burden — Measles
+
+```{r exec-prov-measles}
+#| label: fig-exec-prov-measles
+#| fig-cap: "Measles notifications by province — quarterly trend, last 2 years. Zero cases shaded grey."
+#| fig-height: 5
+
+# Get provincial population
+prov_pop <- NMCleaner::pop %>%
+  filter(as.integer(Year) == year(Sys.Date())) %>%
+  group_by(prov) %>%
+  summarise(population = sum(Population), .groups = "drop")
+
+# Measles by province and quarter
+vpd %>%
+  filter(condition == "Measles", !is.na(notification_date)) %>%
+  mutate(
+    nd  = as_date(notification_date),
+    qtr = paste0(year(nd), " Q", quarter(nd))
+  ) %>%
+  filter(nd >= (Sys.Date() - years(2))) %>%
+  group_by(prov_, qtr) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  complete(prov_, qtr, fill = list(n = 0)) -> measles_qtr
+
+# Order quarters
+qtr_order <- measles_qtr %>% distinct(qtr) %>% arrange(qtr) %>% pull(qtr)
+measles_qtr$qtr <- factor(measles_qtr$qtr, levels = qtr_order)
+
+ggplot(measles_qtr, aes(x = qtr, y = prov_, fill = n)) +
+  geom_tile(color = "white", linewidth = 0.5) +
+  geom_text(aes(label = n), size = 3, colour = "black") +
+  scale_fill_gradient(low = "#FFEBEE", high = "#B71C1C", name = "Cases",
+                      na.value = "#E0E0E0") +
+  labs(x = "Quarter", y = NULL) +
+  theme_nmc() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 9),
+    legend.position = "right",
+    panel.grid = element_blank()
+  )
+```
+
+:::
+
+---
+
+# Summary Statistics {#sec-summary}
+
+```{r summary-stats}
+#| label: tbl-summary
+#| tbl-cap: "Summary of VPD notifications by condition, South Africa, 2020–present."
+
+vpd %>%
+  group_by(condition) %>%
+  summarise(
+    n        = n(),
+    deaths   = sum(deceased, na.rm = TRUE),
+    cfr      = round(deaths / n * 100, 1),
+    under5   = sum(Age_years < 5, na.rm = TRUE),
+    pct_u5   = round(under5 / n * 100, 1),
+    .groups  = "drop"
+  ) %>%
+  arrange(desc(n)) %>%
+  mutate(
+    Condition  = condition,
+    `Cases`    = scales::comma(n),
+    `Deaths`   = deaths,
+    `CFR (%)`  = cfr,
+    `<5 yrs`   = scales::comma(under5),
+    `% <5 yrs` = pct_u5
+  ) %>%
+  select(Condition, Cases, Deaths, `CFR (%)`, `<5 yrs`, `% <5 yrs`) %>%
+  flextable() %>%
+  bold(part = "header") %>%
+  bg(i = ~ `CFR (%)` > 5, j = "CFR (%)", bg = "#FFCDD2") %>%
+  set_table_properties(layout = "autofit") %>%
+  fontsize(size = 10, part = "all") %>%
+  add_footer_lines("CFR = Case fatality ratio. <5 yrs = children under 5 years of age.")
+```
+
+---
+
+# Temporal Trends {#sec-trends}
+
+## Annual notifications by condition
+
+```{r annual-trend}
+#| label: fig-annual-trend
+#| fig-cap: "Annual VPD notifications by condition, South Africa, 2020–present."
+#| fig-height: 6
+
+vpd %>%
+  count(Year_notification, condition) %>%
+  complete(Year_notification, condition, fill = list(n = 0)) -> annual_cond
+
+# Top 8 conditions by total volume for cleaner display
+top_conds <- vpd %>% count(condition, sort = TRUE) %>% slice(1:8) %>% pull(condition)
+
+annual_cond %>%
+  filter(condition %in% top_conds) %>%
+  ggplot(aes(x = factor(Year_notification), y = n, fill = condition)) +
+  geom_col(position = "dodge", width = 0.8) +
+  scale_fill_manual(values = condition_cols, name = "Condition") +
+  labs(x = "Year", y = "Notifications (n)") +
+  theme_nmc() +
+  theme(legend.position = "bottom", legend.key.size = unit(0.4, "cm"))
+```
+
+## Monthly epicurve — key conditions
+
+```{r epicurve-monthly}
+#| label: fig-epicurve-monthly
+#| fig-cap: "Monthly notification counts for key VPDs (Measles, Pertussis, AFP), South Africa, 2020–present."
+#| fig-height: 5
+
+key_conds <- c("Measles", "Pertussis", "Acute flaccid paralysis")
+
+vpd %>%
+  filter(condition %in% key_conds, !is.na(notification_date)) %>%
+  mutate(month_date = floor_date(as_date(notification_date), "month")) %>%
+  count(month_date, condition) %>%
+  complete(month_date, condition, fill = list(n = 0)) -> epicurve_df
+
+ggplot(epicurve_df, aes(x = month_date, y = n, colour = condition)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 1.5) +
+  scale_x_date(date_labels = "%b\n%Y", date_breaks = "6 months") +
+  scale_y_continuous(name = "Notifications (n)") +
+  scale_colour_manual(values = condition_cols, name = "Condition") +
+  labs(x = "Date") +
+  facet_wrap(~condition, ncol = 1, scales = "free_y") +
+  theme_nmc() +
+  theme(legend.position = "none", strip.text = element_text(face = "bold"))
+```
+
+## Seasonal pattern — Measles
+
+```{r seasonal-measles}
+#| label: fig-seasonal-measles
+#| fig-cap: "Epiweek × year heatmap of Measles notifications, South Africa."
+#| fig-height: 4.5
+
+vpd %>%
+  filter(condition == "Measles", !is.na(notification_date)) %>%
+  mutate(
+    nd      = as_date(notification_date),
+    yr      = lubridate::year(nd),
+    epiweek = lubridate::isoweek(nd)
+  ) %>%
+  count(year = yr, epiweek) %>%
+  complete(year = 2020:year(Sys.Date()), epiweek = 1:52, fill = list(n = 0)) -> heat_df
+
+ggplot(heat_df, aes(x = epiweek,
+                    y = factor(year, levels = rev(sort(unique(year)))),
+                    fill = n)) +
+  geom_tile(color = "white", linewidth = 0.3) +
+  scale_fill_gradient2(
+    low = "white", mid = "#FFCDD2", high = "#B71C1C",
+    midpoint = max(1, median(heat_df$n[heat_df$n > 0], na.rm = TRUE)),
+    name = "Cases"
+  ) +
+  scale_x_continuous(breaks = c(1, seq(10, 52, 10)), expand = c(0, 0)) +
+  labs(x = "Epiweek", y = "Year", title = "Measles") +
+  theme_nmc() +
+  theme(legend.position = "bottom", legend.key.width = unit(1.5, "cm"))
+```
+
+---
+
+# Age & Sex Demographics {#sec-demographics}
+
+## Age distribution by condition
+
+```{r age-by-condition}
+#| label: fig-age-by-condition
+#| fig-cap: "Age distribution of VPD notifications by condition (top 6 by volume), South Africa, 2020–present."
+#| fig-height: 6
+
+top6_conds <- vpd %>% count(condition, sort = TRUE) %>% slice(1:6) %>% pull(condition)
+
+vpd %>%
+  filter(condition %in% top6_conds, !is.na(age_group_peds)) %>%
+  count(condition, age_group_peds) %>%
+  group_by(condition) %>%
+  mutate(pct = n / sum(n) * 100) -> age_cond_df
+
+ggplot(age_cond_df, aes(x = age_group_peds, y = pct, fill = condition)) +
+  geom_col(position = "dodge", width = 0.7) +
+  scale_fill_manual(values = condition_cols, name = "Condition") +
+  labs(x = "Age group", y = "% within condition") +
+  facet_wrap(~condition, scales = "free_y") +
+  theme_nmc() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+        legend.position = "none", strip.text = element_text(face = "bold", size = 9))
+```
+
+## Under-5 burden by condition
+
+```{r under5-burden}
+#| label: fig-under5-burden
+#| fig-cap: "Proportion of VPD notifications in children under 5 years by condition, South Africa, 2020–present."
+#| fig-height: 5
+
+vpd %>%
+  group_by(condition) %>%
+  summarise(
+    n_total  = n(),
+    n_under5 = sum(Age_years < 5, na.rm = TRUE),
+    pct_u5   = n_under5 / n_total * 100,
+    .groups  = "drop"
+  ) %>%
+  filter(n_total >= 10) %>%
+  mutate(condition = fct_reorder(condition, pct_u5)) -> u5_df
+
+ggplot(u5_df, aes(x = condition, y = pct_u5, fill = pct_u5)) +
+  geom_col(width = 0.7) +
+  geom_text(aes(label = paste0(round(pct_u5, 0), "%")), hjust = -0.2, size = 3) +
+  coord_flip() +
+  scale_fill_gradient(low = "#BBDEFB", high = "#1565C0", guide = "none") +
+  scale_y_continuous(limits = c(0, 105)) +
+  labs(x = NULL, y = "% of cases in children <5 years") +
+  theme_nmc()
+```
+
+## Population pyramid — all VPDs
+
+```{r age-sex-pyramid}
+#| label: fig-age-sex-pyramid
+#| fig-cap: "Age–sex population pyramid of all VPD notifications, South Africa, 2020–present."
+#| fig-height: 5
+
+vpd %>%
+  filter(!is.na(age_group), !is.na(sex)) %>%
+  count(age_group, sex) %>%
+  mutate(n_plot = if_else(sex == "Male", -n, n)) -> pyramid_df
+
+max_n <- max(abs(pyramid_df$n))
+step  <- ifelse(max_n > 500, 200, ifelse(max_n > 200, 50, 25))
+br    <- seq(0, ceiling(max_n / step) * step, step)
+
+ggplot(pyramid_df, aes(x = age_group, y = n_plot, fill = sex)) +
+  geom_col(width = 0.8) +
+  coord_flip() +
+  scale_y_continuous(breaks = c(-br, br), labels = abs(c(-br, br))) +
+  scale_fill_manual(values = c("Male" = "#1565C0", "Female" = "#C62828"), name = NULL) +
+  geom_hline(yintercept = 0, colour = "white", linewidth = 0.5) +
+  labs(x = "Age group (years)", y = "Number of notifications") +
+  theme_nmc() +
+  theme(legend.position = "bottom")
+```
+
+## Case fatality by condition
+
+```{r cfr-condition}
+#| label: fig-cfr-condition
+#| fig-cap: "Case fatality ratio (%) by VPD condition (conditions with ≥10 cases), South Africa, 2020–present."
+#| fig-height: 5
+
+vpd %>%
+  group_by(condition) %>%
+  summarise(
+    n      = n(),
+    deaths = sum(deceased, na.rm = TRUE),
+    cfr    = deaths / n * 100,
+    .groups = "drop"
+  ) %>%
+  filter(n >= 10) %>%
+  mutate(condition = fct_reorder(condition, cfr)) -> cfr_cond
+
+ggplot(cfr_cond, aes(x = condition, y = cfr, fill = cfr)) +
+  geom_col(width = 0.7) +
+  geom_text(aes(label = paste0(round(cfr, 1), "% (", deaths, "/", n, ")")),
+            hjust = -0.05, size = 2.8) +
+  coord_flip() +
+  scale_fill_gradient(low = "#FFF9C4", high = "#C62828", guide = "none") +
+  scale_y_continuous(limits = c(0, max(cfr_cond$cfr, na.rm = TRUE) * 1.4)) +
+  labs(x = NULL, y = "Case fatality ratio (%)") +
+  theme_nmc()
+```
+
+---
+
+# Geographical Distribution {#sec-geo}
+
+## Provincial incidence — Measles
+
+```{r prov-incidence-measles}
+#| label: fig-prov-incidence-measles
+#| fig-cap: "Measles incidence per 100,000 population by province and year, South Africa."
+#| fig-height: 5
+
+NMCleaner::pop %>%
+  mutate(Year = as.integer(Year)) %>%
+  group_by(prov, Year) %>%
+  summarise(population = sum(Population), .groups = "drop") -> pop_prov
+
+vpd %>%
+  filter(condition == "Measles") %>%
+  group_by(prov_, year = Year_notification) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  left_join(pop_prov, by = c("prov_" = "prov", "year" = "Year")) %>%
+  mutate(incidence = n / population * 1e5) -> measles_inc
+
+ggplot(measles_inc, aes(x = year, y = incidence, colour = prov_, group = prov_)) +
+  geom_line(linewidth = 1.1) +
+  geom_point(size = 2.5) +
+  scale_colour_brewer(palette = "Paired", name = "Province") +
+  scale_x_continuous(breaks = unique(measles_inc$year)) +
+  labs(x = "Year", y = "Incidence per 100,000 population",
+       title = "Measles incidence by province") +
+  theme_nmc() +
+  theme(legend.position = "bottom", legend.key.size = unit(0.4, "cm"))
+```
+
+## Top districts by VPD burden
+
+```{r top-districts}
+#| label: tbl-top-districts
+#| tbl-cap: "Top 20 districts by total VPD notification count, South Africa, 2020–present."
+
+NMCleaner::pop %>%
+  filter(as.integer(Year) %in% 2020:year(Sys.Date())) %>%
+  group_by(district_standard) %>%
+  summarise(pop_total = sum(Population), .groups = "drop") -> pop_dist
+
+vpd %>%
+  filter(!district %in% c("Unknown", "Isazi Import", "Not Applicable"),
+         !is.na(district)) %>%
+  mutate_district_name("district") %>%
+  group_by(Province = prov_, district_standard) %>%
+  summarise(
+    Notifications = n(),
+    Deaths        = sum(deceased, na.rm = TRUE),
+    CFR           = round(Deaths / Notifications * 100, 1),
+    n_measles     = sum(condition == "Measles"),
+    n_pertussis   = sum(condition == "Pertussis"),
+    .groups = "drop"
+  ) %>%
+  left_join(pop_dist, by = "district_standard") %>%
+  mutate(
+    Incidence = round(Notifications / pop_total * 1e5, 1),
+    pop_total = round(pop_total / 1e3, 1)
+  ) %>%
+  arrange(desc(Notifications)) %>%
+  slice(1:20) %>%
+  rename(District = district_standard, Measles = n_measles, Pertussis = n_pertussis,
+         `Incidence per 100k` = Incidence, `Pop (k)` = pop_total) %>%
+  select(Province, District, Notifications, Deaths, `CFR (%)` = CFR,
+         Measles, Pertussis, `Incidence per 100k`, `Pop (k)`) %>%
+  flextable() %>%
+  bold(part = "header") %>%
+  bg(i = ~ `CFR (%)` > 5, j = "CFR (%)", bg = "#FFCDD2") %>%
+  set_table_properties(layout = "autofit") %>%
+  fontsize(size = 9, part = "all")
+```
+
+---
+
+# Polio Surveillance (AFP) {#sec-polio}
+
+::: {.callout-note}
+## AFP Surveillance Context
+
+**Acute flaccid paralysis (AFP)** surveillance is the global standard for detecting poliovirus circulation. South Africa maintains high AFP surveillance sensitivity as part of polio eradication efforts. The target is **≥2 AFP cases per 100,000 children under 15 years**.
+:::
+
+```{r afp-analysis}
+#| label: fig-afp-analysis
+#| fig-cap: "AFP surveillance performance — annual cases and rate per 100,000 children <15 years, South Africa."
+#| fig-height: 4.5
+
+# Under-15 population
+pop_u15 <- NMCleaner::pop %>%
+  filter(as.integer(Year) %in% 2020:year(Sys.Date())) %>%
+  filter(Age < 15) %>%
+  group_by(Year = as.integer(Year)) %>%
+  summarise(pop_u15 = sum(Population), .groups = "drop")
+
+vpd %>%
+  filter(condition == "Acute flaccid paralysis") %>%
+  group_by(year = Year_notification) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  left_join(pop_u15, by = c("year" = "Year")) %>%
+  mutate(rate = n / pop_u15 * 1e5) -> afp_rate
+
+ggplot(afp_rate, aes(x = factor(year))) +
+  geom_col(aes(y = n), fill = "#43A047", alpha = 0.7, width = 0.6) +
+  geom_hline(yintercept = 2, linetype = "dashed", colour = "#C62828", linewidth = 0.8) +
+  geom_text(aes(y = n, label = paste0(n, "\n(", round(rate, 1), ")")),
+            vjust = -0.2, size = 3) +
+  annotate("text", x = 0.6, y = 2.2, label = "Target ≥2/100k", hjust = 0,
+           colour = "#C62828", size = 3, fontface = "italic") +
+  scale_y_continuous(name = "AFP cases", expand = expansion(mult = c(0, 0.15))) +
+  labs(x = "Year", caption = "Numbers in bars: cases (rate per 100,000 <15 yrs)") +
+  theme_nmc()
+```
+
+```{r afp-by-prov}
+#| label: fig-afp-by-prov
+#| fig-cap: "AFP cases by province and year, South Africa, 2020–present."
+#| fig-height: 5
+
+vpd %>%
+  filter(condition == "Acute flaccid paralysis") %>%
+  count(Year_notification, prov_) %>%
+  complete(Year_notification, prov_, fill = list(n = 0)) -> afp_prov
+
+ggplot(afp_prov, aes(x = factor(Year_notification), y = prov_, fill = n)) +
+  geom_tile(color = "white", linewidth = 0.5) +
+  geom_text(aes(label = n), size = 3) +
+  scale_fill_gradient(low = "#E8F5E9", high = "#1B5E20", name = "Cases") +
+  labs(x = "Year", y = NULL, title = "AFP cases by province") +
+  theme_nmc() +
+  theme(legend.position = "right")
+```
+
+---
+
+# Mortality Profile {#sec-mortality}
+
+## Deaths by condition and year
+
+```{r deaths-condition}
+#| label: fig-deaths-condition
+#| fig-cap: "Annual VPD deaths by condition, South Africa."
+#| fig-height: 5
+
+vpd %>%
+  filter(deceased) %>%
+  count(year = Year_notification, condition) -> deaths_cond
+
+ggplot(deaths_cond, aes(x = factor(year), y = n, fill = condition)) +
+  geom_col(position = "stack", width = 0.75) +
+  scale_fill_manual(values = condition_cols, name = "Condition") +
+  labs(x = "Year", y = "Deaths (n)") +
+  theme_nmc() +
+  theme(legend.position = "bottom", legend.key.size = unit(0.4, "cm"))
+```
+
+---
+
+# Reporting & Facility Analysis {#sec-facilities}
+
+## Unique reporting facilities per year
+
+```{r facilities-trend}
+#| label: fig-facilities
+#| fig-cap: "Number of unique health facilities reporting at least one VPD notification per year, South Africa."
+#| fig-height: 4
+
+vpd %>%
+  filter(!is.na(facility)) %>%
+  group_by(Year_notification) %>%
+  summarise(n_facilities = n_distinct(facility), .groups = "drop") -> fac_df
+
+ggplot(fac_df, aes(x = factor(Year_notification))) +
+  geom_col(aes(y = n_facilities, fill = "Unique facilities"), width = 0.6, alpha = 0.85) +
+  geom_text(aes(y = n_facilities, label = n_facilities), vjust = -0.4, size = 3.5) +
+  scale_fill_manual(values = c("Unique facilities" = "#4CAF50"), name = NULL) +
+  labs(x = "Year", y = "Unique reporting facilities (n)") +
+  theme_nmc() +
+  theme(legend.position = "bottom")
+```
+
+---
+
+::: {.callout-note}
+## Interpretation Notes
+
+**EPI-targeted VPDs:**
+
+- **Measles/Rubella**: Core EPI vaccines; rising cases may indicate immunisation gaps
+- **DTP diseases** (Diphtheria, Pertussis, Tetanus): Rare in well-immunised populations
+- **Polio surveillance**: AFP cases should be investigated for poliovirus; target ≥2/100k <15 yrs
+- **Hib**: Haemophilus influenzae type B; vaccine introduced in 1999
+
+**Surveillance implications:**
+
+- Clusters of measles cases warrant immunisation response
+- Any diphtheria or poliomyelitis case is a public health emergency
+- High CFR in certain VPDs may reflect late presentation or case ascertainment bias
+
+See [Data Quality](../../quality.html) for reporting completeness and [Methods](../../methods.html) for full definitions.
+:::
+
+---
+
+*Report generated: `r format(Sys.Date(), "%d %B %Y")` | NMC Surveillance Unit*

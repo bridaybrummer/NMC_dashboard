@@ -2,10 +2,21 @@
 # Update GitHub Main & GitHub Pages
 # ===============================
 
-# 1. Set the working directory to your project folder.
-#setwd("/Users/briday/Desktop/study_stats_site")
-setwd(getwd() )
-cat("Current working directory:", getwd(), "\n")
+# 1. Resolve project root regardless of where this script is called from.
+#    Walks up from cwd checking for _quarto.yml; works whether you run via
+#    Rscript dev/deploy.r, source() inside RStudio, or open the Project.
+find_project_root <- function() {
+  path <- normalizePath(getwd())
+  repeat {
+    if (file.exists(file.path(path, "_quarto.yml"))) return(path)
+    parent <- dirname(path)
+    if (parent == path) stop("Cannot locate project root (_quarto.yml not found). ",
+                             "Run from the project directory.")
+    path <- parent
+  }
+}
+setwd(find_project_root())
+cat("Project root:", getwd(), "\n")
 
 # List files in the directory.
 cat("Directory listing:\n")

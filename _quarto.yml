@@ -26,6 +26,7 @@ project:
     - burden-of-disease/index.qmd
     - special-reports/index.qmd
     - special-reports/agricultural-poisoning/index.qmd
+    - linkage/index.qmd
   #pre-render: Rscript R/prepare_dashboard_data.r
 
 website:
@@ -92,6 +93,9 @@ website:
       - text: Data Quality
         href: quality.html
         icon: clipboard-check
+      - text: Linkage
+        href: linkage/index.html
+        icon: link-45deg
     right:
       - text: Docs
         icon: book

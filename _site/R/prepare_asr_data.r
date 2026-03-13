@@ -10,7 +10,6 @@
 # Outputs cached .rds files in data/processed/
 #
 # Usage:
-#   cd /Users/briday/Desktop/SAFETP/CLA/NMC_website/NMC_dashboard
 #   Rscript R/prepare_asr_data.r
 # ──────────────────────────────────────────────────────────────────────────────
 

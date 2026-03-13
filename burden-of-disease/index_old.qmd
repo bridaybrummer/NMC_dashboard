@@ -1644,9 +1644,8 @@ flextable(dw_tbl) %>%
 
 1. **Ensure the master data is up to date** — the feather file at `~/Desktop/SAFETP/CLA/NMC_database/master/new_master.feather`
 
-2. **Run the BoD preparation script:**
+2. **Run the BoD preparation script** (from the project root directory):
 ```bash
-cd /Users/briday/Desktop/SAFETP/CLA/NMC_website/NMC_dashboard
 Rscript R/prepare_bod_data.r
 ```
 

@@ -706,7 +706,6 @@ Instead, a batch script produces cached `.rds` files that the dashboard reads.
 
 ```bash
 # From the project root
-cd /Users/briday/Desktop/SAFETP/CLA/NMC_website/NMC_dashboard
 Rscript R/prepare_dashboard_data.r
 ```
 

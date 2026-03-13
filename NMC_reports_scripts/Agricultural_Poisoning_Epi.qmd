@@ -29,8 +29,8 @@ execute:
 
 # Force working directory to this file's own folder, overriding the project-level
 # execute-dir: project set in _quarto.yml
-knitr::opts_knit$set(root.dir = "/Users/briday/Desktop/SAFETP/CLA/NMC_website/NMC_dashboard/NMC_reports_scripts")
-setwd("/Users/briday/Desktop/SAFETP/CLA/NMC_website/NMC_dashboard/NMC_reports_scripts")
+knitr::opts_knit$set(root.dir = normalizePath(file.path(getwd(), "NMC_reports_scripts")))
+setwd(normalizePath(file.path(getwd(), "NMC_reports_scripts")))
 
 pacman::p_load(
   ggplot2, plotly, gtsummary, tidyverse, magrittr,
