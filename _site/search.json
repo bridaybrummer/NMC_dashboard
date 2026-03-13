@@ -1508,7 +1508,7 @@
     "href": "burden-of-disease/index.html",
     "title": "Burden of Disease",
     "section": "",
-    "text": "Data snapshot: 10 Mar 2026 | 2,383 deaths across 50 conditions | 2016-01-05 to 2026-02-19 | TB excluded | Maternal deaths excluded | Life table: Stats SA 2024 MYPE\nThis page translates raw NMC case notifications into population-level health impact indicators, moving beyond simple case counts to quantify the mortality, disability, and economic burden of notifiable conditions across South Africa. Each metric answers a different policy question:",
+    "text": "Warning\n\n\n\nNo pre-computed BoD data found. Run Rscript R/prepare_bod_data.r from the project root.\nThis page translates raw NMC case notifications into population-level health impact indicators, moving beyond simple case counts to quantify the mortality, disability, and economic burden of notifiable conditions across South Africa. Each metric answers a different policy question:",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1518,7 +1518,7 @@
     "href": "burden-of-disease/index.html#summary",
     "title": "Burden of Disease",
     "section": "Key Indicators",
-    "text": "Key Indicators\n\n\n\n111,862\n\n\nTotal DALYs\n\n\nCombined mortality + disability burden\n\n\n\n\n98,333\n\n\nYears of Life Lost\n\n\nPremature mortality (YLL)\n\n\n\n\n13,529\n\n\nYears with Disability\n\n\nMorbidity burden (YLD)\n\n\n\n\n2,383\n\n\nDeaths\n\n\nFrom 817,551 notified cases\n\n\n\n\n55\n\n\nConditions Tracked\n\n\nHighest burden: Agricultural or stock remedy poisoning\n\n\n\n\n17.31%\n\n\nHighest CFR\n\n\nRabies\n\n\n\n\nKey finding: The top 3 conditions (Agricultural or stock remedy poisoning, Congenital syphilis, Malaria) account for 51% of all DALYs. Scroll down for detailed breakdowns by mortality, severity, demographics, and geography.",
+    "text": "Key Indicators",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1528,7 +1528,7 @@
     "href": "burden-of-disease/index.html#yll",
     "title": "Burden of Disease",
     "section": "Years of Life Lost",
-    "text": "Years of Life Lost\n\nPremature mortality burden: for each death at age \\(x\\), YLL \\(= e(x)\\) where \\(e(x)\\) is remaining life expectancy from the SA abridged life table (Stats SA 2024).\n\n\nRankingSummary Table\n\n\n\n\n\n\n\n\n\n\nFigure 1: Top 20 NMC conditions ranked by total Years of Life Lost\n\n\n\n\n\n\n\n\n\n\nTable 1: YLL by condition — all years combined",
+    "text": "Years of Life Lost\n\nPremature mortality burden: for each death at age \\(x\\), YLL \\(= e(x)\\) where \\(e(x)\\) is remaining life expectancy from the SA abridged life table (Stats SA 2024).\n\n\nRankingSummary Table\n\n\n\n\n\n\n\n\nTable 1: YLL by condition — all years combined",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1538,7 +1538,7 @@
     "href": "burden-of-disease/index.html#dalys",
     "title": "Burden of Disease",
     "section": "Disability-Adjusted Life Years",
-    "text": "Disability-Adjusted Life Years\n\nDALY \\(=\\) YLL \\(+\\) YLD, combining premature mortality with morbidity (\\(\\text{YLD} = \\text{cases} \\times \\text{disability weight} \\times \\text{duration}\\)). Disability weights from GBD 2019.\n\n\nRankingSummary TableYLL vs YLD Composition\n\n\n\n\n\n\n\n\n\n\nFigure 2: Top 20 NMC conditions by DALY burden (YLL + YLD)\n\n\n\n\n\n\n\n\n\n\nTable 2: DALY breakdown by condition — all years combined\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 3: Proportion of DALYs from premature mortality (YLL) vs disability (YLD)",
+    "text": "Disability-Adjusted Life Years\n\nDALY \\(=\\) YLL \\(+\\) YLD, combining premature mortality with morbidity (\\(\\text{YLD} = \\text{cases} \\times \\text{disability weight} \\times \\text{duration}\\)). Disability weights from GBD 2019.\n\n\nRankingSummary TableYLL vs YLD Composition\n\n\n\n\n\n\n\n\nTable 2: DALY breakdown by condition — all years combined",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1548,7 +1548,7 @@
     "href": "burden-of-disease/index.html#cfr",
     "title": "Burden of Disease",
     "section": "Case Fatality Rate",
-    "text": "Case Fatality Rate\n\nCFR \\(= \\frac{\\text{Deaths}}{\\text{Cases}} \\times 100\\%\\) — a direct measure of disease severity within the surveillance system. Under-reporting of deaths means true CFRs may be higher.\n\n\nBy ConditionSummary TableBy Age & SexCFR Trends\n\n\n\n\n\n\n\n\n\n\nFigure 4: Case fatality rate by condition (conditions with ≥5 deaths)\n\n\n\n\n\n\n\n\n\n\nTable 3: Case fatality rate by condition — all years combined\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 5: Case fatality rate by age and sex for top 6 high-CFR conditions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 6: Annual CFR trends for top 6 high-fatality conditions\n\n\n\n\n\n\n\n\nSeverity alert: Rabies has the highest CFR at 17.31% (95% CI: 13.64–21.73). Conditions with high CFR warrant enhanced clinical surveillance and rapid response.",
+    "text": "Case Fatality Rate\n\nCFR \\(= \\frac{\\text{Deaths}}{\\text{Cases}} \\times 100\\%\\) — a direct measure of disease severity within the surveillance system. Under-reporting of deaths means true CFRs may be higher.\n\n\nBy ConditionSummary TableBy Age & SexCFR Trends\n\n\n\n\n\n\n\n\nTable 3: Case fatality rate by condition — all years combined",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1558,7 +1558,7 @@
     "href": "burden-of-disease/index.html#pypll",
     "title": "Burden of Disease",
     "section": "Productive Life Years Lost",
-    "text": "Productive Life Years Lost\n\nPYPLL focuses on the working-age window (15–64): \\(\\text{PYPLL}(x) = 65 - x\\). This complements YLL by highlighting conditions that disproportionately affect the productive workforce.\n\n\nBy ConditionYLL vs PYPLLSummary Table\n\n\n\n\n\n\n\n\n\n\nFigure 7: Top 20 conditions by Potential Years of Productive Life Lost (ages 15–64)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 8: Comparing YLL (full life expectancy) vs PYPLL (working ages 15–64)\n\n\n\n\n\n\n\n\n\n\nTable 4: PYPLL by condition with working-age mortality characteristics\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nEconomic impact: Agricultural or stock remedy poisoning accounts for the most productive life years lost (12,249 PYPLL), with a median age at death of 31 years. Conditions with high PYPLL merit targeted workforce-age interventions.",
+    "text": "Productive Life Years Lost\n\nPYPLL focuses on the working-age window (15–64): \\(\\text{PYPLL}(x) = 65 - x\\). This complements YLL by highlighting conditions that disproportionately affect the productive workforce.\n\n\nBy ConditionYLL vs PYPLLSummary Table\n\n\n\n\n\n\n\n\n\n\n\nTable 4: PYPLL by condition with working-age mortality characteristics",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1578,7 +1578,7 @@
     "href": "burden-of-disease/index.html#province",
     "title": "Burden of Disease",
     "section": "Geographic Variation",
-    "text": "Geographic Variation\n\nCrude DALY and YLL rates per 100,000 population by province. For age-adjusted comparisons, see the ASR section above.\n\n\nDALY RateYLL RateSummary TableCondition × Province Heatmap\n\n\n\n\n\n\n\n\n\n\nFigure 9: Total DALYs per 100,000 population by province (all NMC conditions)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 10: Total YLL per 100,000 population by province (all NMC conditions)\n\n\n\n\n\n\n\n\n\n\nTable 9: Province-level BoD summary (all NMC conditions combined)\n\n\n\nProvincePopulationDeathsCasesTotal YLLTotal YLDTotal DALYDALY/100kYLL/100kWestern Cape 7,187,004435106,44919,6321,867.321,499299.14273.16Free State 2,928,903164 23,550 6,853472.4 7,325250.10233.98KwaZulu-Natal11,538,813535225,94620,0024,816.524,819215.09173.35Gauteng16,098,571691188,14829,0111,913.830,925192.10180.21Limpopo 5,941,439201 89,475 7,2731,265.4 8,538143.71122.41Mpumalanga 4,743,584104 75,729 4,6581,116.9 5,774121.7298.19Eastern Cape 6,734,001166 63,111 6,7181,411.5 8,129120.7199.76Northern Cape 1,303,047 25 17,708 1,263285.6 1,548118.8196.90North West 4,141,774 62 27,435 2,923379.9 3,30379.7470.57\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 11: Top 10 conditions: DALY rate per 100,000 by province",
+    "text": "Geographic Variation\n\nCrude DALY and YLL rates per 100,000 population by province. For age-adjusted comparisons, see the ASR section above.\n\n\nDALY RateYLL RateSummary TableCondition × Province Heatmap\n\n\n\n\n\n\n\n\n\n\n\nTable 9: Province-level BoD summary (all NMC conditions combined)",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1588,7 +1588,7 @@
     "href": "burden-of-disease/index.html#trends",
     "title": "Burden of Disease",
     "section": "Temporal Trends",
-    "text": "Temporal Trends\n\nYear-over-year trends in burden indicators reveal emerging and declining conditions.\n\n\nDALY TrendsYLL TrendsDeaths by Age\n\n\n\n\n\n\n\n\n\n\nFigure 12: Annual DALY trends for top 10 NMC conditions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 13: Annual YLL trends for top 10 NMC conditions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 14: Age distribution of NMC deaths (top 10 conditions)",
+    "text": "Temporal Trends\n\nYear-over-year trends in burden indicators reveal emerging and declining conditions.\n\n\nDALY TrendsYLL TrendsDeaths by Age",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1598,7 +1598,7 @@
     "href": "burden-of-disease/index.html#pyramids",
     "title": "Burden of Disease",
     "section": "Demographics",
-    "text": "Demographics\n\nAge-sex pyramids reveal which demographic groups bear the greatest notification burden — useful for targeting surveillance and intervention.\n\n\nNational PyramidBy Condition\n\n\n\n\n\n\n\n\n\n\nFigure 15: Age-sex pyramid of all notified NMC cases\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 16: Age-sex pyramids for the top 6 conditions by case volume",
+    "text": "Demographics\n\nAge-sex pyramids reveal which demographic groups bear the greatest notification burden — useful for targeting surveillance and intervention.\n\n\nNational PyramidBy Condition",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1608,7 +1608,7 @@
     "href": "burden-of-disease/index.html#bump-chart",
     "title": "Burden of Disease",
     "section": "Condition Rankings Over Time",
-    "text": "Condition Rankings Over Time\n\nTracking year-over-year rank changes in DALY burden identifies emerging threats and declining conditions.\n\n\nBump ChartRanking Table\n\n\n\n\n\n\n\n\n\n\nFigure 17: Year-over-year DALY ranking for top 10 conditions\n\n\n\n\n\n\n\n\n\n\n\nTable 10: DALY ranking change from earliest to latest year",
+    "text": "Condition Rankings Over Time\n\nTracking year-over-year rank changes in DALY burden identifies emerging threats and declining conditions.\n\n\nBump ChartRanking Table\n\n\n\n\n\n\n\n\nTable 10: DALY ranking change from earliest to latest year",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1618,7 +1618,7 @@
     "href": "burden-of-disease/index.html#downloads",
     "title": "Burden of Disease",
     "section": "Data Exports",
-    "text": "Data Exports\n\nDALY Summary — All Conditions\nUse the search box and column filters below, then use the CSV or Copy buttons to export.\n\n\n\n\nTable 11\n\n\n\n\n\n\n\n\n\n\n\n\n\nTable 12\n\n\nProvince Summary\n\n\n\n\n\n\n\nTable 13",
+    "text": "Data Exports\n\n\n\nTable 11\n\n\n\n\n\n\n\n\n\n\n\nTable 12\n\n\n\n\n\n\n\n\n\n\n\nTable 13",
     "crumbs": [
       "Burden of Disease"
     ]

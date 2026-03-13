@@ -1,0 +1,1984 @@
+---
+title: "Facilities reporting Poisoning, SA"
+format: 
+#docx: default
+    html:
+        embed-resources: true
+        theme: cosmo
+        scrolling: true
+dpi: 300
+fig-dpi: 300
+execute:
+  echo: false          # Show code output, but not code itself by default
+  warning: false       # Suppress warnings
+  message: false       # Suppress messages
+  error: false         # Suppress errors in output (optional, if you want to prevent error messages)
+---
+
+# Brief update on poisonign notificaitons to NMC in SA
+
+```{r, setup }
+#| include: false
+#| echo: false 
+
+flextable::set_flextable_defaults(font_size = 8,
+padding.top = 0, padding.bottomg = 0, 
+padding.left = 0, padding.right = 0)
+
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, fig.width=12, fig.height=6, dpi = 150, fig.align = "center", fig.cap = TRUE)
+
+library(NMCleaner)
+conflicted::conflicts_prefer(dplyr::filter)
+library(stringdist)
+
+#pacman::p_load( janitor, readr, readxl, janitor, tabyl)
+#load MFL 
+directory_files<- list.files()
+mfl_path<- directory_files[grepl("MFL_Updated.csv",directory_files)]
+mfl_path
+mfl <-read_csv( mfl_path)%>%clean_names
+
+#mfl$types %>%tabyl()%>%arrange(-n)
+# get a table of MFL facilities 
+
+mfl%>%glimpse
+mfl%>%
+mutate( types = trimws(gsub( "WC|COVID-19", "", types)))%>%
+select( types) %>%
+tbl_summary(
+    sort = all_categorical(FALSE) ~ "frequency",
+)%>%
+as_flex_table()#%>%save_as_docx( path = "MFL_facilities.docx")
+
+```
+
+# Data 
+
+
+::: {.download_btn}
+
+```{css}
+#| echo: false
+
+.btn-default,
+.btn-default:hover,
+.btn-default:active {
+  font-size: 20px;
+  color: black;
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.btn-default:hover {
+  color: grey;
+  transition: 0.2s;
+}
+
+```
+
+
+```{r}
+#| echo: false
+    load("~/Desktop/SAFETP/CLA/NMC_database/master/new_master.rda")
+pacman::p_load(downloadthis)
+
+# Filter the data
+filtered_data <- new_master %>%
+  filter(
+    Year_notification %in% c(2020:2025),
+    condition %in% c(
+      "Food borne illness outbreak",
+      "Agricultural or stock remedy poisoning"
+    ),
+    !is.na(prov_)
+  )
+
+# Button 1: With personal identifiers
+download_this(
+  filtered_data,
+  output_name = "linelist_with_identifiers",
+  output_extension = ".xlsx",
+  button_label = "Download with Identifiers",
+  button_type = "default",
+  has_icon = TRUE,
+  icon = "fa fa-file-excel"
+)
+
+# Button 2: Without personal identifiers
+filtered_data %>%
+  select(-patient_name, -patient_surname, -patient_id_no, -patient_passport_no) %>%
+  download_this(
+    output_name = "linelist_without_identifiers",
+    output_extension = ".xlsx",
+    button_label = "Download without Identifiers",
+    button_type = "default",
+    has_icon = TRUE,
+    icon = "fa fa-file-excel"
+  )
+  
+```
+
+:::
+
+```{r}
+#| label: update_df_with_ears
+#| include: false 
+
+if(TRUE){
+pacman::p_load(ggplot2, plotly, gtsummary, tidyverse, magrittr, rmapshaper)
+load("~/Desktop/SAFETP/CLA/NMC_database/master/new_master.rda")
+
+# Implementing time series parts
+source( "scripts_and_functions/time_series_functions.r")
+source( "scripts_and_functions/make_fever_rash.r")
+conflicts_prefer(dplyr::lag)
+
+# load NMCleaner package 
+library(NMCleaner)
+conflicted::conflicts_prefer( dplyr::filter)
+conflicted::conflicts_prefer( dplyr::lag)
+conflicted::conflicts_prefer(tidyr::extract)
+
+new_master %>%
+    #filter( nmccategories ==1)%>%
+    #filter( condition %in% 
+    #c(
+     #"Cholera",
+    #"Measles"
+    #),
+    #Year_notification == 2024
+    #)%>%
+    mutate_dates( date_index = "notification_date") ->
+df
+
+df
+
+# convert it to a to_plot format 
+NMCleaner::epicurve_df(
+    df, 
+    date_index = "notification_date", 
+    grouping_vars = "condition",
+    lag_size = 7 ,
+    add_rolling_avg = c(TRUE, 14)
+    )->
+df_to_plot
+
+
+
+load(file = "dashboard/aggregated_data/df_with_ears.rda")
+
+df_with_ears %>%glimpse()
+# remember the structure is for every condition. 
+
+# Check for the dates that exist in new_master that havent been acoutned for in df_with_ears. and complete the function for those missing dates and then combine them for an updated df_with_ears
+df_with_ears$date %>%as_date() %>%min()
+df_with_ears$date %>%as_date() %>%max()
+
+df_with_ears%>%
+    #filter( condition %in% "Rubella")%>%
+    select( date, n )%>%
+    mutate( date = as_date(date))%>%
+    filter( !n == 0) %>%
+    filter(date == max(date))%>%pull(date) %>%unique->  max_df_with_ears_date
+
+max_df_with_ears_date
+new_master$date %>%as_date() %>% max(na.rm = TRUE) -> max_new_master_date
+max_new_master_date
+dates_with_no_ears <- seq( max_df_with_ears_date, max_new_master_date, by = "day")
+
+dates_with_no_ears
+
+dates_with_no_ears[1] -days(180)-> dates_with_no_ears
+
+# make fever_rash one
+
+df_to_plot%>%
+    make_fever_rash() %>%
+    filter( condition %in% "Agricultural and stock remedy poisoning")%>% 
+    group_by( year, 
+    month, epiweek, date, day, condition )%>%
+    summarise( 
+        across( n:roll_avg, sum)
+    )%>%
+    cusum_window_start(window = 180, date_index = "date", start_date = as.Date("2019-06-29")) -> 
+    fever_rash_with_ears
+
+        
+####################################
+
+# To update the df_with_ears with the new data. 
+
+####################################
+
+new_master$condition[grepl( "Agricultural", new_master$condition, ignore.case = TRUE)]%>%unique()
+df_to_plot$condition[grepl( "Agricultural", df_to_plot$condition, ignore.case = TRUE)]%>%unique()
+
+if (TRUE){
+
+c( #NMCleaner::condition_df$condition[1:27], "Fever-Rash", 
+"Food borne illness outbreak", 
+"Agricultural or stock remedy poisoning")%>%
+    map( ~
+        {
+        df_to_plot %>%
+            arrange(condition, date) %>%
+            {if (.x == "Fever-Rash") make_fever_rash(.)%>%
+                group_by( year, 
+                month, epiweek, date, day, condition )%>%
+                summarise( 
+                across( n:roll_avg, sum)
+        )
+            else .} %>%
+            filter(condition == .x) %>%
+            ears() %>%
+            cusum_window_start(window = 180, date_index = "date", start_date = as.Date(min(dates_with_no_ears))) %>%
+            ungroup()
+        }
+    )%>% 
+    bind_rows() ->
+df_with_ears_update
+
+    save( df_with_ears_update, file = "dashboard/aggregated_data/df_with_ears_update.rda")
+
+} else  {
+
+    load(file = "dashboard/aggregated_data/df_with_ears.rda")
+
+}
+
+dates_with_no_ears[1]
+
+df_with_ears %>% filter( as_date(as.character(date) )< dates_with_no_ears[1])-> df_with_ears_old
+
+df_with_ears_update %>%filter( as_date(as.character(date) ) > dates_with_no_ears[1]) -> df_with_ears_new
+df_with_ears_new%>%glimpse()
+
+bind_rows( df_with_ears_old, df_with_ears_new) -> df_with_ears_updated
+
+df_with_ears_big <- df_with_ears_updated
+df_with_ears_big$date %>%as.character%>%as_date() %>%max()
+
+save( df_with_ears_big, file = "dashboard/aggregated_data/df_with_ears_big.rda")
+
+df_with_ears <- df_with_ears_big
+save( df_with_ears, file = "dashboard/aggregated_data/df_with_ears.rda")
+
+}else {
+    #load("~/Desktop/SAFETP/CLA/NMC_database/master/new_master.rda")
+    load(file = "dashboard/aggregated_data/df_with_ears.rda")
+}
+
+
+  load(file = "dashboard/aggregated_data/df_with_ears.rda")
+```
+
+# Effect of circular 
+
+```{r}
+#| include: false
+#| label: making_epicurve
+
+new_master%>%
+    mutate( patient_vital_status = if_else( patient_vital_status %like% c("Unknown"), "Alive",patient_vital_status ))%>%
+filter( 
+       condition %in% 
+        c( 
+          #  "Food borne illness outbreak",
+            "Agricultural or stock remedy poisoning"
+        ),
+        Year_notification %in% 2020:2025
+)-> poison
+
+save( poison, file = "dashboard/aggregated_data/poison.rda")
+load( "dashboard/aggregated_data/poison.rda")
+
+poison %>%
+    epicurve_df(
+        date_index = "notification_date",
+        grouping_vars = "patient_vital_status"
+    )->
+    epicurve_df_to_plot
+    # CHECK DATEA HERE 
+
+epicurve_df_to_plot%>%
+    plot_epicurve_df(
+        x_axis_option = "epiweeks", 
+        grouping_vars = "patient_vital_status",
+    )-> plot_deaths_and_cases
+
+```
+```{r}
+#| label: fig-epicurve_vital_statuts
+#| fig-cap: The number of notifications by patient vital status notified to NMC in South Africa, 2020-2025
+
+
+plot_deaths_and_cases$plot+
+    geom_col( aes( y = n, fill = patient_vital_status))+
+    # add palette with 3 values 
+    scale_fill_manual(values = c("grey", "seagreen", "firebrick"))
+
+```
+
+
+```{r}
+#| label: fig-epicurve_withCFR
+#| fig-cap: The proportion of facilities per province that made notifications for Agricultural and stock remedy poisonings or Foodborne Illness per year out of the toal number of unique facilities that ever made a notifiation to NMC between 2019-2024.
+#| include: false
+
+plot_deaths_and_cases$data %>%filter( patient_vital_status == "Alive")-> df_alive 
+
+plot_deaths_and_cases$data %>%filter( patient_vital_status == "Deceased")-> df_deceased
+df_deceased
+
+element_text <- "Century Gothic"
+left_join( 
+    df_alive, 
+    df_deceased,
+    by = c("year", "epiweek")
+    )%>%
+    mutate( cfr = n.y/n.x*100 %>%round( ., 1))%>%
+    select( 
+        cfr, epiweek, year
+    )%>%
+    ggplot( aes( x = epiweek, y = cfr))+ 
+    geom_col(fill = "darkred") +
+    facet_nested( cols = vars( year), scales = "fixed", switch = "x")+
+     theme(panel.spacing = unit(0.17, "lines"), strip.background = element_rect(color = NA, 
+            fill = NA), strip.placement = "outside", text = element_text(family = "Century Gothic", 
+            size = 10, color = "#333333"), panel.background = element_rect(fill = "#F8F8F8"), 
+            plot.background = element_rect(fill = "#F8F8F8"), 
+            panel.grid = element_line(color = "#DDDDDD"), legend.text = element_text(color = "#333333", 
+                size = 8), legend.title = element_text(color = "#333333", 
+                size = 10), plot.title = element_text(size = 10, 
+                color = "#666666"), plot.subtitle = element_text(size = 8, 
+                color = "#666666"), plot.caption = element_text(size = 8, 
+                color = "#666666"), legend.position = "none", 
+            legend.direction = "vertical", legend.key = element_blank(), 
+            legend.title.align = 0.5, panel.grid.major = element_blank(), 
+            axis.text.x = element_text(angle = 30, size = 6), 
+            axis.text.y = element_text(size = 6, color = "#666666"), 
+            axis.title = element_text(size = 10, color = "#666666"), 
+            panel.grid.minor.x = element_blank(), panel.grid.minor.y = element_blank(), 
+            axis.ticks = element_line(size = 0.15, color = "grey20"), 
+            legend.background = element_rect(fill = "#F8F8F8", 
+                size = 0.25, linetype = "solid", colour = "grey50"), 
+            strip.text.y.right = element_text(angle = 0))
+
+#excluded for now 
+```
+
+
+```{r}
+#| label: fig-CUSUM_outbreak_detection
+#| fig-cap: Potential Increases in notifications by CUSUM over a 180 day window. 
+#| include: false
+
+load("dashboard/aggregated_data/df_with_ears.rda")
+
+dates_2024 <- seq( as_date("2023-01-01"), as_date("2025-12-31"), by = "day")
+
+df_with_ears%>%
+filter( condition %in% "Agricultural or stock remedy poisoning",
+date %in%dates_2024) %>%view()
+
+
+plotly_dashboard <- function(the_last_year, condition_select){
+    library(plotly)
+    df_with_ears %>%
+      filter( 
+        date %in% the_last_year,
+        condition %in%condition_select
+        )%>%
+        mutate( date = as_date(as.character(date))) %>%
+        ungroup() %>%
+    ggplot(., aes(x = !!sym("date"))) +
+    geom_bar(aes(y = n), stat = "identity", alpha = 0.5) +
+    geom_line(group = 1, aes( y = latest_cusum_threshold, color = "CUSUM (Summed variance from the previos 100 days)") )+
+    geom_point(aes( y = -12.5, color = factor(latest_is_cusums_outbreak)), shape = 24, size = 2, fill = "transparent") +  # Triangle shape for alarms
+  scale_color_manual(
+    name = "Legend",  # Legend title
+    values = c(
+        "CUSUM (Summed variance from the previos 100 days)" = "steelblue", 
+        "TRUE" = "red", 
+        "FALSE" = "transparent", 
+        "NA" = "transparent"),
+    labels = c(
+        "CUSUM (Summed variance from the previos 100 days)", 
+        "TRUE" = "Potential Outbreak Detected", 
+        "FALSE" = "",
+        "NA" = ""
+               )
+  ) +
+    labs(title = "CUSUM Signal Detection for Measles Notifications", x = "Iteration", y = "Infection Counts") +
+    theme_minimal() +
+    theme(legend.position = "bottom")->
+  cholera_epicurve
+
+    df_with_ears %>%
+        filter( date %in% the_last_year,
+        condition %in% condition_select) %>% 
+        group_by(month) %>%
+        summarise(n = sum(n, na.rm = TRUE)) %>%
+        arrange(desc(n)) %>%
+        top_n(1, n) %>%
+        slice(1)%>%
+        pull(n) ->
+    max_cases_per_month_in_last_year
+
+    df_with_ears %>%
+            filter(condition %in% condition_select) %>%
+            mutate(
+                #new_date = as_epiweek(date)
+                new_date = floor_date(as_date(as.character(date)), "month")
+                )%>%
+            group_by(year, new_date) %>%
+            summarise(n = sum(n, na.rm = TRUE))%>%
+            complete()%>%
+            ggplot(., aes(x = !!sym("new_date"))) +
+            geom_bar(aes(y = n), stat = "identity", alpha = 0.5) +
+            # make a grey box for the last two years of data
+            geom_rect(
+                aes(xmin = as_date(min(the_last_year)), xmax =as_date(max(the_last_year)), ymin = 
+                # make an if_else so that NA or 0 == 5 
+                  if_else(max_cases_per_month_in_last_year == 0| 
+                  is.na(max_cases_per_month_in_last_year), 5, max_cases_per_month_in_last_year*2),
+                ymax = -5
+                ),
+                fill = "grey", alpha = 0.1, color = "black"
+            ) +
+            theme_classic() ->
+            cholera_epicurve_weekly
+
+    cholera_epicurve_weekly
+
+    # show the two graphs ina single column but make the botto graph much flatten_raw(
+    # the top graph is the daily data and the bottom graph is the weekly data
+    # the output shoudl be viewable in plotly 
+
+    # Convert both plots to plotly
+
+    plotly_daily <- ggplotly(cholera_epicurve)
+    plotly_weekly <- ggplotly(cholera_epicurve_weekly)
+
+    # Use subplot from plotly to stack vertically with the weekly graph flattened
+    subplot(plotly_daily, plotly_weekly, nrows = 2, heights = c(0.7, 0.3)) %>%
+      plotly::layout(title = paste0(condition_select, " epicurve: daily and weekly"),
+            xaxis = list(title = "Date"),
+            yaxis = list(title = "Number of Cases"))
+    }
+
+
+#plotly_dashboard(the_last_year= dates_2024, c("Agricultural or stock remedy poisoning"))
+#plotly_dashboard(the_last_year= dates_2024, c("Food borne illness outbreak"))
+
+
+```
+
+```{r}
+#| label: fig-Overview_Cusum 
+#| fig-cap: Agricultural or stock remedy poisoning notified in the last 3 years. A Cumulative Sum (CUSUM) algorithm is used to detect increases in the number of notifications compared to the last 180 days. 
+
+
+dates_in_last_3_months <- seq( Sys.Date()-lubridate::days(90), Sys.Date()-lubridate::days(1), by = "day") # 3 months ago including today, change lubridate::days(0) to lubridate::days(1) to exlucde today as it can be confusing for external stakeholders
+
+
+df_with_ears %>%
+filter( 
+    condition %in% 
+        c("Agricultural or stock remedy poisoning"),
+    year %in% c( 2022:2025),
+    #date %in% dates_in_last_3_months
+    )%>%
+mutate( date = as_date(as.character(date)))%>%
+    ggplot(aes( x = date)) + 
+    geom_col(aes(y = n, fill = "Notifications", color = "Notifications"), fill = "grey75" ,position = "dodge") +
+    geom_line(aes(y = latest_cusum_threshold, color = "CUSUM (Summed variance from the previous 180 days)"),  size = 1) +
+     geom_point(aes( y = -0.5, color = factor(latest_is_cusums_outbreak)), shape = 24, size = 2, fill = "transparent") +  # Triangle shape for alarms
+     # add vertical line on the 28 november 2024 
+     #geom_vline(xintercept = as_date("2024-11-28"), linetype = "dashed")
+scale_color_manual(
+    name = "Legend",  # Legend title
+    values = c(
+        "Bar Chart (n)" = "grey50",
+        "CUSUM (Summed variance from the previous 180 days)" = "steelblue", 
+        "TRUE" = "red", 
+        "FALSE" = "transparent", 
+        "NA" = "transparent"),
+    labels = c(
+        "CUSUM (Summed variance from the previos 180 days)" = "CUSUM (Summed variance from the previos 180 days)", 
+        "TRUE" = "Potential Outbreak Detected", 
+        "FALSE" = "",
+        "NA" = ""
+               )
+  ) +
+  guides(
+    color = guide_legend(order = 1),
+    fill = guide_legend(order = 1)
+    ) +
+    scale_y_continuous( limits = c(-0.5, 25))+
+    scale_x_date(
+        #make daily lables 
+             date_labels = "%b, '%y",
+        date_breaks = "1 month"
+    )+ 
+    labs( y = "Notifications (n)",
+    x = "Date of notification")+
+
+    theme_classic() +
+    theme( 
+        axis.text.x = element_text( angle = 90, hjust = 1, size = 8 ),
+        legend.position = "bottom") -> poison_plot_with_cusum
+
+#poison_plot_with_cusum
+#poison_plot_with_cusum
+#poison_plot%>%ggplotly()
+
+
+#poison_plot_without_cusum
+#poison_plot_without_cusum
+#poison_plot_without_cusum
+poison_plot_with_cusum
+
+```
+@fig-Overview_Cusum shows that poisonings are endemic in South Africa with increases in notificaiotns accoring in September-November each year. 
+
+
+```{r}
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+library(purrr)
+conflicts_prefer(dplyr::first)
+
+# ---- PREPARE ----
+plot_df <- df_with_ears %>%
+    filter(condition %in% "Agricultural or stock remedy poisoning") %>%
+    mutate(
+        date = as_date(as.character(date)),
+        month_date = floor_date(date, "month")
+    ) %>%
+    filter(date %in% seq(as_date("2020-01-01"), as_date("2025-12-31"), by = "day"))
+# ---- GET MONTHLY COUNTS FOR EVERY SOURCE ----
+
+monthly_df <- plot_df %>%
+    group_by(month_date) %>%
+    summarise(month_n = sum(n, na.rm = TRUE), .groups = "drop")
+
+# ---- CALCULATE SCALE FACTOR PER SOURCE ----
+scale_tbl <- plot_df %>%
+    # group_by(source) %>%
+    summarise(
+        cusum_max = max(latest_cusum_threshold, na.rm = TRUE),
+        month_n_max = max(monthly_df$month_n, na.rm = TRUE),
+        .groups = "drop"
+    ) %>%
+    mutate(
+        cusum_max = ifelse(!is.finite(cusum_max) | cusum_max <= 0, 1, cusum_max),
+        month_n_max = ifelse(!is.finite(month_n_max) | month_n_max <= 0, 1, month_n_max),
+        scale_factor = 1.7 * cusum_max / month_n_max
+    )
+
+# join scale factor back
+
+
+monthly_df$scale_factor <- scale_tbl$scale_factor
+plot_df$scale_factor <- scale_tbl$scale_factor
+
+
+# ---- BUILD THE PLOT ----
+ggplot() +
+    # monthly bars on secondary axis
+    geom_col(
+        data = monthly_df,
+        aes(
+            x = month_date,
+            y = month_n * scale_factor
+        ),
+        width = 25,
+        fill = "grey80",
+        color = "grey70"
+    ) +
+
+# daily CUSUM
+geom_line(
+    data = plot_df,
+    aes(
+        x = date,
+        y = latest_cusum_threshold,
+        color = "CUSUM (180-day window)"
+    ),
+    linewidth = 0.9
+) +
+
+    # alarm points
+    geom_point(
+        data = plot_df,
+        aes(x = date, y = -0.5, color = factor(latest_is_cusums_outbreak)),
+        shape = 24, size = 2, fill = NA
+    ) +
+    # facet_wrap(~source, scales = "free_y", ncol = 1) +
+    scale_y_continuous(
+        name = "CUSUM threshold (daily)",
+        breaks = c(0, 5),
+        sec.axis = sec_axis(
+            ~ . / scale_tbl$scale_factor[1], # this is a dummy—labels overridden below
+            name = "Monthly notifications (n)", 
+            breaks = seq( 0, 150, 25)
+        )
+    ) +
+      #zoo::scale_x_yearqtr(format = "Q%q\n%Y")
+    scale_x_date(
+        date_labels = "Dec/%b\n%Y",
+        date_breaks = "1 year", # main ticks each year
+        date_minor_breaks = "3 months",
+        expand = expansion(add = c(0, 0))
+    )+
+scale_color_manual(
+    name = NULL,
+    values = c(
+        "CUSUM (180-day window)" = "steelblue",
+        "TRUE" = "red",
+        "FALSE" = "transparent",
+        "NA" = "transparent"
+    ),
+    labels = c(
+        "CUSUM (180-day window)",
+        "TRUE"  = "Potential outbreak detected",
+        "FALSE" = "",
+        "NA"    = ""
+    )
+) +
+    geom_hline(yintercept = 5, color = "grey50", linetype = "dashed") +
+    coord_cartesian(ylim = c(-0.5, NA)) +
+    labs(x = "Date of notification") +
+    theme_classic() +
+    theme(
+        axis.text.x = element_text(angle = 0, hjust = 0.5, size = 8),
+        legend.position = "bottom"
+    ) -> CUSUM_all_data_sources
+
+CUSUM_all_data_sources
+
+
+ggsave( 
+    CUSUM_all_data_sources, 
+    file = "figures/CUSUM_updated_2025_poison.png", 
+    dpi = 300, 
+    width = 10, 
+    height = 6
+    )
+
+```
+
+# FBI Cusum 
+```{r}
+#| label: fig-CUSUM_outbreak_detection_updated_FBI
+#| fig-cap: Potential Increases in notifications by CUSUM over a 180 day window.
+
+# ---- PREPARE ----
+plot_df <- df_with_ears %>%
+    filter(condition %in% "Food borne illness outbreak") %>%
+    mutate(
+        date = as_date(as.character(date)),
+        month_date = floor_date(date, "month")
+    ) %>%
+    filter(date %in% seq(as_date("2020-01-01"), as_date("2025-12-31"), by = "day"))
+# ---- GET MONTHLY COUNTS FOR EVERY SOURCE ----
+
+monthly_df <- plot_df %>%
+    group_by(month_date) %>%
+    summarise(month_n = sum(n, na.rm = TRUE), .groups = "drop")
+
+# ---- CALCULATE SCALE FACTOR PER SOURCE ----
+scale_tbl <- plot_df %>%
+    # group_by(source) %>%
+    summarise(
+        cusum_max = max(latest_cusum_threshold, na.rm = TRUE),
+        month_n_max = max(monthly_df$month_n, na.rm = TRUE),
+        .groups = "drop"
+    ) %>%
+    mutate(
+        cusum_max = ifelse(!is.finite(cusum_max) | cusum_max <= 0, 1, cusum_max),
+        month_n_max = ifelse(!is.finite(month_n_max) | month_n_max <= 0, 1, month_n_max),
+        scale_factor = 1.7 * cusum_max / month_n_max
+    )
+
+# join scale factor back
+
+
+monthly_df$scale_factor <- scale_tbl$scale_factor
+plot_df$scale_factor <- scale_tbl$scale_factor
+
+
+# ---- BUILD THE PLOT ----
+ggplot() +
+    # monthly bars on secondary axis
+    geom_col(
+        data = monthly_df,
+        aes(
+            x = month_date,
+            y = month_n * scale_factor
+        ),
+        width = 25,
+        fill = "grey80",
+        color = "grey70"
+    ) +
+
+    # daily CUSUM
+    geom_line(
+        data = plot_df,
+        aes(
+            x = date,
+            y = latest_cusum_threshold,
+            color = "CUSUM (180-day window)"
+        ),
+        linewidth = 0.9
+    ) +
+
+    # alarm points
+    geom_point(
+        data = plot_df,
+        aes(x = date, y = -0.5, color = factor(latest_is_cusums_outbreak)),
+        shape = 24, size = 2, fill = NA
+    ) +
+    # facet_wrap(~source, scales = "free_y", ncol = 1) +
+    scale_y_continuous(
+        name = "CUSUM threshold (daily)",
+        breaks = c(0, 5),
+        sec.axis = sec_axis(
+            ~ . / scale_tbl$scale_factor[1], # this is a dummy—labels overridden below
+            name = "Monthly notifications (n)",
+            breaks = seq(0, 150, 25)
+        )
+    ) +
+    # zoo::scale_x_yearqtr(format = "Q%q\n%Y")
+    scale_x_date(
+        date_labels = "Dec/%b\n%Y",
+        date_breaks = "1 year", # main ticks each year
+        date_minor_breaks = "3 months",
+        expand = expansion(add = c(0, 0))
+    ) +
+    scale_color_manual(
+        name = NULL,
+        values = c(
+            "CUSUM (180-day window)" = "steelblue",
+            "TRUE" = "red",
+            "FALSE" = "transparent",
+            "NA" = "transparent"
+        ),
+        labels = c(
+            "CUSUM (180-day window)",
+            "TRUE"  = "Potential outbreak detected",
+            "FALSE" = "",
+            "NA"    = ""
+        )
+    ) +
+    geom_hline(yintercept = 5, color = "grey50", linetype = "dashed") +
+    coord_cartesian(ylim = c(-0.5, NA)) +
+    labs(x = "Date of notification") +
+    theme_classic() +
+    theme(
+        axis.text.x = element_text(angle = 0, hjust = 0.5, size = 8),
+        legend.position = "bottom"
+    ) -> CUSUM_updated_2025_fbi
+
+CUSUM_updated_2025_fbi
+
+
+ggsave(
+    CUSUM_updated_2025_fbi,
+    file = "figures/CUSUM_updated_2025_fbi.png",
+    dpi = 300,
+    width = 10,
+    height = 6
+)
+
+```
+
+```{r}
+#| label: tbl-incidence_table_province
+#| tbl-cap: The incidence of Agricultural or stock remedy poisoning notifications per 100,000 population by province in South Africa, 2020-2024.
+
+library(flextable)
+NMCleaner::pop[,
+    .(population = sum(Population)),
+    by = .(prov, Year)
+] -> pop_prov_years
+
+
+poison %>%
+    #filter(Year_notification %in% 2020:2025) %>%
+    group_by(prov_, year) %>%
+    summarise(
+        n_notifications = n(),
+        .groups = "drop"
+    ) %>%
+    left_join(
+        pop_prov_years,
+        by = c("prov_" = "prov", "year" = "Year")
+    ) %>%
+    mutate(
+        incidence = (n_notifications / population) * 1e5
+    ) -> incidence_table_prov
+
+peaks_prov <-
+    incidence_table_prov %>%
+    group_by(prov_) %>%
+    filter(incidence == max(incidence, na.rm = TRUE)) %>%
+    ungroup()
+peaks_prov
+
+incidence_table_prov %>%
+    ggplot() +
+    geom_line(
+        aes(
+            x = year,
+            y = incidence,
+            group = prov_,
+            color = prov_
+        ),
+        linewidth = 1.1
+    ) +
+    geom_point(
+        aes(
+            x = year,
+            y = incidence,
+            group = prov_,
+            color = prov_
+        ),
+    ) +
+    geom_label(
+        data = peaks_prov,
+        aes(
+            x = year,
+            y = incidence,
+            label = prov_,
+            color = prov_,
+        ),
+        nudge_x = 0.3,
+        size = 3.5,
+        show.legend = FALSE
+    ) +
+    scale_color_brewer(palette = "Paired") +
+    labs(
+        title = "Incidence of Agricultural or Stock Remedy Poisoning Notifications by Province, South Africa (2020–2024)",
+        x = "Year",
+        y = "Incidence per 100,000 population"
+    ) +
+    theme_minimal() +
+    theme(legend.position = "none") -> incidence_prov_plot
+
+ggsave(
+    incidence_prov_plot,
+    file = "figures/incidence_prov_plot.png",
+    dpi = 300,
+    width = 10,
+    height = 6
+)
+
+library(gt)
+
+incidence_wide <- incidence_table_prov %>%
+    mutate(year = as.character(year)) %>%
+    pivot_wider(
+        names_from  = year,
+        values_from = c(n_notifications, population, incidence),
+        names_glue  = "{.value}_{year}"
+    )
+
+# --- 3. Build gt table with merged year headers ---
+incidence_wide %>%
+    gt(rowname_col = "Province") %>%
+    # Column labels (within each year)
+    cols_label(
+        n_notifications_2020 = "Notifications",
+        population_2020      = "Population",
+        incidence_2020       = "Incidence / 100,000",
+        n_notifications_2021 = "Notifications",
+        population_2021      = "Population",
+        incidence_2021       = "Incidence / 100,000",
+        n_notifications_2022 = "Notifications",
+        population_2022      = "Population",
+        incidence_2022       = "Incidence / 100,000",
+        n_notifications_2023 = "Notifications",
+        population_2023      = "Population",
+        incidence_2023       = "Incidence / 100,000",
+        n_notifications_2024 = "Notifications",
+        population_2024      = "Population",
+        incidence_2024       = "Incidence / 100,000"
+    ) %>%
+    # Year-level spanners (merged headers)
+    tab_spanner(
+        label   = "2020",
+        columns = c(n_notifications_2020, population_2020, incidence_2020)
+    ) %>%
+    tab_spanner(
+        label   = "2021",
+        columns = c(n_notifications_2021, population_2021, incidence_2021)
+    ) %>%
+    tab_spanner(
+        label   = "2022",
+        columns = c(n_notifications_2022, population_2022, incidence_2022)
+    ) %>%
+    tab_spanner(
+        label   = "2023",
+        columns = c(n_notifications_2023, population_2023, incidence_2023)
+    ) %>%
+    tab_spanner(
+        label   = "2024",
+        columns = c(n_notifications_2024, population_2024, incidence_2024)
+    ) %>%
+    # Number formatting
+    fmt_number(
+        columns = starts_with("n_notifications_"),
+        decimals = 0,
+        use_seps = TRUE
+    ) %>%
+    fmt_number(
+        columns = starts_with("population_"),
+        decimals = 0,
+        use_seps = TRUE
+    ) %>%
+    fmt_number(
+        columns = starts_with("incidence_"),
+        decimals = 1
+    ) %>%
+    # Title + source note
+    tab_header(
+        title = md("**Incidence of agricultural or stock remedy poisoning notifications by province, South Africa, 2020–2024**")
+    ) %>%
+    tab_source_note(
+        source_note = "Incidence per 100,000 population; population denominators from 2020–2024 provincial estimates."
+    )
+
+
+new_master%>%filter( 
+    condition %in%  "Agricultural or stock remedy poisoning") %>%
+    group_by(year, prov_) %>%
+    summarise(n = n()) %>%
+    ungroup() %>%
+    arrange(year) %>%
+    mutate(
+        lag_n = lag(n),
+        percent_change = ((n - lag_n) / lag_n) * 100
+    ) -> poison_yearly_counts
+
+```
+
+```{r}
+#| label: fig-EffectOfCircularZOOM
+#| fig-cap: Agricultural or stock remedy poisoning notified in the last 3 months. A Cumulative Sum (CUSUM) algorithm is used to detect increases in the number of notifications compared to the last 180 days. The vertical dashed line represents the date the circular was released. \nData is draw betweeen 09h00 and 12h00 on the day of reporting, as such, number on the preceding two days may be higher in proceeding reports. 
+
+
+dates_in_last_3_months <- seq( as_date("2024-11-02"), #Sys.Date()-lubridate::days(90), 
+
+Sys.Date()-lubridate::days(1), by = "day") # 3 months ago including today, change lubridate::days(0) to lubridate::days(1) to exlucde today as it can be confusing for external stakeholders
+
+
+df_with_ears %>%
+filter( 
+    condition %in% 
+        c("Agricultural or stock remedy poisoning"),
+    year %in% c( 2024:2025),
+    date %in% dates_in_last_3_months
+    )%>%
+mutate( date = as_date(as.character(date)))%>%
+    ggplot(aes( x = date)) + 
+    geom_col(aes(y = n, fill = "Notifications", color = "Notifications"), fill = "grey75" ,position = "dodge") +
+    geom_line(aes(y = latest_cusum_threshold, color = "CUSUM (Summed variance from the previous 180 days)"),  size = 1) +
+     geom_point(aes( y = -0.5, color = factor(latest_is_cusums_outbreak)), shape = 24, size = 2, fill = "transparent") +  # Triangle shape for alarms
+     # add vertical line on the 28 november 2024 
+     geom_vline(xintercept = as_date("2024-11-28"), linetype = "dashed")+
+     geom_label( 
+            aes( x = as_date("2024-12-02"), y = 10, label = "Circular released"), 
+            label.size = 0.5, 
+            label.padding = unit(0.5, "lines"),
+            label.color = "black",
+            fill = "yellow",
+            color = "black",
+            size = 3
+            )+
+scale_color_manual(
+    name = "Legend",  # Legend title
+    values = c(
+        "Bar Chart (n)" = "grey50",
+        "CUSUM (Summed variance from the previous 180 days)" = "steelblue", 
+        "TRUE" = "red", 
+        "FALSE" = "transparent", 
+        "NA" = "transparent"),
+    labels = c(
+        "CUSUM (Summed variance from the previos 180 days)" = "CUSUM (Summed variance from the previos 180 days)", 
+        "TRUE" = "Potential Outbreak Detected", 
+        "FALSE" = "",
+        "NA" = ""
+               )
+  ) +
+  guides(
+    color = guide_legend(order = 1),
+    fill = guide_legend(order = 1)
+    ) +
+    scale_y_continuous( limits = c(-0.5, 25))+
+    scale_x_date(
+        #make daily lables 
+        date_labels = "%d, %b",
+        date_breaks = "1 day"
+    )+ 
+    labs( y = "Notifications (n)",
+    x = "Date of notification")+
+
+    theme_classic() +
+    theme( 
+        axis.text.x = element_text( angle = 90, hjust = 1, size = 8 ),
+        legend.position = "bottom") -> poison_plot_with_cusum
+
+#poison_plot_with_cusum
+#poison_plot_with_cusum
+#poison_plot%>%ggplotly()
+
+
+epicurve_df_to_plot%>%
+    mutate( date = as_date(as.character(date)))%>%
+    group_by( 
+        year, month, day, date
+    )%>%
+    summarise( n = sum(n))%>%
+    ungroup() %>%
+    filter(   date %in% dates_in_last_3_months)%>%
+
+mutate( date = as_date(as.character(date)))%>%
+    ggplot(aes( x = date)) + 
+    geom_col(aes(y = n, fill = "Notifications", color = "Notifications"), fill = "grey75" ,position = "dodge") +
+   # geom_line(aes(y = latest_cusum_threshold, color = "CUSUM (Summed variance from the #previous 180 days)"),  size = 1) +
+   #  geom_point(aes( y = -0.5, color = factor(latest_is_cusums_outbreak)), shape = 24, size = 2, fill = "transparent") +  # Triangle shape for alarms
+     # add vertical line on the 28 november 2024 
+     geom_vline(xintercept = as_date("2024-11-28"), linetype = "dashed")+
+     geom_label( 
+            aes( x = as_date("2024-12-02"), y = 10, label = "Circular released"), 
+            label.size = 0.5, 
+            label.padding = unit(0.5, "lines"),
+            label.color = "black",
+            fill = "yellow",
+            color = "black",
+            size = 3
+            )+
+scale_color_manual(
+    name = "Legend",  # Legend title
+    values = c(
+        "Bar Chart (n)" = "grey50",
+        "CUSUM (Summed variance from the previous 180 days)" = "steelblue", 
+        "TRUE" = "red", 
+        "FALSE" = "transparent", 
+        "NA" = "transparent"),
+    labels = c(
+        "CUSUM (Summed variance from the previos 180 days)" = "CUSUM (Summed variance from the previos 180 days)", 
+        "TRUE" = "Potential Outbreak Detected", 
+        "FALSE" = "",
+        "NA" = ""
+               )
+  ) +
+  guides(
+    color = guide_legend(order = 1),
+    fill = guide_legend(order = 1)
+    ) +
+    scale_y_continuous( limits = c(0, 25))+
+    scale_x_date(
+        #make daily lables 
+        date_labels = "%d, %b",
+        date_breaks = "1 month"
+    )+ 
+    labs( y = "Notifications (n)",
+    x = "Date of notification")+
+
+    theme_classic() +
+    theme( 
+        axis.text.x = element_text( angle = 90, hjust = 1, size = 8 ),
+        legend.position = "bottom") -> poison_plot_without_cusum
+
+#poison_plot_without_cusum
+#poison_plot_without_cusum
+#poison_plot_without_cusum
+poison_plot_with_cusum
+
+```
+@fig-EffectOfCircularZOOM shows that Agricultural or stock remedy poisonings appeared to increased above the normal variance in the prior 180 days on 15 October 2024 and the highest number of notifications was on 8 November 2024. Increased notifications were also observed at similar period in 2023. There is some evidence that the circular released on 28 November 2024 has had an effect on the number of notifications with an increase observed on 9 December. 
+
+
+
+```{r}
+#| include: false
+
+
+poison %>%filter( year %in% 2024:as_year(Sys.Date()))%>%
+    epicurve_df(
+        date_index = "notification_date",
+        grouping_vars = "prov_"
+    )->
+    plot_provinces_to_plot
+    # CHECK DATEA HERE 
+
+plot_provinces_to_plot%>%
+    plot_epicurve_df(
+        x_axis_option = "epiweeks", 
+        grouping_vars = "prov_",
+    )-> plot_provinces
+
+
+
+```
+
+```{r}
+#| label: fig-Epicurve_Province
+#| fig-cap: An epicurve of poisoning notificaitons by province in SA, 2024-2025
+
+plot_provinces$plot+
+    geom_col( aes( y = n, fill = prov_))+
+    # add palette with 3 values 
+    scale_fill_brewer(
+        palette = "Set1",
+    )+
+    theme(text = element_text( face = "bold", size = 10))
+
+```
+
+
+# Decompose trend 
+
+```{r}
+#| label: fig-decompose_trend_poison
+decompose_condition <- function(data, condition_select) {
+  # data should typically be the 'df_with_ears' dataset.
+  # condition_select can be a string representing the condition, e.g., "Malaria".
+  #data <- df_with_ears
+  #condition_select <- "Cholera"
+
+
+  # Filter data based on condition and convert to data.table
+  data %>%
+    filter(condition %in% 
+    condition_select) %>%
+    as.data.table() -> dt_condition
+
+
+    dt_condition[  date %in% min(as_date(date)), "date"][[1]] -> 
+  min_date
+
+    floor_date(as_date(min_date), "year")%>%as_year%>%as.numeric() -> 
+  min_year
+
+    length(seq(as_date(paste0(min_year, "-01-01")) , as_date(min_date), "day") )-> 
+  nth_day_of_year
+  
+  # Create a time series object from filtered data
+  dt_condition[year %in% as.factor(min_year:2024), ]$n %>%
+    ts(frequency = 365.25, start = c(min_year, nth_day_of_year)) -> cases_ts
+  
+  # Define model types for decomposition
+  model_types <- c("additive", "multiplicative")
+  time_series <- list()
+  
+  # Perform decomposition for each model type and store in time_series list
+  map(model_types, ~ {
+    decomp <- stats::decompose(cases_ts, type = .x)
+    time_series[[.x]] <<- decomp
+  })
+  
+  # Calculate variances of the random components
+  additive_variance <- var(time_series[["additive"]]$random, na.rm = TRUE)
+  multiplicative_variance <- var(time_series[["multiplicative"]]$random, na.rm = TRUE)
+  
+  # Choose decomposition type based on variance
+  type <- if_else(multiplicative_variance < additive_variance, "multiplicative", "additive")
+
+  type<- if_else( is.na(type), "additive", type)
+  
+  # Convert time series components into a tidy tibble for plotting
+  time_series_df <- tibble(
+    date = time(time_series[[type]]$x),
+    seasonal = time_series[[type]]$seasonal %>%round(., 2),
+    trend = time_series[[type]]$trend%>%round(., 3),
+    random = time_series[[type]]$random%>%round(., 0)
+  ) %>%
+    rowwise() %>%
+    mutate(observed = if_else(type == "additive", seasonal + trend + random, seasonal * trend * random)) %>%
+    pivot_longer(
+      cols = c("seasonal", "trend", "random", "observed"),
+      names_to = "component",
+      values_to = "n"
+    ) -> time_series_df
+  
+  # Plot the decomposed components
+  decomposed_plot <- time_series_df %>%
+    ggplot(aes(x = date, y = n)) +
+    geom_line() +
+    facet_wrap(~ component, scales = "free_y", ncol = 1) +
+    labs(title = paste0(str_to_title(type), " decomposition of ", condition_select)) +
+    theme_classic()
+  
+#  ggplotly(decomposed_plot)
+  #decomposed_plot
+  return(decomposed_plot)
+
+}
+
+decompose_condition(data = df_with_ears, condition_select = "Agricultural or stock remedy poisoning")
+```
+
+```{r}
+#| label: fig-epicurve_check
+#| fig-cap: Quality Check- The number of notifications comparing the raw dataset to the one used for the CUSUM) signal detection, which is labled as "Modelled". A green triangle means the data in the modelled dataset and the real dataset is the same. 
+
+#make another plot using the df_ears and compare to raw new_master to ensure true cases are reported in both 
+
+df_with_ears %>%
+filter( 
+    condition %in% 
+        c("Agricultural or stock remedy poisoning"),
+    #year %in% c( "2024"),
+    date %in% dates_in_last_3_months
+    )%>%
+mutate( date = as_date(as.character(date)))%>%
+mutate( source = "modelled")%>%
+select( contains(c(names(epicurve_df_to_plot), "source")) )-> 
+df_ears_df
+
+#df_ears_df%>%view()
+
+
+epicurve_df_to_plot%>%
+    mutate( date = as_date(as.character(date)))%>%
+    group_by( 
+        year, month, day, date
+    )%>%
+    summarise( n = sum(n))%>%
+    ungroup() %>%
+    filter(   date %in% dates_in_last_3_months)%>%
+    mutate( source = "raw") ->
+    
+ raw_epicurve
+
+raw_epicurve$date%>%as_date() %>%summary() 
+
+bind_rows( df_ears_df, raw_epicurve)-> merged_raw_df_ears
+
+merged_raw_df_ears%>%  
+    # i want to alert myself when the n on the date is different
+    group_by( date)%>%
+    mutate( 
+        different = if_else( n == dplyr::lag(n), "Same", "Different"),
+        difference = n - dplyr::lag(n)
+    )%>%
+    ggplot(aes( x = date)) +
+    geom_line( aes( y = difference, color = source, group = source), size = 1)+
+    geom_col(aes(y = n, fill = source, color = source, group = source), fill = "transparent" ,position = "dodge")+
+    geom_point(aes( y = -1, color = different), shape = 24, size = 2, fill = "transparent")  + # Triangle shape for alarms
+    scale_x_date(
+        #make daily lables 
+        date_labels = "%d, %b",
+        date_breaks = "1 day"
+    )+
+    scale_color_manual(
+        name = "Legend",  # Legend title
+        values = c(
+            "modelled" = "steelblue", 
+            "raw" = "grey", 
+            "Same" = "green", 
+            "Different" = "red"),
+        labels = c(
+            "modelled" = "Modelled", 
+            "raw" = "Raw", 
+            "Same" = "Same", 
+            "Different" = "Different")
+    ) +
+    labs( y = "Notifications (n)",
+    x = "Date of notification")+
+    theme_classic() +
+    theme( 
+        axis.text.x = element_text( angle = 90, hjust = 1, size = 8 ),
+        legend.position = "bottom") -> merged_raw_df_ears_plot
+
+merged_raw_df_ears_plot
+
+```
+
+# Reporting delay 
+
+```{r}
+#| label: fig-ReportingDelay
+#| fig-cap: The distribution of reporting delays for Agricultural or stock remedy poisoning notifications in 2024, South Africa
+
+
+new_master%>%
+filter( 
+    condition %in% "Agricultural or stock remedy poisoning",
+    year %in% 2024
+    )%>%
+mutate(
+    after_circular = factor( if_else( notification_date > as.Date("2024-12-02"), "After 2 December", "Before 2 December"),
+    levels = c("Before 2 December", "After 2 December"))  , 
+    date_arrived_in_NMC =   as.character(str_extract(case_id, "^\\d{6}")%>%as_date),
+    date_arrived_in_NMC_to_Notification = difftime( notification_date, date_arrived_in_NMC, units = "days"),
+    symptom_onset_to_notification = difftime( notification_date, symptom_date, units = "days"), 
+    diagnosis_to_notification = difftime( notification_date, diagnosis_date, units = "days"), 
+    admission_to_notification = difftime( notification_date, admissiondate, units = "days"), 
+    pmadmission_to_notification = difftime( notification_date, pmhadmissiondate, units = "days")
+
+    )%>%
+    select( 
+        after_circular, 
+        date_arrived_in_NMC_to_Notification, 
+        symptom_onset_to_notification, 
+        diagnosis_to_notification,
+        admission_to_notification
+       # pmadmission_to_notification
+        )-> poison_delays
+
+        poison_delays%>%
+        tbl_summary(
+            by = after_circular, 
+            type  = list( admission_to_notification ~ "continuous"),
+            missing_text = "Unkown") %>%
+            modify_header( label = "")%>%
+        #add_p() %>%
+        clean_labels() %>%
+        bold_labels()%>%
+        as_flex_table()
+
+
+
+```
+
+```{r}
+#| label: tbl-DeathsUnder12
+#| tbl-cap: Table describing the vital status in notifications of Agricultural or stock remedy poisoning in from Jan 2023 to date, among those reported under 12 years of age, South Africa
+
+new_master %>%
+    filter(
+        condition %in% "Agricultural or stock remedy poisoning",
+        year %in% 2023:2025
+    ) %>%
+    mutate(
+        patient_vital_status = if_else(patient_vital_status == "Unknown", "Alive", patient_vital_status),
+        Age_years = as.numeric(Age_years),
+        under_12 = if_else(Age_years <= 12, "Under 12", "12 and over")
+    ) %>%
+    filter(
+        # under_12 %in% "Under 12"
+    ) %>%
+    select(
+        under_12,
+        patient_vital_status,
+        Age_years,
+        patient_gender,
+        prov_,
+        # facility_type,
+        # patient_admission_status,
+        year
+    ) %>%
+    mutate(
+        prov_ = str_to_upper(prov_),
+    ) %>%
+    tbl_strata(
+        strata = year,
+        .tbl_fun =
+            ~ .x %>%
+                tbl_summary(
+                    # missing = "no",
+                    by = patient_vital_status,
+                    # sort = list( facility_type ~ "frequency"),
+                    label = list(
+                        prov_ ~ "Province"
+                    ),
+                    type = list(all_continuous() ~ "continuous"),
+                    percent = "row"
+                ) %>%
+                clean_labels() %>%
+                bold_labels()
+    ) ->
+tbl_of_U12_deaths
+
+tbl_of_U12_deaths[["table_body"]][["label"]][c(11:18) + 2] %>% str_to_upper() ->
+tbl_of_U12_deaths[["table_body"]][["label"]][c(11:18) + 2]
+
+tbl_of_U12_deaths %>%
+    as_flex_table() %>%
+    save_as_docx(path = "outputs/Deaths_under12_poisoning.docx")
+
+tbl_of_U12_deaths %>% as_flex_table() 
+
+```
+
+
+# Map 
+
+```{r}
+#| label: fig_mapLast7days
+#| fig-cap: A map showing the number of notifications for agricultural or stock remedy poisoning in the last 7 days by disrict.
+
+last_7_days<- seq( Sys.Date()-7, Sys.Date(), by = "day")
+
+
+map_n  <- function(
+    data, 
+    condition_select,
+    show_names = FALSE,
+    limits = NULL ) {
+
+data  %>% 
+  # if condition_select == "Fever-Rash" then apply fucntion make_fever_rash
+    {if (condition_select== "Fever-Rash") make_fever_rash(.) else .} %>%
+   dplyr::filter(! district %in% c("Unknown", "Isazi Import", "Not Applicable"))%>%
+   dplyr:: filter( !condition %in% "Covid-19", 
+    #nmccategories ==1 , 
+    grepl( condition_select,  condition, ignore.case = TRUE),  
+    year %in% 2023:2025)%>%
+    group_by( district) %>%
+    summarise( n = n())%>%
+    mutate_district_name( ., "district")->
+    notifications_df
+
+#standardise pop data 
+#NMCleaner::pop$Name
+NMCleaner::pop-> 
+    pop
+
+pop$district_standard%>%unique()
+
+pop %>% 
+    mutate( district = district_standard)->
+    pop
+
+
+
+NMCleaner::pop%>%
+    dplyr::filter( Year %in% 2023:2025) %>%
+    #mutate( district = gsub( ".*- ", "", Name ))%>%
+    select( - Name)%>%
+    group_by( district_standard)%>%
+    summarise( pop = sum( Population))-> 
+    pop_df 
+
+
+shape_files[["districts"]]$district%>%unique
+shape_files[["sub_districts"]]$district%>%unique
+
+# standardsie the district names in these two datasets. 
+shape_files[c("districts", "sub_districts")] <- 
+  map(c("districts", "sub_districts"), ~
+    shape_files[[.x]] %>%
+      as_tibble() %>%
+      mutate_district_name("district") %>%
+      st_as_sf()%>%
+      rmapshaper::ms_simplify(, keep  = 0.01)
+      
+  )
+
+
+shape_files$districts%>%
+    as_tibble() %>%
+    mutate_district_name(., "district")%>%
+    st_as_sf()->
+    shape_df
+
+shape_df%>%
+    left_join( pop_df, by = "district_standard")%>%
+    left_join( notifications_df, by = "district_standard")%>%
+    mutate( 
+        district = district_standard,
+    #  incidence = n/pop*100000
+      )->
+    final_df
+
+###########
+
+# Case counts 
+
+###########
+
+final_df%>% 
+# maybe in the last 5 weeks? 
+    arrange( -n) %>%
+    #slice(1:10 )%>%
+    group_by( district )%>%
+    filter( n ==max(n))-> 
+peaks_df
+    
+
+final_df %>% sf::st_sf() -> final_sf
+    
+    final_sf%>%
+    ggplot()+
+    geom_sf(aes(fill = n, group = district), color = "white", size = 1)+
+    scale_fill_viridis_c()+
+    theme_classic()+
+    labs( 
+        x = "", 
+        y = ""
+    )+
+    theme(
+        axis.line.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.line.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank()
+    )->
+    notifications_map_n
+
+        if(show_names == TRUE){
+            notifications_map_n+
+                geom_sf_label(data = final_df, aes(label = district_standard), size = 2.5)-> 
+                notifications_map_n
+    }
+
+        if(!is.null(limits)){
+         notifications_map_n + 
+                scale_fill_viridis_c(limits = limits)-> 
+                notifications_map_n
+        }
+
+#plotly::ggplotly(notifications_map_n)
+return(notifications_map_n)
+}
+
+map_n( 
+    data = new_master%>%filter( notification_date %in% last_7_days), 
+    condition_select = "Agricultural or stock remedy poisoning",
+    show_names = FALSE, 
+    limits = c( 0,30)) +
+    labs(
+        title = "Agricultural or stock remedy poisoning notifications in the last 7 days",
+        caption = "Data from the NMC"
+    )
+
+```
+
+# Map of districts from last 7 months 
+```{r}
+#| include: false
+#| label: fig_mapLast7months
+#| fig-cap: A map showing the number of notifications for agricultural or stock remedy poisoning in the last 7 months by disrict.
+
+# I am going to map the number of notifications for the last 7 months
+# create a map of the notifications using map_n for each month from June 2024 to date
+
+tibble(
+    date = seq(as.Date("2023-06-01"), Sys.Date(), by = "day"),
+    month = as_yearmonth(date),
+) %>% as.data.table() -> dates_df
+
+
+dates_df$month %>% unique() -> months
+
+
+number_of_cases <- function(
+    data,
+    condition_select,
+    date_select) {
+    data %>%
+        dplyr::filter(
+            condition %in% condition_select,
+            notification_date %in% date_select
+        ) %>%
+        nrow() -> number_notifications
+}
+
+as_date(Sys.Date()) %>% format("%b '%y")
+
+months %>%
+    map(
+        ~ map_n(
+            data = new_master %>% filter(notification_date %in% dates_df[month %in% .x]$date),
+            condition_select = "Agricultural or stock remedy poisoning",
+            show_names = FALSE,
+            limits = c(0, 30)
+        ) +
+            labs(
+                title = paste0(as.character(.x %>% format("%b '%y") ), " N = ", number_of_cases(new_master, "Agricultural or stock remedy poisoning", dates_df[month %in% .x]$date)),
+                # caption = "Data from the NMC"
+            )
+    ) -> maps_list
+
+library(patchwork)
+
+wrap_plots(maps_list,
+    ncol = 6,
+    guides = "collect"
+) -> maps_plot
+
+# make a button that download the image
+save(maps_plot, file = "dashboard/aggregated_data/maps_plot.rda")
+
+ggsave("dashboard/aggregated_data/maps_plot.png", maps_plot, width = 16, height = 25, units = "cm", dpi = 300)
+
+maps_plot
+```
+
+# Maps 
+
+```{r}
+#| label: new_map_function
+
+
+map_n <- function(data, condition_select) {
+    # data <- new_master
+    # condition_select<- "Agricultural or stock remedy poisoning"
+
+    data %>%
+        # if condition_select == "Fever-Rash" then apply fucntion make_fever_rash
+        {
+            if (condition_select == "Fever-Rash") make_fever_rash(.) else .
+        } %>%
+        dplyr::filter(!district %in% c("Unknown", "Isazi Import", "Not Applicable")) %>%
+        dplyr::filter(
+            !condition %in% "Covid-19",
+            # nmccategories ==1 ,
+            grepl(condition_select, condition, ignore.case = TRUE),
+            # year %in% 2024
+        ) %>%
+        group_by(district) %>%
+        summarise(n = n()) %>%
+        mutate_district_name(., "district") ->
+    notifications_df
+
+    # standardise pop data
+    # NMCleaner::pop$Name
+    NMCleaner::pop ->
+    pop
+
+    # pop$district_standard %>% unique()
+
+    pop %>%
+        mutate(district = district_standard) ->
+    pop
+
+
+
+    NMCleaner::pop %>%
+        dplyr::filter(
+            Year %in% 2024
+        ) %>%
+        mutate(district = gsub(".*- ", "", Name)) %>%
+        select(-Name) %>%
+        group_by(district) %>%
+        summarise(pop = sum(Population)) %>%
+        mutate_district_name(., "district") ->
+    pop_df
+
+
+    shape_files[["districts"]]$district %>% unique()
+    shape_files[["sub_districts"]]$district %>% unique()
+
+    # standardsie the district names in these two datasets.
+    shape_files[c("districts", "sub_districts")] <-
+        map(
+            c("districts", "sub_districts"), ~
+                shape_files[[.x]] %>%
+                    as_tibble() %>%
+                    mutate_district_name("district") %>%
+                    st_as_sf() # %>%
+            # rmapshaper::ms_simplify(, keep  = 0.01)
+        )
+
+
+    shape_files$districts %>%
+        as_tibble() %>%
+        mutate_district_name(., "district") %>%
+        st_as_sf() ->
+    shape_df
+
+    shape_df %>%
+        left_join(pop_df, by = "district_standard") %>%
+        left_join(notifications_df, by = "district_standard") %>%
+        mutate(
+            #  incidence = n/pop*100000
+        ) ->
+    final_df
+
+    ###########
+
+    # Case counts
+
+    ###########
+
+    final_df %>%
+        # maybe in the last 5 weeks?
+        arrange(-n) %>%
+        slice(1:10) %>%
+        group_by(district) %>%
+        filter(n == max(n)) ->
+    peaks_df
+
+
+    # GGrepel
+    geom_sf_label_variants <- function(mapping = NULL,
+                                       data = NULL,
+                                       fun.geometry,
+                                       geom_fun,
+                                       ...) {
+        if (is.null(mapping$geometry)) {
+            geometry_col <- attr(data, "sf_column") %||% "geometry"
+            mapping$geometry <- as.name(geometry_col)
+        }
+
+        geom_fun(
+            mapping = mapping,
+            data = data,
+            stat = StatSfCoordinates,
+            fun.geometry = fun.geometry,
+            ...
+        )
+    }
+
+    pacman::p_load(ggpattern)
+    ?geom_sf_pattern
+
+    final_df %>% sf::st_sf() -> final_sf
+
+    ggplot(final_sf) +
+        ggpattern::geom_sf_pattern(
+            data = final_sf %>% dplyr::filter(is.na(n)),
+            aes(geometry = geometry),
+            inherit.aes = FALSE,
+            linewidth = 0,
+            fill = "white",
+            color = NA,
+            pattern = "stripe",
+            pattern_fill = "grey75",
+            pattern_colour = NA,
+            pattern_spacing = 0.02
+        ) +
+        geom_sf(aes(fill = n, group = district)) +
+        scale_fill_viridis_c(
+            na.value = "transparent"
+        ) +
+        ggrepel::geom_label_repel(
+            data = peaks_df,
+            aes(
+                label = district_standard,
+                geometry = geometry
+            ),
+            label.size = 0.1,
+            size = 2,
+            stat = "sf_coordinates",
+            nudge_x = 1
+            # min.segment.length = 0,
+            # direction = c( "y"),
+            # arrow = arrow(length = unit(0.1, "npc"))
+        ) +
+        # geom_sf_label(data = peaks_df,
+        #  aes(label = district_standard), size = 2.5)+
+        theme_classic() +
+        labs(
+            x = "",
+            y = ""
+        ) +
+        coord_sf(expand = FALSE) +
+        theme(
+            axis.line.x = element_blank(),
+            axis.ticks.x = element_blank(),
+            axis.text.x = element_blank(),
+            axis.line.y = element_blank(),
+            axis.ticks.y = element_blank(),
+            axis.text.y = element_blank(),
+            plot.margin = margin(5, 5, 5, 5),
+            legend.position = "bottom"
+        ) +
+        theme(
+            panel.spacing = unit(0.17, "lines"),
+            strip.background = element_rect(color = NA, fill = NA),
+            strip.placement = "outside",
+            text = element_text(family = "Century Gothic", size = 15, color = "#333333"),
+            panel.background = element_rect(fill = "#F8F8F8"),
+            plot.background = element_rect(fill = "#F8F8F8"),
+            panel.grid = element_line(color = "#DDDDDD"), legend.text = element_text(
+                color = "#333333",
+                size = 8
+            ), legend.title = element_text(
+                color = "#333333",
+                size = 10
+            ), plot.title = element_text(
+                size = 15,
+                color = "#666666"
+            ), plot.subtitle = element_text(
+                size = 8,
+                color = "#666666"
+            ), plot.caption = element_text(
+                size = 8,
+                color = "#666666"
+            ), legend.position = "bottom",
+            legend.direction = "horizontal", legend.key = element_blank(),
+            legend.title.align = 0.5, panel.grid.major = element_blank(),
+            axis.title = element_text(size = 15, color = "#666666"),
+            panel.grid.minor.x = element_blank(), panel.grid.minor.y = element_blank(),
+            axis.ticks = element_line(size = 0.15, color = "grey20"),
+            legend.background = element_rect(
+                fill = "#F8F8F8",
+                size = 0.25, linetype = "solid", colour = "grey50"
+            ),
+            strip.text.y.right = element_text(angle = 0)
+        ) ->
+    notifications_map_n
+
+
+    # plotly::ggplotly(notifications_map_n)
+    notifications_map_n
+}
+
+```
+
+## FBI 
+
+```{r}
+# last full epiweek
+new_master %>%
+    filter(
+        date %in% seq(as_date("2024-10-01"), as_date(Sys.Date()), by = "day"),
+    ) %>%
+    select(
+        year, month, epiweek, day, date
+    ) %>%
+    unique() %>%
+    group_by(epiweek) %>%
+    filter(
+        n() == 7,
+    ) %>%
+    ungroup() %>%
+    filter(date == max(date)) %>%
+    slice(1) %>%
+    select(date) %>%
+    pull() -> end_date_of_most_recent_epiweek
+
+map_n(
+    data =
+        new_master %>%
+            filter(
+                date %in% seq(as_date("2024-10-01"), as_date(end_date_of_most_recent_epiweek), by = "day"),
+                condition %in% "Food borne illness outbreak"
+            ), condition_select = "Food borne illness outbreak"
+) ->
+genevie_map_FBI
+
+genevie_map_FBI +
+    scale_fill_gradient(
+        low = "blanchedalmond",
+        high = "darkred",
+        na.value = "transparent",
+        name = "Number of notifications",
+        limits = c(0, max(genevie_map_FBI$data$n, na.rm = TRUE)) # adjust as needed
+    ) -> genevie_map_FBI
+
+genevie_map_FBI
+
+ggsave(
+    "figures/genevie_map_FBI.png",
+    genevie_map_FBI,
+    width = 8,
+    height = 5,
+    dpi = 300
+)
+
+```
+
+```{r}
+
+new_master %>%
+    filter(
+        date %in% seq(as_date("2024-10-01"), as_date(end_date_of_most_recent_epiweek), by = "day"),
+        condition %in% "Food borne illness outbreak"
+    ) %>%
+    group_by(
+        district, prov_
+    ) %>%
+    summarise(n = n()) %>%
+    arrange(-n) 
+```
+
+## Agricultural or stock remedy poisoning
+
+```{r}
+map_n(
+    data =
+        new_master %>%
+            filter(
+                date %in% seq(as_date("2024-10-01"), as_date(end_date_of_most_recent_epiweek), by = "day"),
+                condition %in% "Agricultural or stock remedy poisoning"
+            ), condition_select = "Agricultural or stock remedy poisoning"
+) ->
+genevie_map_ASRP
+
+genevie_map_ASRP +
+    scale_fill_gradient(
+        low = "lightgoldenrodyellow",
+        high = "darkgreen",
+        na.value = "transparent",
+        name = "Number of notifications",
+        limits = c(0, max(genevie_map_ASRP$data$n, na.rm = TRUE)) # adjust as needed
+    ) -> genevie_map_ASRP
+
+genevie_map_ASRP
+
+ggsave(
+    "figures/genevie_map_ASRP.png",
+    genevie_map_ASRP,
+    width = 8,
+    height = 5,
+    dpi = 300
+)
+
+```
+
+```{r}
+new_master %>%
+    filter(
+        date %in% seq(as_date("2024-10-01"), as_date(end_date_of_most_recent_epiweek), by = "day"),
+        condition %in% "Agricultural or stock remedy poisoning"
+    ) %>%
+    group_by(
+        district, prov_
+    ) %>%
+    summarise(n = n()) %>%
+    arrange(-n)
+    
+```
+
+::: {.download_btn}
+
+```{css}
+#| echo: false
+
+.btn-default,
+.btn-default:hover,
+.btn-default:active {
+  font-size: 20px;
+  color: black;
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.btn-default:hover {
+  color: grey;
+  transition: 0.2s;
+}
+
+```
+
+
+```{r}
+#| echo: false
+
+ggsave("maps_plot.png", maps_plot, path = "dashboard/aggregated_data")
+
+pacman::p_load(downloadthis)
+??download
+download_file(
+  path = "dashboard/aggregated_data/maps_plot.png",
+  output_name = "maps_plot",
+  button_label = "Download Maps Plot",
+  button_type = "default",
+  icon = "fa fa-download"
+)
+
+  
+```
+
+:::

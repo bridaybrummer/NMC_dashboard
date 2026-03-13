@@ -86,6 +86,19 @@ system("git config --global http.postBuffer 524288000")
 system("git branch -M main")
 cat("Renamed branch to 'main'.\n")
 
+# 7.1 Clean up any corrupted branch references (e.g., "main 2" with spaces).
+corrupt_refs <- list.files(".git/refs/heads", pattern = " ", full.names = TRUE)
+if (length(corrupt_refs) > 0) {
+    cat("Found corrupted branch references:\n")
+    for (ref in corrupt_refs) {
+        cat("  Removing:", ref, "\n")
+        file.remove(ref)
+    }
+    cat("✓ Cleaned up corrupted refs.\n")
+} else {
+    cat("No corrupted branch references found.\n")
+}
+
 # 8. Pull remote changes (with rebase) to ensure your local branch is up-to-date.
 cat("Pulling latest changes from remote 'main' branch with rebase...\n")
 pull_result <- system("git pull origin main --rebase")
