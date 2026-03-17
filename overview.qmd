@@ -35,7 +35,12 @@ suppressPackageStartupMessages({
   library(plotly)
   library(DT)
   library(lubridate)
+  library(knitr)
+  library(kableExtra)
 })
+
+# Source NMC category lookup
+source("R/nmc_categories.r")
 
 agg_nat  <- readRDS("data/processed/agg_national.rds")
 agg_prov <- readRDS("data/processed/agg_province.rds")
@@ -60,6 +65,11 @@ agg_prov <- agg_prov[!is.na(prov_) & prov_ != ""]
 latest_date <- max(agg_nat$date)
 month_start <- floor_date(latest_date, "month")
 prev_month  <- month_start - months(1)
+
+# Assign NMC categories to national data
+agg_nat_cat <- copy(agg_nat)
+agg_nat_cat <- assign_nmc_category(agg_nat_cat)
+agg_nat_cat[, year := year(date)]
 ```
 
 ## Key Figures — `r format(month_start, "%B %Y")`
@@ -111,6 +121,94 @@ cat(sprintf(
   arrow, abs(pct_change),
   n_cond, n_prov
 ))
+```
+
+---
+
+## All NMC Notifications, 2023 – 2026
+
+```{r}
+#| label: tbl-category-summary
+#| tbl-cap: "Total notifications by NMC Category and Year"
+
+# Aggregate by category and year
+years_of_interest <- 2023:2026
+cat_summary <- agg_nat_cat[year %in% years_of_interest & !is.na(nmc_category), 
+                            .(Cases = sum(count)), 
+                            by = .(nmc_category, year)]
+
+# Pivot to wide format
+cat_wide <- dcast(cat_summary, nmc_category ~ year, value.var = "Cases", fill = 0)
+setnames(cat_wide, "nmc_category", "Category")
+cat_wide[, Category := paste0("Category ", Category)]
+
+# Add totals row
+totals <- cat_summary[, .(Cases = sum(Cases)), by = year]
+totals_wide <- dcast(totals, . ~ year, value.var = "Cases", fill = 0)
+totals_wide[, Category := "**Total**"]
+totals_wide[, `.` := NULL]
+
+# Combine
+cat_wide <- rbind(cat_wide, totals_wide, fill = TRUE)
+
+# Format numbers with commas
+year_cols <- as.character(years_of_interest)
+for (col in year_cols) {
+  if (col %in% names(cat_wide)) {
+    cat_wide[[col]] <- format(cat_wide[[col]], big.mark = ",", scientific = FALSE)
+  }
+}
+
+kable(cat_wide, align = c("l", rep("r", length(year_cols)))) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE,
+                position = "left") %>%
+  row_spec(nrow(cat_wide), bold = TRUE)
+```
+
+---
+
+## Notifications of Category 1 Conditions
+
+```{r}
+#| label: tbl-category1-detail
+#| tbl-cap: "Category 1 condition notifications by year (immediate notification required)"
+
+# Filter to Category 1 only
+cat1_detail <- agg_nat_cat[year %in% years_of_interest & nmc_category == 1, 
+                            .(Cases = sum(count)), 
+                            by = .(condition, year)]
+
+# Pivot to wide format
+cat1_wide <- dcast(cat1_detail, condition ~ year, value.var = "Cases", fill = 0)
+setnames(cat1_wide, "condition", "Condition")
+
+# Calculate total across years for sorting
+cat1_wide[, total := rowSums(.SD, na.rm = TRUE), .SDcols = year_cols[year_cols %in% names(cat1_wide)]]
+setorder(cat1_wide, -total)
+cat1_wide[, total := NULL]
+
+# Add totals row
+if (nrow(cat1_detail) > 0) {
+  totals_cat1 <- cat1_detail[, .(Cases = sum(Cases)), by = year]
+  totals_cat1_wide <- dcast(totals_cat1, . ~ year, value.var = "Cases", fill = 0)
+  totals_cat1_wide[, Condition := "**Total**"]
+  totals_cat1_wide[, `.` := NULL]
+  cat1_wide <- rbind(cat1_wide, totals_cat1_wide, fill = TRUE)
+}
+
+# Format numbers with commas
+for (col in year_cols) {
+  if (col %in% names(cat1_wide)) {
+    cat1_wide[[col]] <- format(cat1_wide[[col]], big.mark = ",", scientific = FALSE)
+  }
+}
+
+kable(cat1_wide, align = c("l", rep("r", length(year_cols)))) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE,
+                position = "left") %>%
+  row_spec(nrow(cat1_wide), bold = TRUE)
 ```
 
 ---

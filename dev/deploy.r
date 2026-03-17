@@ -41,7 +41,8 @@ if (!("origin" %in% remotes)) {
 
 # 3. Refresh data before rendering.
 cat("Running data preparation pipeline...\n")
-prep_result <- system("Rscript R/prepare_dashboard_data.r")
+rscript_path <- file.path(R.home("bin"), "Rscript")
+prep_result <- system(paste(shQuote(rscript_path), "R/prepare_dashboard_data.r"))
 if (prep_result != 0) {
     stop("Data preparation failed. Aborting deploy.")
 }
@@ -101,11 +102,23 @@ if (length(corrupt_refs) > 0) {
 
 # 8. Pull remote changes (with rebase) to ensure your local branch is up-to-date.
 cat("Pulling latest changes from remote 'main' branch with rebase...\n")
+
+# Stash any remaining uncommitted changes that might block rebase
+stash_result <- system("git stash push -m 'deploy-script-autostash' --include-untracked")
+stashed <- (stash_result == 0 && length(system("git stash list | grep deploy-script-autostash", intern = TRUE)) > 0)
+
 pull_result <- system("git pull origin main --rebase")
 if (pull_result != 0) {
     cat("Pull with rebase failed. Aborting rebase...\n")
     system("git rebase --abort")
+    if (stashed) system("git stash pop")
     stop("Rebase failed — resolve conflicts manually before deploying.")
+}
+
+# Restore stashed changes if any
+if (stashed) {
+    system("git stash pop")
+    cat("Restored stashed changes.\n")
 }
 
 # (Optional) Check again if there are staged changes post-rebase, and commit if needed.
