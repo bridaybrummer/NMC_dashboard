@@ -125,18 +125,49 @@ system("git config --global http.postBuffer 524288000")
 system("git branch -M main")
 cat("Renamed branch to 'main'.\n")
 
-# 7.1 Clean up any corrupted branch references (e.g., "main 2" with spaces).
-corrupt_refs <- list.files(".git/refs/heads", pattern = " ", full.names = TRUE)
-if (length(corrupt_refs) > 0) {
-    cat("Found corrupted branch references:\n")
-    for (ref in corrupt_refs) {
-        cat("  Removing:", ref, "\n")
-        file.remove(ref)
+# 7.1 Clean up any corrupted branch/remote-tracking references (names containing
+#     spaces or digits like "main 2", "gh-pages 2") that can cause fetch to fail
+#     with "bad object" or "did not send all necessary objects" errors.
+clean_corrupt_refs <- function(dir) {
+    refs <- list.files(dir, pattern = " ", full.names = TRUE, recursive = TRUE)
+    if (length(refs) > 0) {
+        cat("Found corrupted refs in", dir, ":\n")
+        for (ref in refs) {
+            cat("  Removing:", ref, "\n")
+            file.remove(ref)
+        }
     }
-    cat("✓ Cleaned up corrupted refs.\n")
+    refs
+}
+removed_heads  <- clean_corrupt_refs(".git/refs/heads")
+removed_remote <- clean_corrupt_refs(".git/refs/remotes")
+if (length(c(removed_heads, removed_remote)) > 0) {
+    cat("✓ Cleaned up", length(c(removed_heads, removed_remote)), "corrupted ref(s).\n")
 } else {
     cat("No corrupted branch references found.\n")
 }
+
+# Also strip any corrupted entries from packed-refs (lines whose ref name contains a space).
+packed_refs_path <- ".git/packed-refs"
+if (file.exists(packed_refs_path)) {
+    lines <- readLines(packed_refs_path, warn = FALSE)
+    clean  <- lines[!grepl("refs/[^ ]* .*[0-9]$", lines) & !grepl(" [^ ]*[ ][0-9]", lines)]
+    # Simpler heuristic: drop any ref line where the ref name segment contains a space.
+    clean <- lines[sapply(lines, function(l) {
+        if (startsWith(l, "#")) return(TRUE)   # keep comment lines
+        parts <- strsplit(trimws(l), " ")[[1]]
+        # A normal packed-ref line is: <sha> <refname>  — refname has no spaces
+        length(parts) == 2
+    })]
+    if (length(clean) < length(lines)) {
+        writeLines(clean, packed_refs_path)
+        cat("✓ Removed", length(lines) - length(clean), "corrupted packed-ref(s).\n")
+    }
+}
+
+# Prune any stale remote-tracking refs before pulling.
+cat("Pruning stale remote-tracking refs...\n")
+system("git remote prune origin")
 
 # 8. Pull remote changes (with rebase) to ensure your local branch is up-to-date.
 cat("Pulling latest changes from remote 'main' branch with rebase...\n")
@@ -148,7 +179,7 @@ stashed <- (stash_result == 0 && length(system("git stash list | grep deploy-scr
 pull_result <- system("git pull origin main --rebase")
 if (pull_result != 0) {
     cat("Pull with rebase failed. Aborting rebase...\n")
-    system("git rebase --abort")
+    system("git rebase --abort 2>/dev/null")   # ignore error when no rebase was started
     if (stashed) system("git stash pop")
     stop("Rebase failed — resolve conflicts manually before deploying.")
 }
