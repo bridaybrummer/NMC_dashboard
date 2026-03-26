@@ -2,6 +2,14 @@
 # Update GitHub Main & GitHub Pages
 # ===============================
 
+# ── Deploy options ────────────────────────────────────────────────────────────
+# Set run_all_scripts = TRUE to (re-)generate ALL processed data before rendering.
+# This includes the Burden of Disease indicators (prepare_bod_data.r) and any
+# other optional preparation scripts.  Set to FALSE (default) to skip them and
+# only run the core dashboard data pipeline (prepare_dashboard_data.r).
+run_all_scripts <- TRUE
+# ─────────────────────────────────────────────────────────────────────────────
+
 # 1. Resolve project root regardless of where this script is called from.
 #    Walks up from cwd checking for _quarto.yml; works whether you run via
 #    Rscript dev/deploy.r, source() inside RStudio, or open the Project.
@@ -40,18 +48,48 @@ if (!("origin" %in% remotes)) {
 }
 
 # 3. Refresh data before rendering.
-cat("Running data preparation pipeline...\n")
 rscript_path <- file.path(R.home("bin"), "Rscript")
+
+# 3a. Core dashboard data (always runs).
+cat("Running core data preparation pipeline...\n")
 prep_result <- system(paste(shQuote(rscript_path), "R/prepare_dashboard_data.r"))
 if (prep_result != 0) {
-    stop("Data preparation failed. Aborting deploy.")
+    stop("Core data preparation failed. Aborting deploy.")
 }
 if (!file.exists("data/processed/agg_national.rds") ||
     !file.exists("data/processed/agg_province.rds") ||
     !file.exists("data/processed/agg_district.rds")) {
-    stop("Data preparation did not produce expected .rds files. Aborting deploy.")
+    stop("Core data preparation did not produce expected .rds files. Aborting deploy.")
 }
-cat("✓ Data preparation complete.\n")
+cat("✓ Core data preparation complete.\n")
+
+# 3b. Optional full-pipeline scripts (runs when run_all_scripts = TRUE).
+if (run_all_scripts) {
+    cat("run_all_scripts = TRUE — running additional preparation scripts...\n")
+
+    # Burden of Disease indicators (YLL, YLD, DALY) required by burden-of-disease/index.qmd
+    cat("  Running prepare_bod_data.r...\n")
+    bod_result <- system(paste(shQuote(rscript_path), "R/prepare_bod_data.r"))
+    if (bod_result != 0) {
+        stop("Burden of Disease data preparation failed. Aborting deploy.")
+    }
+    bod_files <- c("bod_deaths.rds", "bod_yll.rds", "bod_yll_province.rds",
+                   "bod_yll_year.rds", "bod_yld.rds", "bod_yld_year.rds",
+                   "bod_daly.rds", "bod_daly_province.rds", "bod_daly_year.rds")
+    missing_bod <- bod_files[!file.exists(file.path("data/processed", bod_files))]
+    if (length(missing_bod) > 0) {
+        stop("prepare_bod_data.r did not produce: ", paste(missing_bod, collapse = ", "),
+             ". Aborting deploy.")
+    }
+    cat("  ✓ Burden of Disease data complete.\n")
+
+    # Add further optional scripts here following the same pattern, e.g.:
+    # asr_result <- system(paste(shQuote(rscript_path), "R/prepare_asr_data.r"))
+
+    cat("✓ All additional preparation scripts complete.\n")
+} else {
+    cat("run_all_scripts = FALSE — skipping additional preparation scripts.\n")
+}
 
 # 4. Render your Quarto site.
 cat("Rendering Quarto site...\n")

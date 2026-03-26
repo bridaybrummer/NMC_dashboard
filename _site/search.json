@@ -4,21 +4,21 @@
     "href": "linkage/index.html",
     "title": "Opportunities for Linkage",
     "section": "",
-    "text": "NoteAbout this Page\n\n\n\n\n\nThis page reports on the quality of patient identifier fields that enable record linkage across health information systems.\n\n\n\n\n\n\n\n\nIdentifier\nColumn\nPurpose\n\n\n\n\nSA ID Number\npatient_id_no\nLinks to Home Affairs, NHLS, vital registration\n\n\nHospital Folder No.\nfolder_no\nLinks to facility-level clinical records\n\n\nMRN\nmrn (if present)\nMedical Record Number from facility HIS\n\n\n\nCompleteness classification:\n\nPresent — a non-empty value was recorded (excluding “Unknown”)\nMissing — field is NA, empty string, whitespace-only, or recorded as “Unknown”\n\nSA ID validation applies two sequential checks to IDs classified as “present”:\n\nCorrect length — a valid SA ID is exactly 13 numeric digits. IDs with letters, spaces, or wrong length fail this check.\nLuhn checksum — the last digit is a checksum computed from the first 12; IDs that fail this are likely transcription errors (digit swaps, typos).\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_linkage_*.rds\nReporting period: last 12 months to February 2026 — 158,556 notifications"
+    "text": "NoteAbout this Page\n\n\n\n\n\nThis page reports on the quality of patient identifier fields that enable record linkage across health information systems.\n\n\n\n\n\n\n\n\nIdentifier\nColumn\nPurpose\n\n\n\n\nSA ID Number\npatient_id_no\nLinks to Home Affairs, NHLS, vital registration\n\n\nHospital Folder No.\nfolder_no\nLinks to facility-level clinical records\n\n\nMRN\nmrn (if present)\nMedical Record Number from facility HIS\n\n\n\nCompleteness classification:\n\nPresent — a non-empty value was recorded (excluding “Unknown”)\nMissing — field is NA, empty string, whitespace-only, or recorded as “Unknown”\n\nSA ID validation applies two sequential checks to IDs classified as “present”:\n\nCorrect length — a valid SA ID is exactly 13 numeric digits. IDs with letters, spaces, or wrong length fail this check.\nLuhn checksum — the last digit is a checksum computed from the first 12; IDs that fail this are likely transcription errors (digit swaps, typos).\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_linkage_*.rds\nReporting period: last 12 months to March 2026 — 156,166 notifications"
   },
   {
     "objectID": "linkage/index.html#summary",
     "href": "linkage/index.html#summary",
     "title": "Opportunities for Linkage",
     "section": "Summary",
-    "text": "Summary\n\n\n\nIdentifier\nCompleteness (national)\nStatus\n\n\n\n\nSA ID Number (patient_id_no)\n52%\n🟡 52%\n\n\nHospital Folder No. (folder_no)\n79.9%\n🟡 79.9%\n\n\nMRN\nColumn not found in data\n⬜ N/A\n\n\n\nAmong cases with an SA ID recorded:\n\n\n\nCheck\nPass rate\nStatus\n\n\n\n\nCorrect length (13 digits)\n86.4%\n🟢 86.4%\n\n\nPasses Luhn algorithm\n86.3%\n🟢 86.3%"
+    "text": "Summary\n\n\n\nIdentifier\nCompleteness (national)\nStatus\n\n\n\n\nSA ID Number (patient_id_no)\n51.6%\n🟡 51.6%\n\n\nHospital Folder No. (folder_no)\n79.9%\n🟡 79.9%\n\n\nMRN\nColumn not found in data\n⬜ N/A\n\n\n\nAmong cases with an SA ID recorded:\n\n\n\nCheck\nPass rate\nStatus\n\n\n\n\nCorrect length (13 digits)\n86.5%\n🟢 86.5%\n\n\nPasses Luhn algorithm\n86.4%\n🟢 86.4%"
   },
   {
     "objectID": "linkage/index.html#sa-id-number-processing-pipeline",
     "href": "linkage/index.html#sa-id-number-processing-pipeline",
     "title": "Opportunities for Linkage",
     "section": "SA ID Number Processing Pipeline",
-    "text": "SA ID Number Processing Pipeline\nThe following breakdown shows how notifications flow through the SA ID validation pipeline:\n\n\n\n\n\n\nNoteWhat counts as “Missing”?\n\n\n\n\n\nA SA ID is classified as missing if the patient_id_no field is:\n\nNA (null / not recorded)\nEmpty string (\"\")\nContains only whitespace\nRecorded as \"Unknown\" (case-insensitive)\n\nThis category includes both cases where no attempt was made to capture the ID and cases where capture was attempted but the value was not available or deliberately withheld. The NMC system does not distinguish between these scenarios, so all are grouped as “missing”.\n\n\n\n\nData Flow Summary (Last 12 Months)\n\n\n\n\n\n\n\n\nStage\nCount\nDescription\n\n\n\n\n1. Total notifications\n158,556\nAll notifications received in reporting period\n\n\n2. ID missing\n76,184 (48%)\nField is NA, empty, whitespace-only, or “Unknown”\n\n\n3. ID present (entered)\n82,372 (52%)\nSome value was recorded in patient_id_no\n\n\n4. Wrong length\n11,230 (13.6% of entered)\nPresent but not exactly 13 numeric digits\n\n\n5. Correct length (13 digits)\n71,142 (86.4% of entered)\nExactly 13 numeric digits — eligible for Luhn check\n\n\n6. Luhn check fails\n17 (0% of 13-digit)\nChecksum invalid — likely transcription error\n\n\n7. Luhn check passes\n71,125 (100% of 13-digit)\nValid SA ID format — suitable for linkage\n\n\n\n\n\n\n\n\n\n\n\nFigure 1: SA ID validation pipeline — data flow from total notifications to validated IDs"
+    "text": "SA ID Number Processing Pipeline\nThe following breakdown shows how notifications flow through the SA ID validation pipeline:\n\n\n\n\n\n\nNoteWhat counts as “Missing”?\n\n\n\n\n\nA SA ID is classified as missing if the patient_id_no field is:\n\nNA (null / not recorded)\nEmpty string (\"\")\nContains only whitespace\nRecorded as \"Unknown\" (case-insensitive)\n\nThis category includes both cases where no attempt was made to capture the ID and cases where capture was attempted but the value was not available or deliberately withheld. The NMC system does not distinguish between these scenarios, so all are grouped as “missing”.\n\n\n\n\nData Flow Summary (Last 12 Months)\n\n\n\n\n\n\n\n\nStage\nCount\nDescription\n\n\n\n\n1. Total notifications\n156,166\nAll notifications received in reporting period\n\n\n2. ID missing\n75,529 (48.4%)\nField is NA, empty, whitespace-only, or “Unknown”\n\n\n3. ID present (entered)\n80,637 (51.6%)\nSome value was recorded in patient_id_no\n\n\n4. Wrong length\n10,922 (13.5% of entered)\nPresent but not exactly 13 numeric digits\n\n\n5. Correct length (13 digits)\n69,715 (86.5% of entered)\nExactly 13 numeric digits — eligible for Luhn check\n\n\n6. Luhn check fails\n17 (0% of 13-digit)\nChecksum invalid — likely transcription error\n\n\n7. Luhn check passes\n69,698 (100% of 13-digit)\nValid SA ID format — suitable for linkage\n\n\n\n\n\n\n\n\n\n\n\nFigure 1: SA ID validation pipeline — data flow from total notifications to validated IDs"
   },
   {
     "objectID": "linkage/index.html#linkage-by-condition-summary-table",
@@ -32,7 +32,7 @@
     "href": "linkage/index.html#key-findings-interpretation",
     "title": "Opportunities for Linkage",
     "section": "Key Findings & Interpretation",
-    "text": "Key Findings & Interpretation\n\nBottom Line: Is Linkage Feasible?\n\n\n\n\n\n\nImportantLinkage Readiness Assessment\n\n\n\nOverall SA ID completeness: 52% of notifications have an SA ID recorded.\nOf those with SA IDs: 86.3% pass Luhn validation (valid format for linkage).\nNet linkage-ready records: 44.9% of all notifications have a valid, linkable SA ID.\nAssessment: 🔴 Not currently feasible for robust linkage. Fewer than half of notifications can be reliably linked. Priority: improve ID capture at point of notification.\nConditions ready for linkage (≥50% ID completeness AND ≥80% Luhn validity):\n\nTuberculosis:pulmonary: 51,393 linkable IDs (61.1% of notifications)\nTuberculosis:extra-pulmonary: 9,599 linkable IDs (52.5% of notifications)\nTuberculosis: multidrug- resistant (MDR -TB): 1,404 linkable IDs (66.4% of notifications)\nCovid-19: 1,242 linkable IDs (83.1% of notifications)\nPertussis: 580 linkable IDs (53.7% of notifications)\nHepatitis C: 145 linkable IDs (71.4% of notifications)\nLegionellosis: 105 linkable IDs (80.8% of notifications)\nTuberculosis: extensively drug -resistant (XDR -TB): 79 linkable IDs (71.8% of notifications)\n\n\n\n\n\nCompleteness vs Validity Trade-off\nThis matrix shows the trade-off between ID completeness and ID validity. The ideal conditions are in the upper-right (high completeness AND high validity):\n\n\nWarning: `line.width` does not currently support multiple values.\nWarning: `line.width` does not currently support multiple values.\nWarning: `line.width` does not currently support multiple values.\n\n\n\n\n\n\n\n\nFigure 2: ID Completeness vs Validity matrix. Quadrants help identify intervention priorities: improve capture (left), improve quality (bottom), or ready for linkage (upper-right).\n\n\n\n\n\n\n\n\n\n\nTip\n\n\n\nUsing this matrix to prioritize:\n\n\n\n\n\n\n\nQuadrant\nAction\n\n\n\n\nReady for linkage (upper-right, green)\nProceed with linkage studies — sufficient data quality\n\n\nImprove ID quality (lower-right, orange)\nIDs captured but often invalid — implement Luhn validation at entry\n\n\nImprove ID capture (upper-left, blue)\nGood quality when captured, but too many missing — training/workflow focus\n\n\nNeeds both (lower-left, red)\nFundamental notification quality issues — start with capture, then quality\n\n\n\nBubble size = number of valid IDs available for linkage.\n\n\n\n\nLinkage Priority Matrix\nThis scatter plot helps identify conditions that are both high-volume AND have good ID quality — the “sweet spot” for impactful linkage studies (upper-right quadrant):\n\n\nWarning: `line.width` does not currently support multiple values.\n\n\n\n\n\n\n\n\nFigure 3: Linkage priority matrix: N valid IDs vs % Luhn validity by condition. Bubble size = total notifications. Conditions in the upper-right offer the best combination of volume and data quality for linkage.\n\n\n\n\n\n\n\n\n\n\nNote\n\n\n\nInterpreting this plot:\n\nUpper-right quadrant (high volume + high validity): Best candidates for linkage — enough cases for statistical power with good data quality.\nUpper-left (low volume + high validity): Good data quality but small numbers may limit study power.\nLower-right (high volume + low validity): Priority for data quality improvement — high public health relevance but ID quality limits linkage.\nLower-left (low volume + low validity): May need fundamental improvements in notification practices.\n\nBubble size represents total notifications (larger = more cases reported).\n\n\n\n\nLinkage Candidate Score\nThis plot ranks conditions by a composite linkage score that balances three key factors:\n\nID Completeness (40%) — What proportion of cases have an ID recorded? Higher = more representative linked dataset.\nID Validity (30%) — Of recorded IDs, what proportion pass Luhn? Higher = fewer linkage failures.\nVolume (30%) — How many linkable cases are available? Higher = greater statistical power and public health impact.\n\n\n\n\n\n\n\n\n\nFigure 4: Conditions ranked by composite linkage candidate score. Higher scores indicate better candidates for linkage studies.\n\n\n\n\n\n\nConditions with Highest Luhn Validity\nThese conditions have the best quality SA ID numbers — highest proportion of recorded IDs that pass Luhn validation (among conditions with ≥50 recorded IDs):\n\n\n\n\nTable 2\n\n\n\n\n\n\nCondition\nTotal cases\nID recorded\nLuhn valid\n\n\n\n\nLegionellosis\n130\n82.3%\n98.1%\n\n\nCovid-19\n1,494\n85.3%\n97.5%\n\n\nHepatitis C\n203\n74.4%\n96%\n\n\nHepatitis B\n12,004\n13.2%\n94.2%\n\n\nMalaria\n5,384\n16.8%\n94%\n\n\n\n\n\n\n\n\n\n\nConditions with Lowest ID Completeness\nThese conditions have the most missing SA ID numbers — priority targets for improving capture:\n\n\n\n\nTable 3\n\n\n\n\n\n\n\n\n\n\n\n\nCondition\nTotal cases\nID missing\nNotification type\n\n\n\n\nBilharzia (schistosomiasis)\n9,559\n93.4%\nLaboratory notifications (92%)\n\n\nCongenital rubella syndrome\n243\n95.9%\nLaboratory notifications (79%)\n\n\nCongenital syphilis\n5,061\n96%\nLaboratory notifications (79%)\n\n\nNon-typhoidal salmonellosis\n603\n98.5%\nLaboratory notifications (89%)\n\n\nShigellosis\n817\n99.1%\nLaboratory notifications (89%)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNote\n\n\n\nObservation: Most conditions with low ID completeness are predominantly laboratory-notified. This is expected — laboratory notifications often lack patient identifiers when specimens are submitted without full demographic data. Interventions should focus on improving specimen submission forms and laboratory-clinician communication.\n\n\n\n\n\n\n\n\n\nTipImproving Linkage Quality\n\n\n\n\nSA ID not captured: Priority issue — work with facility IPC practitioners to ensure ID capture at time of notification.\nWrong-length IDs: Likely transcription errors; consider validation at point of entry in the NMC system.\nLuhn failures on 13-digit IDs: Transposition errors (e.g. digit swap) — Luhn validation at point of entry would catch these immediately.\nFolder number missing: Critical for linking back to facility clinical records; should be mandatory for hospitalised cases.\n\nSee Data Quality for reporting completeness and Methods for full definitions."
+    "text": "Key Findings & Interpretation\n\nBottom Line: Is Linkage Feasible?\n\n\n\n\n\n\nImportantLinkage Readiness Assessment\n\n\n\nOverall SA ID completeness: 51.6% of notifications have an SA ID recorded.\nOf those with SA IDs: 86.4% pass Luhn validation (valid format for linkage).\nNet linkage-ready records: 44.6% of all notifications have a valid, linkable SA ID.\nAssessment: 🔴 Not currently feasible for robust linkage. Fewer than half of notifications can be reliably linked. Priority: improve ID capture at point of notification.\nConditions ready for linkage (≥50% ID completeness AND ≥80% Luhn validity):\n\nTuberculosis:pulmonary: 50,783 linkable IDs (61.1% of notifications)\nTuberculosis:extra-pulmonary: 9,384 linkable IDs (52.8% of notifications)\nTuberculosis: multidrug- resistant (MDR -TB): 1,383 linkable IDs (66.1% of notifications)\nPertussis: 629 linkable IDs (54.5% of notifications)\nCovid-19: 584 linkable IDs (81.9% of notifications)\nHepatitis C: 138 linkable IDs (70.1% of notifications)\nLegionellosis: 105 linkable IDs (80.2% of notifications)\nTuberculosis: extensively drug -resistant (XDR -TB): 75 linkable IDs (69.4% of notifications)\n\n\n\n\n\nCompleteness vs Validity Trade-off\nThis matrix shows the trade-off between ID completeness and ID validity. The ideal conditions are in the upper-right (high completeness AND high validity):\n\n\nWarning: `line.width` does not currently support multiple values.\nWarning: `line.width` does not currently support multiple values.\nWarning: `line.width` does not currently support multiple values.\n\n\n\n\n\n\n\n\nFigure 2: ID Completeness vs Validity matrix. Quadrants help identify intervention priorities: improve capture (left), improve quality (bottom), or ready for linkage (upper-right).\n\n\n\n\n\n\n\n\n\n\nTip\n\n\n\nUsing this matrix to prioritize:\n\n\n\n\n\n\n\nQuadrant\nAction\n\n\n\n\nReady for linkage (upper-right, green)\nProceed with linkage studies — sufficient data quality\n\n\nImprove ID quality (lower-right, orange)\nIDs captured but often invalid — implement Luhn validation at entry\n\n\nImprove ID capture (upper-left, blue)\nGood quality when captured, but too many missing — training/workflow focus\n\n\nNeeds both (lower-left, red)\nFundamental notification quality issues — start with capture, then quality\n\n\n\nBubble size = number of valid IDs available for linkage.\n\n\n\n\nLinkage Priority Matrix\nThis scatter plot helps identify conditions that are both high-volume AND have good ID quality — the “sweet spot” for impactful linkage studies (upper-right quadrant):\n\n\nWarning: `line.width` does not currently support multiple values.\n\n\n\n\n\n\n\n\nFigure 3: Linkage priority matrix: N valid IDs vs % Luhn validity by condition. Bubble size = total notifications. Conditions in the upper-right offer the best combination of volume and data quality for linkage.\n\n\n\n\n\n\n\n\n\n\nNote\n\n\n\nInterpreting this plot:\n\nUpper-right quadrant (high volume + high validity): Best candidates for linkage — enough cases for statistical power with good data quality.\nUpper-left (low volume + high validity): Good data quality but small numbers may limit study power.\nLower-right (high volume + low validity): Priority for data quality improvement — high public health relevance but ID quality limits linkage.\nLower-left (low volume + low validity): May need fundamental improvements in notification practices.\n\nBubble size represents total notifications (larger = more cases reported).\n\n\n\n\nLinkage Candidate Score\nThis plot ranks conditions by a composite linkage score that balances three key factors:\n\nID Completeness (40%) — What proportion of cases have an ID recorded? Higher = more representative linked dataset.\nID Validity (30%) — Of recorded IDs, what proportion pass Luhn? Higher = fewer linkage failures.\nVolume (30%) — How many linkable cases are available? Higher = greater statistical power and public health impact.\n\n\n\n\n\n\n\n\n\nFigure 4: Conditions ranked by composite linkage candidate score. Higher scores indicate better candidates for linkage studies.\n\n\n\n\n\n\nConditions with Highest Luhn Validity\nThese conditions have the best quality SA ID numbers — highest proportion of recorded IDs that pass Luhn validation (among conditions with ≥50 recorded IDs):\n\n\n\n\nTable 2\n\n\n\n\n\n\nCondition\nTotal cases\nID recorded\nLuhn valid\n\n\n\n\nLegionellosis\n131\n81.7%\n98.1%\n\n\nCovid-19\n713\n84.3%\n97.2%\n\n\nHepatitis C\n197\n72.6%\n96.5%\n\n\nHepatitis B\n11,859\n13.2%\n93.9%\n\n\nHepatitis A\n3,218\n19.4%\n93.6%\n\n\n\n\n\n\n\n\n\n\nConditions with Lowest ID Completeness\nThese conditions have the most missing SA ID numbers — priority targets for improving capture:\n\n\n\n\nTable 3\n\n\n\n\n\n\n\n\n\n\n\n\nCondition\nTotal cases\nID missing\nNotification type\n\n\n\n\nBilharzia (schistosomiasis)\n9,529\n93.3%\nLaboratory notifications (92%)\n\n\nCongenital rubella syndrome\n228\n96.1%\nLaboratory notifications (79%)\n\n\nCongenital syphilis\n4,833\n95.8%\nLaboratory notifications (79%)\n\n\nNon-typhoidal salmonellosis\n567\n98.4%\nLaboratory notifications (89%)\n\n\nShigellosis\n776\n99.1%\nLaboratory notifications (89%)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNote\n\n\n\nObservation: Most conditions with low ID completeness are predominantly laboratory-notified. This is expected — laboratory notifications often lack patient identifiers when specimens are submitted without full demographic data. Interventions should focus on improving specimen submission forms and laboratory-clinician communication.\n\n\n\n\n\n\n\n\n\nTipImproving Linkage Quality\n\n\n\n\nSA ID not captured: Priority issue — work with facility IPC practitioners to ensure ID capture at time of notification.\nWrong-length IDs: Likely transcription errors; consider validation at point of entry in the NMC system.\nLuhn failures on 13-digit IDs: Transposition errors (e.g. digit swap) — Luhn validation at point of entry would catch these immediately.\nFolder number missing: Critical for linking back to facility clinical records; should be mandatory for hospitalised cases.\n\nSee Data Quality for reporting completeness and Methods for full definitions."
   },
   {
     "objectID": "linkage/index.html#completeness-by-province",
@@ -78,14 +78,14 @@
     "href": "explorer/index.html",
     "title": "Data Explorer",
     "section": "",
-    "text": "The Data Explorer lets you query NMC surveillance data organised by the four regulatory notification categories. Category 1 conditions are highlighted first — they require immediate public health action. Category 2 supports trend monitoring for higher-volume conditions like TB and schistosomiasis.\nData through: 19 February 2026"
+    "text": "The Data Explorer lets you query NMC surveillance data organised by the four regulatory notification categories. Category 1 conditions are highlighted first — they require immediate public health action. Category 2 supports trend monitoring for higher-volume conditions like TB and schistosomiasis.\nData through: 16 March 2026"
   },
   {
     "objectID": "explorer/index.html#category-overview",
     "href": "explorer/index.html#category-overview",
     "title": "Data Explorer",
     "section": "Category Overview",
-    "text": "Category Overview\n\nCategory 1 — Immediate Notification\n\n1,232 cases\n16 conditions reporting  |  Top: Malaria (555)\n\n\n\nCategory 2 — Routine Notification\n\n6,373 cases\n19 conditions reporting  |  Top: Tuberculosis:pulmonary (4,080)\n\n\n\nCategory 3 — Sentinel Surveillance\n\n54 cases\n3 conditions reporting  |  Top: Non-typhoidal salmonellosis (27)"
+    "text": "Category Overview\n\nCategory 1 — Immediate Notification\n\n905 cases\n12 conditions reporting  |  Top: Measles (409)\n\n\n\nCategory 2 — Routine Notification\n\n4,728 cases\n15 conditions reporting  |  Top: Tuberculosis:pulmonary (3,043)\n\n\n\nCategory 3 — Sentinel Surveillance\n\n49 cases\n2 conditions reporting  |  Top: Shigellosis (34)"
   },
   {
     "objectID": "explorer/index.html#cat1",
@@ -127,7 +127,7 @@
     "href": "by-trending/index.html",
     "title": "Trending Conditions",
     "section": "",
-    "text": "NoteDevelopment Roadmap — Trending / Signal Detection\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nRecent surge table — conditions with biggest % increase (last 14 days vs prior 14)\n✅ Done\n\n\nv0.1\nInteractive trend sparklines for flagged conditions\n✅ Done\n\n\nv0.2\nCUSUM / EARS algorithm signal detection integration\n🔲 Planned\n\n\nv0.2\nProvince → district hotspot drill-down for flagged conditions\n🔲 Planned\n\n\nv0.3\nAnalyst notes & alert log (manual triage layer)\n🔲 Planned\n\n\nv0.3\nAutomated alert email / webhook on threshold breach\n🔲 Planned\n\n\nv0.4\nLink to Forecasts page — auto-trigger EpiNow2 for flagged conditions\n🔲 Planned\n\n\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_national.rds Forecasting extension: by-forecasts/index.qmd (uses EpiNow2)\nData through: 19 February 2026",
+    "text": "NoteDevelopment Roadmap — Trending / Signal Detection\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nRecent surge table — conditions with biggest % increase (last 14 days vs prior 14)\n✅ Done\n\n\nv0.1\nInteractive trend sparklines for flagged conditions\n✅ Done\n\n\nv0.2\nCUSUM / EARS algorithm signal detection integration\n🔲 Planned\n\n\nv0.2\nProvince → district hotspot drill-down for flagged conditions\n🔲 Planned\n\n\nv0.3\nAnalyst notes & alert log (manual triage layer)\n🔲 Planned\n\n\nv0.3\nAutomated alert email / webhook on threshold breach\n🔲 Planned\n\n\nv0.4\nLink to Forecasts page — auto-trigger EpiNow2 for flagged conditions\n🔲 Planned\n\n\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_national.rds Forecasting extension: by-forecasts/index.qmd (uses EpiNow2)\nData through: 16 March 2026",
     "crumbs": [
       "Trending Conditions"
     ]
@@ -167,7 +167,7 @@
     "href": "by-province/wc/index.html",
     "title": "Western Cape",
     "section": "",
-    "text": "Western Cape (WC) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 7,187,004\nHome All Provinces",
+    "text": "Western Cape (WC) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 16 March 2026  |  Population: 7,187,004\nHome All Provinces",
     "crumbs": [
       "By Province",
       "Western Cape"
@@ -255,7 +255,7 @@
     "href": "by-province/nc/index.html",
     "title": "Northern Cape",
     "section": "",
-    "text": "Northern Cape (NC) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 1,303,047\nHome All Provinces",
+    "text": "Northern Cape (NC) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 16 March 2026  |  Population: 1,303,047\nHome All Provinces",
     "crumbs": [
       "By Province",
       "Northern Cape"
@@ -343,7 +343,7 @@
     "href": "by-province/lp/index.html",
     "title": "Limpopo",
     "section": "",
-    "text": "Limpopo (LP) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 5,941,439\nHome All Provinces",
+    "text": "Limpopo (LP) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 16 March 2026  |  Population: 5,941,439\nHome All Provinces",
     "crumbs": [
       "By Province",
       "Limpopo"
@@ -431,7 +431,7 @@
     "href": "by-province/gp/index.html",
     "title": "Gauteng",
     "section": "",
-    "text": "Gauteng (GP) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 16,098,571\nHome All Provinces",
+    "text": "Gauteng (GP) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 16 March 2026  |  Population: 16,098,571\nHome All Provinces",
     "crumbs": [
       "By Province",
       "Gauteng"
@@ -519,7 +519,7 @@
     "href": "by-province/ec/index.html",
     "title": "Eastern Cape",
     "section": "",
-    "text": "Eastern Cape (EC) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 6,734,001\nHome All Provinces",
+    "text": "Eastern Cape (EC) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 16 March 2026  |  Population: 6,734,001\nHome All Provinces",
     "crumbs": [
       "By Province",
       "Eastern Cape"
@@ -760,25 +760,25 @@
     "text": "NoteDevelopment Roadmap — National Overview\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nSummary value boxes (total cases, conditions, provinces)\n✅ Done\n\n\nv0.1\nTop-10 conditions bar chart (current month)\n✅ Done\n\n\nv0.1\nNational weekly epicurve (all conditions combined)\n✅ Done\n\n\nv0.2\nProvincial choropleth map (total cases)\n🔲 Planned\n\n\nv0.2\nMonth-on-month change indicators (↑/↓)\n🔲 Planned\n\n\nv0.3\nAge/sex pyramid (when demographic data available)\n🔲 Planned\n\n\nv0.3\nSeasonal overlay / historical comparison bands\n🔲 Planned\n\n\nv0.4\nEpiNow2 national Rt estimate cards\n🔲 Planned\n\n\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_national.rds, agg_province.rds"
   },
   {
-    "objectID": "overview.html#key-figures-february-2026",
-    "href": "overview.html#key-figures-february-2026",
+    "objectID": "overview.html#key-figures-march-2026",
+    "href": "overview.html#key-figures-march-2026",
     "title": "National Overview",
-    "section": "Key Figures — February 2026",
-    "text": "Key Figures — February 2026\n\n\n\nTotal Cases\n\n7,659\n\n\n\nMonth Δ\n\n↓ 38%\n\n\n\nConditions Reported\n\n38\n\n\n\nProvinces Reporting\n\n9 / 9"
+    "section": "Key Figures — March 2026",
+    "text": "Key Figures — March 2026\n\n\n\nTotal Cases\n\n5,682\n\n\n\nMonth Δ\n\n↓ 55.1%\n\n\n\nConditions Reported\n\n29\n\n\n\nProvinces Reporting\n\n9 / 9"
   },
   {
     "objectID": "overview.html#all-nmc-notifications-2023-2026",
     "href": "overview.html#all-nmc-notifications-2023-2026",
     "title": "National Overview",
     "section": "All NMC Notifications, 2023 – 2026",
-    "text": "All NMC Notifications, 2023 – 2026\n\n\n\n\nTable 1: Total notifications by NMC Category and Year\n\n\n\n\n\n\nCategory\n2023\n2024\n2025\n2026\n\n\n\n\nCategory 1\n38,850\n43,421\n19,529\n3,227\n\n\nCategory 2\n126,625\n137,042\n130,718\n16,597\n\n\nCategory 3\n1,678\n1,668\n1,431\n190\n\n\n**Total**\n167,153\n182,131\n151,678\n20,014"
+    "text": "All NMC Notifications, 2023 – 2026\n\n\n\n\nTable 1: Total notifications by NMC Category and Year\n\n\n\n\n\n\nCategory\n2023\n2024\n2025\n2026\n\n\n\n\nCategory 1\n38,850\n43,421\n19,529\n4,940\n\n\nCategory 2\n126,625\n137,042\n130,718\n25,478\n\n\nCategory 3\n1,678\n1,668\n1,431\n282\n\n\n**Total**\n167,153\n182,131\n151,678\n30,700"
   },
   {
     "objectID": "overview.html#notifications-of-category-1-conditions",
     "href": "overview.html#notifications-of-category-1-conditions",
     "title": "National Overview",
     "section": "Notifications of Category 1 Conditions",
-    "text": "Notifications of Category 1 Conditions\n\n\n\n\nTable 2: Category 1 condition notifications by year (immediate notification required)\n\n\n\n\n\n\nCondition\n2023\n2024\n2025\n2026\n\n\n\n\nCovid-19\n21,998\n9,284\n3,083\n0\n\n\nMeasles\n3,113\n11,314\n6,749\n960\n\n\nRubella\n1,117\n14,388\n2,269\n102\n\n\nMalaria\n6,722\n4,719\n4,177\n1,623\n\n\nPertussis\n2,881\n753\n903\n212\n\n\nFood borne illness outbreak\n783\n1,288\n712\n122\n\n\nCholera\n1,338\n157\n11\n1\n\n\nAcute flaccid paralysis\n242\n304\n297\n46\n\n\nEnteric fever (typhoid or paratyphoid fever)\n163\n190\n267\n49\n\n\nCongenital rubella syndrome\n146\n246\n245\n14\n\n\nMeningococcal disease\n139\n210\n214\n28\n\n\nDiphtheria\n54\n64\n332\n35\n\n\nMpox\n0\n354\n86\n6\n\n\nListeriosis\n81\n80\n90\n9\n\n\nRabies\n12\n42\n39\n9\n\n\nRespiratory disease caused by a novel respiratory pathogen\n28\n4\n25\n2\n\n\nAcute rheumatic fever\n11\n11\n13\n5\n\n\nHaemolytic uraemic syndrome (HUS)\n6\n7\n4\n0\n\n\nCrimean-congo viral haemorrhagic fever (human)\n1\n3\n7\n1\n\n\nWaterborne illness outbreak - undefined\n12\n0\n0\n0\n\n\nBotulism\n0\n3\n1\n1\n\n\nAnthrax\n1\n0\n1\n1\n\n\nMarburg virus (VHF)\n1\n0\n0\n1\n\n\nYellow fever\n1\n0\n1\n0\n\n\nEbola virus (VHF)\n0\n0\n1\n0\n\n\nPoliomyelitis\n0\n0\n1\n0\n\n\nRift valley fever (human)\n0\n0\n1\n0\n\n\nPlague\n0\n0\n0\n0\n\n\nSmallpox\n0\n0\n0\n0\n\n\n**Total**\n38,850\n43,421\n19,529\n3,227"
+    "text": "Notifications of Category 1 Conditions\n\n\n\n\nTable 2: Category 1 condition notifications by year (immediate notification required)\n\n\n\n\n\n\nCondition\n2023\n2024\n2025\n2026\n\n\n\n\nCovid-19\n21,998\n9,284\n3,083\n0\n\n\nMeasles\n3,113\n11,314\n6,749\n1,702\n\n\nRubella\n1,117\n14,388\n2,269\n194\n\n\nMalaria\n6,722\n4,719\n4,177\n2,233\n\n\nPertussis\n2,881\n753\n903\n312\n\n\nFood borne illness outbreak\n783\n1,288\n712\n195\n\n\nCholera\n1,338\n157\n11\n2\n\n\nAcute flaccid paralysis\n242\n304\n297\n60\n\n\nEnteric fever (typhoid or paratyphoid fever)\n163\n190\n267\n81\n\n\nCongenital rubella syndrome\n146\n246\n245\n24\n\n\nMeningococcal disease\n139\n210\n214\n42\n\n\nDiphtheria\n54\n64\n332\n46\n\n\nMpox\n0\n354\n86\n10\n\n\nListeriosis\n81\n80\n90\n13\n\n\nRabies\n12\n42\n39\n17\n\n\nRespiratory disease caused by a novel respiratory pathogen\n28\n4\n25\n0\n\n\nAcute rheumatic fever\n11\n11\n13\n5\n\n\nHaemolytic uraemic syndrome (HUS)\n6\n7\n4\n0\n\n\nCrimean-congo viral haemorrhagic fever (human)\n1\n3\n7\n1\n\n\nWaterborne illness outbreak - undefined\n12\n0\n0\n0\n\n\nBotulism\n0\n3\n1\n1\n\n\nAnthrax\n1\n0\n1\n1\n\n\nMarburg virus (VHF)\n1\n0\n0\n1\n\n\nYellow fever\n1\n0\n1\n0\n\n\nEbola virus (VHF)\n0\n0\n1\n0\n\n\nPoliomyelitis\n0\n0\n1\n0\n\n\nRift valley fever (human)\n0\n0\n1\n0\n\n\nPlague\n0\n0\n0\n0\n\n\nSmallpox\n0\n0\n0\n0\n\n\n**Total**\n38,850\n43,421\n19,529\n4,940"
   },
   {
     "objectID": "overview.html#top-conditions-current-month",
@@ -834,14 +834,14 @@
     "href": "index.html#planned-architecture",
     "title": "SA NMC Dashboard",
     "section": "Planned Architecture",
-    "text": "Planned Architecture\nThe planned structure of the dashboard is as follows:\n\n\n\n\n\nflowchart TD\n    %% ---------- MAIN LAYERS ----------\n    A[\"Home: NMC Epidemiology SA\"]\n\n    %% Descriptive\n    B[\"By Province\"]\n    B1[\"Province Overview of all conditions\"]\n    B2[\"District Drilldown\"]\n    C[\"By Condition\"]\n    C1[\"National Trends\"]\n    C2[\"Province Comparison of condition X\"]\n    C3[\"District Hotspots of condition X\"]\n\n    %% Interactive\n    G[\"Explorer\"]\n    G1[\"Interactive Condition, Date & Location Selector\"]\n    G2[\"Epicurve Visualisation\"]\n    G3[\"Map Visualisation\"]\n    G4[\"Descriptive Statistics\"]\n    G5[\"Data Table view and download\"]\n\n    %% Analytical\n    D[\"Burden of Disease\"]\n    D1[\"YLL — life tables & from vital status\"]\n    D2[\"DALYs — YLL + YLD\"]\n    D3[\"ASR — age-standardised rates\"]\n\n     %%\n    E[\"Trending Conditions\"]\n    E1[\"Signal Detection (CUSUM/EARS)\"]\n    E2[\"Hotspots (province→district)\"]\n    E3[\"Analyst Notes & Alert Log\"]\n\n    %% Predictive\n    F[\"Forecasts and scenarios\"]\n    F1[\"Short-term forecasts (1–6 wks)\"]\n    F2[\"Scenario bands & seasonality\"]\n    F3[\"Nowcasting (delay adjustment)\"]\n\n    %% ---------- FLOW ----------\n    A --&gt; B --&gt; B1 --&gt; B2\n    A --&gt; C --&gt; C1 --&gt; C2 --&gt; C3\n    A --&gt; D --&gt; D1 --&gt; D2 --&gt; D3\n    A --&gt; G --&gt; G1 --&gt; G2 --&gt; G3 --&gt; G4 --&gt; G5\n    A --&gt; E --&gt; E1 --&gt; E2 --&gt; E3\n    E --&gt; F --&gt; F1 --&gt; F2 --&gt; F3\n\n    %% ---------- CLASSES ----------\n    classDef Descriptive fill:#e6f2ff,stroke:#1d4ed8,stroke-width:1.5px,color:#0b2e78;\n    classDef Interactive fill:#e0f7fa,stroke:#00796b,stroke-width:1.5px,color:#004d40;\n    classDef Analytical fill:#fff4e5,stroke:#b45309,stroke-width:1.5px,color:#7a3b07;\n    classDef Predictive fill:#f3e8ff,stroke:#7e22ce,stroke-width:1.5px,color:#42136a;\n    classDef LegendBox fill:#f8fafc,stroke:#94a3b8,color:#334155;\n\n    class B,B1,B2,C,C1,C2,C3, Descriptive;\n    class G,G1,G2,G3,G4,G5 Interactive;\n    class D,D1,D2,D3,E,E1,E2,E3 Analytical;\n    class F,F1,F2,F3 Predictive;\n\n    %% ---------- LEGEND ----------\n    subgraph LEG[\"Legend\"]\n      direction TB\n      L1[\"Descriptive\"]:::Descriptive\n      L2[\"Interactive\"]:::Interactive\n      L3[\"Analytical\"]:::Analytical\n      L4[\"Predictive\"]:::Predictive\n    end\n\n    class LEG LegendBox;\n\n    %% ---------- OPTIONAL STYLING ----------\n    style A stroke:#0b3a75,stroke-width:2px,fill:#eef2ff,rx:8,ry:8\n    style LEG rx:6,ry:6\n\n\n\n\n\n\n\n\n\nIDCategoryTaskDescriptionOwnerDue DateDays RemainingStatusNotes.overdue1Project SetupDefine scope & architectureFinalize site structure (Province/Condition/BoD/Trending/Forecasts)2026-03-248Not startedfalse2Project SetupFinalize hosting planChoose GitHub Pages / Netlify / Posit Connect2026-03-259Not startedfalse3Project SetupCreate _quarto.ymlNavbar, theme, lightbox, mermaid config2026-03-2610In progressfalse4Data IntegrationData source mappingMap NMC, lab, MYPE, sentinel feeds2026-03-2913Not startedInclude canonical district dictionaryfalse5Data IntegrationETL scriptsR scripts for cleaning/QC/aggregation2026-04-0217Not startedfalse6Data IntegrationValidation checksCompleteness, timeliness, duplicates2026-04-0520Not startedfalse7DescriptiveBy Province pageProvincial summary, district drilldown, maps2026-04-0924In progressBasic dashboard structure implementedfalse8DescriptiveBy Condition pageTabset + dropdown selector2026-04-1227In progressBasic dashboard structure implementedfalse9DescriptiveClick-to-zoom mapsLeaflet/Plotly + lightbox2026-04-1429Not startedfalse10AnalyticalBurden of DiseaseCompute YLL, DALY, ASR; document assumptions2026-04-2035Not startedfalse11AnalyticalTrending detectionCUSUM/EARS; hotspots table/map2026-04-2439Not startedfalse12AnalyticalValidate signalsTest false positives; analyst triage2026-04-2641Not startedfalse13PredictiveForecast modelsARIMA/Prophet/BSTS with 50–95% CI2026-04-3045Not startedfalse14PredictiveNowcastingDelay-adjusted counts integrated with signals2026-05-0247Not startedfalse15PredictiveExports/subscriptionsCSV/PDF; (optional) email hooks later2026-05-0550Not startedfalse16DesignSite-wide CSSConsistent fonts/spacing/palette2026-05-0651Not startedfalse17DesignMermaid diagramsStyled descriptive/analytical/predictive + SVG2026-03-226DoneExported SVG + lightboxfalse18DocsMethods pageData sources, calculations, QC2026-05-0853Not startedfalse19DocsGlossary pageIndicators & abbreviations2026-05-1055Not startedfalse20DocsAbout/CreditsD4H, SAMRC, NDoH, Africa CDC2026-05-1156Not startedfalse21DeployInternal reviewCRDM & MRC review of outputs2026-05-3075Not startedfalse22DeployExternal deploymentPublish to host (Pages/Connect)2026-06-0480Not startedfalse23DeployMaintenance planData refresh + rebuild workflow2026-06-0985Not startedfalse"
+    "text": "Planned Architecture\nThe planned structure of the dashboard is as follows:\n\n\n\n\n\nflowchart TD\n    %% ---------- MAIN LAYERS ----------\n    A[\"Home: NMC Epidemiology SA\"]\n\n    %% Descriptive\n    B[\"By Province\"]\n    B1[\"Province Overview of all conditions\"]\n    B2[\"District Drilldown\"]\n    C[\"By Condition\"]\n    C1[\"National Trends\"]\n    C2[\"Province Comparison of condition X\"]\n    C3[\"District Hotspots of condition X\"]\n\n    %% Interactive\n    G[\"Explorer\"]\n    G1[\"Interactive Condition, Date & Location Selector\"]\n    G2[\"Epicurve Visualisation\"]\n    G3[\"Map Visualisation\"]\n    G4[\"Descriptive Statistics\"]\n    G5[\"Data Table view and download\"]\n\n    %% Analytical\n    D[\"Burden of Disease\"]\n    D1[\"YLL — life tables & from vital status\"]\n    D2[\"DALYs — YLL + YLD\"]\n    D3[\"ASR — age-standardised rates\"]\n\n     %%\n    E[\"Trending Conditions\"]\n    E1[\"Signal Detection (CUSUM/EARS)\"]\n    E2[\"Hotspots (province→district)\"]\n    E3[\"Analyst Notes & Alert Log\"]\n\n    %% Predictive\n    F[\"Forecasts and scenarios\"]\n    F1[\"Short-term forecasts (1–6 wks)\"]\n    F2[\"Scenario bands & seasonality\"]\n    F3[\"Nowcasting (delay adjustment)\"]\n\n    %% ---------- FLOW ----------\n    A --&gt; B --&gt; B1 --&gt; B2\n    A --&gt; C --&gt; C1 --&gt; C2 --&gt; C3\n    A --&gt; D --&gt; D1 --&gt; D2 --&gt; D3\n    A --&gt; G --&gt; G1 --&gt; G2 --&gt; G3 --&gt; G4 --&gt; G5\n    A --&gt; E --&gt; E1 --&gt; E2 --&gt; E3\n    E --&gt; F --&gt; F1 --&gt; F2 --&gt; F3\n\n    %% ---------- CLASSES ----------\n    classDef Descriptive fill:#e6f2ff,stroke:#1d4ed8,stroke-width:1.5px,color:#0b2e78;\n    classDef Interactive fill:#e0f7fa,stroke:#00796b,stroke-width:1.5px,color:#004d40;\n    classDef Analytical fill:#fff4e5,stroke:#b45309,stroke-width:1.5px,color:#7a3b07;\n    classDef Predictive fill:#f3e8ff,stroke:#7e22ce,stroke-width:1.5px,color:#42136a;\n    classDef LegendBox fill:#f8fafc,stroke:#94a3b8,color:#334155;\n\n    class B,B1,B2,C,C1,C2,C3, Descriptive;\n    class G,G1,G2,G3,G4,G5 Interactive;\n    class D,D1,D2,D3,E,E1,E2,E3 Analytical;\n    class F,F1,F2,F3 Predictive;\n\n    %% ---------- LEGEND ----------\n    subgraph LEG[\"Legend\"]\n      direction TB\n      L1[\"Descriptive\"]:::Descriptive\n      L2[\"Interactive\"]:::Interactive\n      L3[\"Analytical\"]:::Analytical\n      L4[\"Predictive\"]:::Predictive\n    end\n\n    class LEG LegendBox;\n\n    %% ---------- OPTIONAL STYLING ----------\n    style A stroke:#0b3a75,stroke-width:2px,fill:#eef2ff,rx:8,ry:8\n    style LEG rx:6,ry:6\n\n\n\n\n\n\n\n\n\nIDCategoryTaskDescriptionOwnerDue DateDays RemainingStatusNotes.overdue1Project SetupDefine scope & architectureFinalize site structure (Province/Condition/BoD/Trending/Forecasts)2026-04-028Not startedfalse2Project SetupFinalize hosting planChoose GitHub Pages / Netlify / Posit Connect2026-04-039Not startedfalse3Project SetupCreate _quarto.ymlNavbar, theme, lightbox, mermaid config2026-04-0410In progressfalse4Data IntegrationData source mappingMap NMC, lab, MYPE, sentinel feeds2026-04-0713Not startedInclude canonical district dictionaryfalse5Data IntegrationETL scriptsR scripts for cleaning/QC/aggregation2026-04-1117Not startedfalse6Data IntegrationValidation checksCompleteness, timeliness, duplicates2026-04-1420Not startedfalse7DescriptiveBy Province pageProvincial summary, district drilldown, maps2026-04-1824In progressBasic dashboard structure implementedfalse8DescriptiveBy Condition pageTabset + dropdown selector2026-04-2127In progressBasic dashboard structure implementedfalse9DescriptiveClick-to-zoom mapsLeaflet/Plotly + lightbox2026-04-2329Not startedfalse10AnalyticalBurden of DiseaseCompute YLL, DALY, ASR; document assumptions2026-04-2935Not startedfalse11AnalyticalTrending detectionCUSUM/EARS; hotspots table/map2026-05-0339Not startedfalse12AnalyticalValidate signalsTest false positives; analyst triage2026-05-0541Not startedfalse13PredictiveForecast modelsARIMA/Prophet/BSTS with 50–95% CI2026-05-0945Not startedfalse14PredictiveNowcastingDelay-adjusted counts integrated with signals2026-05-1147Not startedfalse15PredictiveExports/subscriptionsCSV/PDF; (optional) email hooks later2026-05-1450Not startedfalse16DesignSite-wide CSSConsistent fonts/spacing/palette2026-05-1551Not startedfalse17DesignMermaid diagramsStyled descriptive/analytical/predictive + SVG2026-03-316DoneExported SVG + lightboxfalse18DocsMethods pageData sources, calculations, QC2026-05-1753Not startedfalse19DocsGlossary pageIndicators & abbreviations2026-05-1955Not startedfalse20DocsAbout/CreditsD4H, SAMRC, NDoH, Africa CDC2026-05-2056Not startedfalse21DeployInternal reviewCRDM & MRC review of outputs2026-06-0875Not startedfalse22DeployExternal deploymentPublish to host (Pages/Connect)2026-06-1380Not startedfalse23DeployMaintenance planData refresh + rebuild workflow2026-06-1885Not startedfalse"
   },
   {
     "objectID": "quality.html",
     "href": "quality.html",
     "title": "Data Quality",
     "section": "",
-    "text": "NoteDevelopment Roadmap — Data Quality\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nReporting completeness by province (% days with ≥ 1 case)\n✅ Done\n\n\nv0.1\nWeekly submission heatmap\n✅ Done\n\n\nv0.2\nTimeliness metrics (median days from onset to notification)\n🔲 Planned\n\n\nv0.2\nDuplicate detection summary\n🔲 Planned\n\n\nv0.3\nMissing-field rates by condition (name, age, sex, district)\n🔲 Planned\n\n\nv0.3\nFacility-level reporting participation rates\n🔲 Planned\n\n\nv0.4\nAutomated data-quality score card (red/amber/green)\n🔲 Planned\n\n\nv0.5\nHistoric trend of completeness to track improvement\n🔲 Planned\n\n\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_province.rds\nData through: 19 February 2026"
+    "text": "NoteDevelopment Roadmap — Data Quality\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nReporting completeness by province (% days with ≥ 1 case)\n✅ Done\n\n\nv0.1\nWeekly submission heatmap\n✅ Done\n\n\nv0.2\nTimeliness metrics (median days from onset to notification)\n🔲 Planned\n\n\nv0.2\nDuplicate detection summary\n🔲 Planned\n\n\nv0.3\nMissing-field rates by condition (name, age, sex, district)\n🔲 Planned\n\n\nv0.3\nFacility-level reporting participation rates\n🔲 Planned\n\n\nv0.4\nAutomated data-quality score card (red/amber/green)\n🔲 Planned\n\n\nv0.5\nHistoric trend of completeness to track improvement\n🔲 Planned\n\n\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_province.rds\nData through: 16 March 2026"
   },
   {
     "objectID": "quality.html#reporting-completeness-by-province",
@@ -909,7 +909,7 @@
     "href": "by-province/index.html",
     "title": "By Province",
     "section": "",
-    "text": "NoteDevelopment Roadmap — By Province\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nMonthly case counts by province × condition (interactive bar chart)\n✅ Done\n\n\nv0.1\nIncidence per 100 000 dot-plot, filterable by condition\n✅ Done\n\n\nv0.1\nSearchable & downloadable data table (CSV / Excel)\n✅ Done\n\n\nv0.1\nNMC category organisation (Cat 1–4 tabs)\n✅ Done\n\n\nv0.2\nLeaflet choropleth map — province-level counts\n🔲 Planned\n\n\nv0.2\nDistrict drilldown table per province\n🔲 Planned\n\n\nv0.3\nClick-to-zoom district maps with Leaflet + lightbox\n🔲 Planned\n\n\nv0.3\nTime-series sparklines per province\n🔲 Planned\n\n\nv0.4\nLink to per-province sub-pages (EC, GP, …)\n🔲 Planned\n\n\nv0.5\nEpiNow2 Rt estimates per province fed from agg_province.rds\n🔲 Planned\n\n\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_province.rds\nProvincial surveillance data organised by NMC notification category. Category 1 conditions appear first — they require immediate public health action. Category 2 supports trend monitoring for higher-volume routine conditions.\nData through: 19 February 2026",
+    "text": "NoteDevelopment Roadmap — By Province\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nMonthly case counts by province × condition (interactive bar chart)\n✅ Done\n\n\nv0.1\nIncidence per 100 000 dot-plot, filterable by condition\n✅ Done\n\n\nv0.1\nSearchable & downloadable data table (CSV / Excel)\n✅ Done\n\n\nv0.1\nNMC category organisation (Cat 1–4 tabs)\n✅ Done\n\n\nv0.2\nLeaflet choropleth map — province-level counts\n🔲 Planned\n\n\nv0.2\nDistrict drilldown table per province\n🔲 Planned\n\n\nv0.3\nClick-to-zoom district maps with Leaflet + lightbox\n🔲 Planned\n\n\nv0.3\nTime-series sparklines per province\n🔲 Planned\n\n\nv0.4\nLink to per-province sub-pages (EC, GP, …)\n🔲 Planned\n\n\nv0.5\nEpiNow2 Rt estimates per province fed from agg_province.rds\n🔲 Planned\n\n\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_province.rds\nProvincial surveillance data organised by NMC notification category. Category 1 conditions appear first — they require immediate public health action. Category 2 supports trend monitoring for higher-volume routine conditions.\nData through: 16 March 2026",
     "crumbs": [
       "By Province",
       "By Province"
@@ -986,7 +986,7 @@
     "href": "by-province/fs/index.html",
     "title": "Free State",
     "section": "",
-    "text": "Free State (FS) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 2,928,903\nHome All Provinces",
+    "text": "Free State (FS) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 16 March 2026  |  Population: 2,928,903\nHome All Provinces",
     "crumbs": [
       "By Province",
       "Free State"
@@ -1074,7 +1074,7 @@
     "href": "by-province/kzn/index.html",
     "title": "KwaZulu-Natal",
     "section": "",
-    "text": "KwaZulu-Natal (KZN) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 11,538,813\nHome All Provinces",
+    "text": "KwaZulu-Natal (KZN) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 16 March 2026  |  Population: 11,538,813\nHome All Provinces",
     "crumbs": [
       "By Province",
       "KwaZulu-Natal"
@@ -1162,7 +1162,7 @@
     "href": "by-province/mp/index.html",
     "title": "Mpumalanga",
     "section": "",
-    "text": "Mpumalanga (MP) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 4,743,584\nHome All Provinces",
+    "text": "Mpumalanga (MP) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 16 March 2026  |  Population: 4,743,584\nHome All Provinces",
     "crumbs": [
       "By Province",
       "Mpumalanga"
@@ -1250,7 +1250,7 @@
     "href": "by-province/nw/index.html",
     "title": "North West",
     "section": "",
-    "text": "North West (NW) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 19 February 2026  |  Population: 4,141,774\nHome All Provinces",
+    "text": "North West (NW) — Conditions by NMC regulatory category: immediate notification, routine, sentinel surveillance, and AMR.\nData through: 16 March 2026  |  Population: 4,141,774\nHome All Provinces",
     "crumbs": [
       "By Province",
       "North West"
@@ -1382,7 +1382,7 @@
     "href": "by-forecasts/index.html",
     "title": "Predictive Modelling – NMC Conditions",
     "section": "",
-    "text": "This section showcases nowcasting and short-term outbreak forecasting for key notifiable medical conditions (NMC) reported through the national surveillance system. The models use the EpiNow2 R package, which combines:\n\nNowcasting – adjusting for reporting delays\n\nEstimation of \\(R_t\\) – the time-varying effective reproduction number\n\nShort-term forecasting – projecting cases up to 3 weeks ahead\n\n\n\n\n\n\n\nNoteConditions covered\n\n\n\n\n\n\n\n\n\n\nNMC Category\nConditions\n\n\n\n\nVaccine-preventable\nFever-Rash (Measles + Rubella), Pertussis, Diphtheria, Tetanus, Hepatitis B, Haemophilus influenzae type B, Congenital rubella syndrome, Poliomyelitis / AFP, Yellow fever\n\n\nCategory 1 — Immediate notification (non-VPD)\nCholera, Malaria, Covid-19, Enteric fever, Meningococcal disease, Listeriosis, Mpox\n\n\nCategory 2 — Routine notification\nHepatitis A\n\n\n\nForecasts are only generated for conditions with ≥ 60 days of data.\n\n\n\n\n\n\n\n\nTipLast forecast run\n\n\n\n17 March 2026 17:57 — Horizon: 28 days — Conditions: Acute flaccid paralysis, Cholera, Congenital rubella syndrome, Covid-19, Diphtheria, Enteric fever (typhoid or paratyphoid fever), Haemophilus influenzae type B, Hepatitis A, Hepatitis B, Listeriosis, Malaria, Fever-Rash, Meningococcal disease, Mpox, Pertussis, Poliomyelitis, Tetanus, Yellow fever",
+    "text": "This section showcases nowcasting and short-term outbreak forecasting for key notifiable medical conditions (NMC) reported through the national surveillance system. The models use the EpiNow2 R package, which combines:\n\nNowcasting – adjusting for reporting delays\n\nEstimation of \\(R_t\\) – the time-varying effective reproduction number\n\nShort-term forecasting – projecting cases up to 3 weeks ahead\n\n\n\n\n\n\n\nNoteConditions covered\n\n\n\n\n\n\n\n\n\n\nNMC Category\nConditions\n\n\n\n\nVaccine-preventable\nFever-Rash (Measles + Rubella), Pertussis, Diphtheria, Tetanus, Hepatitis B, Haemophilus influenzae type B, Congenital rubella syndrome, Poliomyelitis / AFP, Yellow fever\n\n\nCategory 1 — Immediate notification (non-VPD)\nCholera, Malaria, Covid-19, Enteric fever, Meningococcal disease, Listeriosis, Mpox\n\n\nCategory 2 — Routine notification\nHepatitis A\n\n\n\nForecasts are only generated for conditions with ≥ 60 days of data.\n\n\n\n\n\n\n\n\nWarning\n\n\n\nNo cached forecasts found. See the Updating Forecasts section below to generate them.",
     "crumbs": [
       "Predictive Modelling – NMC Conditions"
     ]
@@ -1392,7 +1392,7 @@
     "href": "by-forecasts/index.html#overview",
     "title": "Predictive Modelling – NMC Conditions",
     "section": "",
-    "text": "This section showcases nowcasting and short-term outbreak forecasting for key notifiable medical conditions (NMC) reported through the national surveillance system. The models use the EpiNow2 R package, which combines:\n\nNowcasting – adjusting for reporting delays\n\nEstimation of \\(R_t\\) – the time-varying effective reproduction number\n\nShort-term forecasting – projecting cases up to 3 weeks ahead\n\n\n\n\n\n\n\nNoteConditions covered\n\n\n\n\n\n\n\n\n\n\nNMC Category\nConditions\n\n\n\n\nVaccine-preventable\nFever-Rash (Measles + Rubella), Pertussis, Diphtheria, Tetanus, Hepatitis B, Haemophilus influenzae type B, Congenital rubella syndrome, Poliomyelitis / AFP, Yellow fever\n\n\nCategory 1 — Immediate notification (non-VPD)\nCholera, Malaria, Covid-19, Enteric fever, Meningococcal disease, Listeriosis, Mpox\n\n\nCategory 2 — Routine notification\nHepatitis A\n\n\n\nForecasts are only generated for conditions with ≥ 60 days of data.\n\n\n\n\n\n\n\n\nTipLast forecast run\n\n\n\n17 March 2026 17:57 — Horizon: 28 days — Conditions: Acute flaccid paralysis, Cholera, Congenital rubella syndrome, Covid-19, Diphtheria, Enteric fever (typhoid or paratyphoid fever), Haemophilus influenzae type B, Hepatitis A, Hepatitis B, Listeriosis, Malaria, Fever-Rash, Meningococcal disease, Mpox, Pertussis, Poliomyelitis, Tetanus, Yellow fever",
+    "text": "This section showcases nowcasting and short-term outbreak forecasting for key notifiable medical conditions (NMC) reported through the national surveillance system. The models use the EpiNow2 R package, which combines:\n\nNowcasting – adjusting for reporting delays\n\nEstimation of \\(R_t\\) – the time-varying effective reproduction number\n\nShort-term forecasting – projecting cases up to 3 weeks ahead\n\n\n\n\n\n\n\nNoteConditions covered\n\n\n\n\n\n\n\n\n\n\nNMC Category\nConditions\n\n\n\n\nVaccine-preventable\nFever-Rash (Measles + Rubella), Pertussis, Diphtheria, Tetanus, Hepatitis B, Haemophilus influenzae type B, Congenital rubella syndrome, Poliomyelitis / AFP, Yellow fever\n\n\nCategory 1 — Immediate notification (non-VPD)\nCholera, Malaria, Covid-19, Enteric fever, Meningococcal disease, Listeriosis, Mpox\n\n\nCategory 2 — Routine notification\nHepatitis A\n\n\n\nForecasts are only generated for conditions with ≥ 60 days of data.\n\n\n\n\n\n\n\n\nWarning\n\n\n\nNo cached forecasts found. See the Updating Forecasts section below to generate them.",
     "crumbs": [
       "Predictive Modelling – NMC Conditions"
     ]
@@ -1412,7 +1412,7 @@
     "href": "by-forecasts/index.html#forecasts",
     "title": "Predictive Modelling – NMC Conditions",
     "section": "EpiNow2 Forecasts",
-    "text": "EpiNow2 Forecasts\nEach panel shows the median estimate (solid line), 50 % credible interval (dark ribbon) and 90 % credible interval (light ribbon), all smoothed with a 7-day rolling average to remove weekend reporting artefacts. The shaded forecast horizon extends 28 days (4 weeks) beyond the last data point.\n\nAcute flaccid paralysisCholeraCongenital rubella syndromeCovid-19DiphtheriaEnteric fever (typhoid or paratyphoid fever)Fever-RashHaemophilus influenzae type BHepatitis AHepatitis BListeriosisMalariaMeningococcal diseaseMpoxPertussisPoliomyelitisTetanusYellow fever",
+    "text": "EpiNow2 Forecasts\nEach panel shows the median estimate (solid line), 50 % credible interval (dark ribbon) and 90 % credible interval (light ribbon), all smoothed with a 7-day rolling average to remove weekend reporting artefacts. The shaded forecast horizon extends 28 days (4 weeks) beyond the last data point.\n\nNo forecasts available\n\n\nRun Rscript R/run_forecasts.r from the project root to generate cached forecast data.",
     "crumbs": [
       "Predictive Modelling – NMC Conditions"
     ]
@@ -1422,7 +1422,7 @@
     "href": "by-forecasts/index.html#epinow2-diagnostics",
     "title": "Predictive Modelling – NMC Conditions",
     "section": "Standard EpiNow2 Diagnostic Plots",
-    "text": "Standard EpiNow2 Diagnostic Plots\nThe panels below show the native EpiNow2 diagnostic output for each condition. Each plot combines three key elements in a single view:\n\nReported cases — observed data with nowcast / forecast and credible intervals\nEstimated infections — latent infection trajectory inferred by the model\nEffective reproduction number (\\(R_t\\)) — with threshold line at \\(R_t = 1\\)\n\nThese are produced directly by EpiNow2::plot() and provide a comprehensive snapshot of the epidemic state without any post-processing.\n\nAcute Flaccid ParalysisCholeraCongenital Rubella SyndromeCovid 19DiphtheriaEnteric Fever (Typhoid or Paratyphoid Fever)Fever RashHaemophilus Influenzae Type bHepatitis aHepatitis bListeriosisMalariaMeningococcal DiseaseMpoxPertussisPoliomyelitisTetanusYellow Fever",
+    "text": "Standard EpiNow2 Diagnostic Plots\nThe panels below show the native EpiNow2 diagnostic output for each condition. Each plot combines three key elements in a single view:\n\nReported cases — observed data with nowcast / forecast and credible intervals\nEstimated infections — latent infection trajectory inferred by the model\nEffective reproduction number (\\(R_t\\)) — with threshold line at \\(R_t = 1\\)\n\nThese are produced directly by EpiNow2::plot() and provide a comprehensive snapshot of the epidemic state without any post-processing.\n\nNo EpiNow2 result objects found\n\n\nRun Rscript R/run_forecasts.r to generate full result objects for standard diagnostic plots.",
     "crumbs": [
       "Predictive Modelling – NMC Conditions"
     ]
@@ -1432,7 +1432,7 @@
     "href": "by-forecasts/index.html#animation",
     "title": "Predictive Modelling – NMC Conditions",
     "section": "Animated Forecast Outlook",
-    "text": "Animated Forecast Outlook\nThe rolling forecast shows how the predicted trajectory shifted each week as new data arrived. Each coloured line represents a forecast made on a different snapshot date; vertical markers show where each snapshot’s data ended.\nThis visualisation helps assess:\n\nForecast stability – are successive predictions consistent?\nOutbreak acceleration – are newer forecasts trending higher?\nEarly warning – divergence between snapshots signals emerging outbreaks.\n\n\n\n\n\n\n\n\n\nFigure 2: Rolling weekly EpiNow2 forecasts (animated)",
+    "text": "Animated Forecast Outlook\nThe rolling forecast shows how the predicted trajectory shifted each week as new data arrived. Each coloured line represents a forecast made on a different snapshot date; vertical markers show where each snapshot’s data ended.\nThis visualisation helps assess:\n\nForecast stability – are successive predictions consistent?\nOutbreak acceleration – are newer forecasts trending higher?\nEarly warning – divergence between snapshots signals emerging outbreaks.\n\n\n\nNo rolling forecast data available. Run `Rscript R/run_forecasts.r` to generate.",
     "crumbs": [
       "Predictive Modelling – NMC Conditions"
     ]
@@ -1452,7 +1452,7 @@
     "href": "by-forecasts/index.html#rt",
     "title": "Predictive Modelling – NMC Conditions",
     "section": "Effective Reproduction Number (\\(R_t\\))",
-    "text": "Effective Reproduction Number (\\(R_t\\))\nThe time-varying reproduction number \\(R_t\\) indicates how many secondary cases each infected person generates on average.\n\n\\(R_t &gt; 1\\) → epidemic is growing\n\\(R_t = 1\\) → epidemic is stable\n\\(R_t &lt; 1\\) → epidemic is declining\n\n\n\n\n\n\n\n\n\nFigure 3: Estimated Rt for vaccine-preventable conditions",
+    "text": "Effective Reproduction Number (\\(R_t\\))\nThe time-varying reproduction number \\(R_t\\) indicates how many secondary cases each infected person generates on average.\n\n\\(R_t &gt; 1\\) → epidemic is growing\n\\(R_t = 1\\) → epidemic is stable\n\\(R_t &lt; 1\\) → epidemic is declining\n\n\n\nRun `Rscript R/run_forecasts.r` to generate Rt estimates.",
     "crumbs": [
       "Predictive Modelling – NMC Conditions"
     ]
@@ -1462,7 +1462,7 @@
     "href": "by-forecasts/index.html#growth-table",
     "title": "Predictive Modelling – NMC Conditions",
     "section": "Growth-Rate Summary Table",
-    "text": "Growth-Rate Summary Table\n\n\n\n\nTable 2: Latest Rt and growth-rate summary per condition\n\n\n\nConditionLatest RtLower 90%Upper 90%AssessmentDateAcute flaccid paralysis0.980.851.07Stable / slow decline2026-04-13Cholera0.980.671.22Stable / slow decline2026-04-13Congenital rubella syndrome0.910.711.17Stable / slow decline2026-04-13Covid-190.250.011.68Declining2026-04-13Diphtheria0.980.891.04Stable / slow decline2026-04-13Enteric fever (typhoid or paratyphoid fever)1.020.891.12Growing2026-04-13Fever-Rash0.660.361.09Declining2026-04-13Haemophilus influenzae type B1.000.961.08Growing2026-04-13Hepatitis A0.890.491.10Declining2026-04-13Hepatitis B0.860.301.32Declining2026-04-13Listeriosis0.940.541.29Stable / slow decline2026-04-13Malaria0.420.190.96Declining2026-04-13Meningococcal disease0.990.921.07Stable / slow decline2026-04-13Mpox0.840.541.12Declining2026-04-13Pertussis0.900.771.05Stable / slow decline2026-04-13Poliomyelitis0.640.091.41Declining2026-04-13Tetanus0.880.511.15Declining2026-04-13Yellow fever0.800.201.42Declining2026-04-13",
+    "text": "Growth-Rate Summary Table\n\n\n\nTable 2: Latest Rt and growth-rate summary per condition\n\n\n\nForecast data not yet generated.",
     "crumbs": [
       "Predictive Modelling – NMC Conditions"
     ]
@@ -1472,7 +1472,7 @@
     "href": "by-forecasts/index.html#provincial",
     "title": "Predictive Modelling – NMC Conditions",
     "section": "Provincial Breakdown",
-    "text": "Provincial Breakdown\n\n\n\n\n\n\n\n\nFigure 4: Weekly cases by province for forecasted NMC conditions",
+    "text": "Provincial Breakdown\n\n\n\n\n\n\n\n\nFigure 2: Weekly cases by province for forecasted NMC conditions",
     "crumbs": [
       "Predictive Modelling – NMC Conditions"
     ]
@@ -1482,7 +1482,7 @@
     "href": "by-forecasts/index.html#capacity",
     "title": "Predictive Modelling – NMC Conditions",
     "section": "Outbreak Capacity Indicator",
-    "text": "Outbreak Capacity Indicator\nA simple traffic-light display combining \\(R_t\\), recent case trends, and forecast trajectory.\n\n\n\n\n\n\n\n\nFigure 5: Outbreak capacity indicator per condition",
+    "text": "Outbreak Capacity Indicator\nA simple traffic-light display combining \\(R_t\\), recent case trends, and forecast trajectory.\n\n\nForecast data required. See **Updating Forecasts** below.",
     "crumbs": [
       "Predictive Modelling – NMC Conditions"
     ]
@@ -1522,7 +1522,7 @@
     "href": "burden-of-disease/index.html",
     "title": "Burden of Disease",
     "section": "",
-    "text": "Warning\n\n\n\nNo pre-computed BoD data found. Run Rscript R/prepare_bod_data.r from the project root.\nThis page translates raw NMC case notifications into population-level health impact indicators, moving beyond simple case counts to quantify the mortality, disability, and economic burden of notifiable conditions across South Africa. Each metric answers a different policy question:",
+    "text": "Data snapshot: 26 Mar 2026 | 2,420 deaths across 50 conditions | 2016-01-05 to 2026-03-16 | TB excluded | Maternal deaths excluded | Life table: Stats SA 2024 MYPE\nThis page translates raw NMC case notifications into population-level health impact indicators, moving beyond simple case counts to quantify the mortality, disability, and economic burden of notifiable conditions across South Africa. Each metric answers a different policy question:",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1532,7 +1532,7 @@
     "href": "burden-of-disease/index.html#summary",
     "title": "Burden of Disease",
     "section": "Key Indicators",
-    "text": "Key Indicators",
+    "text": "Key Indicators\n\n\n\n113,812\n\n\nTotal DALYs\n\n\nCombined mortality + disability burden\n\n\n\n\n100,206\n\n\nYears of Life Lost\n\n\nPremature mortality (YLL)\n\n\n\n\n13,606\n\n\nYears with Disability\n\n\nMorbidity burden (YLD)\n\n\n\n\n2,420\n\n\nDeaths\n\n\nFrom 821,361 notified cases\n\n\n\n\n55\n\n\nConditions Tracked\n\n\nHighest burden: Agricultural or stock remedy poisoning\n\n\n\n\n17.49%\n\n\nHighest CFR\n\n\nRabies\n\n\n\n\nKey finding: The top 3 conditions (Agricultural or stock remedy poisoning, Congenital syphilis, Malaria) account for 51% of all DALYs. Scroll down for detailed breakdowns by mortality, severity, demographics, and geography.",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1542,7 +1542,7 @@
     "href": "burden-of-disease/index.html#yll",
     "title": "Burden of Disease",
     "section": "Years of Life Lost",
-    "text": "Years of Life Lost\n\nPremature mortality burden: for each death at age \\(x\\), YLL \\(= e(x)\\) where \\(e(x)\\) is remaining life expectancy from the SA abridged life table (Stats SA 2024).\n\n\nRankingSummary Table\n\n\n\n\n\n\n\n\nTable 1: YLL by condition — all years combined",
+    "text": "Years of Life Lost\n\nPremature mortality burden: for each death at age \\(x\\), YLL \\(= e(x)\\) where \\(e(x)\\) is remaining life expectancy from the SA abridged life table (Stats SA 2024).\n\n\nRankingSummary Table\n\n\n\n\n\n\n\n\n\n\nFigure 1: Top 20 NMC conditions ranked by total Years of Life Lost\n\n\n\n\n\n\n\n\n\n\nTable 1: YLL by condition — all years combined",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1552,7 +1552,7 @@
     "href": "burden-of-disease/index.html#dalys",
     "title": "Burden of Disease",
     "section": "Disability-Adjusted Life Years",
-    "text": "Disability-Adjusted Life Years\n\nDALY \\(=\\) YLL \\(+\\) YLD, combining premature mortality with morbidity (\\(\\text{YLD} = \\text{cases} \\times \\text{disability weight} \\times \\text{duration}\\)). Disability weights from GBD 2019.\n\n\nRankingSummary TableYLL vs YLD Composition\n\n\n\n\n\n\n\n\nTable 2: DALY breakdown by condition — all years combined",
+    "text": "Disability-Adjusted Life Years\n\nDALY \\(=\\) YLL \\(+\\) YLD, combining premature mortality with morbidity (\\(\\text{YLD} = \\text{cases} \\times \\text{disability weight} \\times \\text{duration}\\)). Disability weights from GBD 2019.\n\n\nRankingSummary TableYLL vs YLD Composition\n\n\n\n\n\n\n\n\n\n\nFigure 2: Top 20 NMC conditions by DALY burden (YLL + YLD)\n\n\n\n\n\n\n\n\n\n\nTable 2: DALY breakdown by condition — all years combined\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 3: Proportion of DALYs from premature mortality (YLL) vs disability (YLD)",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1562,7 +1562,7 @@
     "href": "burden-of-disease/index.html#cfr",
     "title": "Burden of Disease",
     "section": "Case Fatality Rate",
-    "text": "Case Fatality Rate\n\nCFR \\(= \\frac{\\text{Deaths}}{\\text{Cases}} \\times 100\\%\\) — a direct measure of disease severity within the surveillance system. Under-reporting of deaths means true CFRs may be higher.\n\n\nBy ConditionSummary TableBy Age & SexCFR Trends\n\n\n\n\n\n\n\n\nTable 3: Case fatality rate by condition — all years combined",
+    "text": "Case Fatality Rate\n\nCFR \\(= \\frac{\\text{Deaths}}{\\text{Cases}} \\times 100\\%\\) — a direct measure of disease severity within the surveillance system. Under-reporting of deaths means true CFRs may be higher.\n\n\nBy ConditionSummary TableBy Age & SexCFR Trends\n\n\n\n\n\n\n\n\n\n\nFigure 4: Case fatality rate by condition (conditions with ≥5 deaths)\n\n\n\n\n\n\n\n\n\n\nTable 3: Case fatality rate by condition — all years combined\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 5: Case fatality rate by age and sex for top 6 high-CFR conditions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 6: Annual CFR trends for top 6 high-fatality conditions\n\n\n\n\n\n\n\n\nSeverity alert: Rabies has the highest CFR at 17.49% (95% CI: 13.84–21.87). Conditions with high CFR warrant enhanced clinical surveillance and rapid response.",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1572,7 +1572,7 @@
     "href": "burden-of-disease/index.html#pypll",
     "title": "Burden of Disease",
     "section": "Productive Life Years Lost",
-    "text": "Productive Life Years Lost\n\nPYPLL focuses on the working-age window (15–64): \\(\\text{PYPLL}(x) = 65 - x\\). This complements YLL by highlighting conditions that disproportionately affect the productive workforce.\n\n\nBy ConditionYLL vs PYPLLSummary Table\n\n\n\n\n\n\n\n\n\n\n\nTable 4: PYPLL by condition with working-age mortality characteristics",
+    "text": "Productive Life Years Lost\n\nPYPLL focuses on the working-age window (15–64): \\(\\text{PYPLL}(x) = 65 - x\\). This complements YLL by highlighting conditions that disproportionately affect the productive workforce.\n\n\nBy ConditionYLL vs PYPLLSummary Table\n\n\n\n\n\n\n\n\n\n\nFigure 7: Top 20 conditions by Potential Years of Productive Life Lost (ages 15–64)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 8: Comparing YLL (full life expectancy) vs PYPLL (working ages 15–64)\n\n\n\n\n\n\n\n\n\n\nTable 4: PYPLL by condition with working-age mortality characteristics\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nEconomic impact: Agricultural or stock remedy poisoning accounts for the most productive life years lost (12,680 PYPLL), with a median age at death of 31 years. Conditions with high PYPLL merit targeted workforce-age interventions.",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1592,7 +1592,7 @@
     "href": "burden-of-disease/index.html#province",
     "title": "Burden of Disease",
     "section": "Geographic Variation",
-    "text": "Geographic Variation\n\nCrude DALY and YLL rates per 100,000 population by province. For age-adjusted comparisons, see the ASR section above.\n\n\nDALY RateYLL RateSummary TableCondition × Province Heatmap\n\n\n\n\n\n\n\n\n\n\n\nTable 9: Province-level BoD summary (all NMC conditions combined)",
+    "text": "Geographic Variation\n\nCrude DALY and YLL rates per 100,000 population by province. For age-adjusted comparisons, see the ASR section above.\n\n\nDALY RateYLL RateSummary TableCondition × Province Heatmap\n\n\n\n\n\n\n\n\n\n\nFigure 9: Total DALYs per 100,000 population by province (all NMC conditions)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 10: Total YLL per 100,000 population by province (all NMC conditions)\n\n\n\n\n\n\n\n\n\n\nTable 9: Province-level BoD summary (all NMC conditions combined)\n\n\n\nProvincePopulationDeathsCasesTotal YLLTotal YLDTotal DALYDALY/100kYLL/100kWestern Cape 7,187,004439107,13819,8911,880.221,771302.93276.77Free State 2,928,903167 23,682 6,981475.4 7,457254.59238.35KwaZulu-Natal11,538,813538227,15020,1804,844.025,023216.86174.88Gauteng16,098,571707188,65429,7541,925.931,679196.78184.82Limpopo 5,941,439203 89,876 7,4021,272.2 8,674145.99124.58Eastern Cape 6,734,001172 63,384 7,0531,418.7 8,472125.80104.74Mpumalanga 4,743,584107 76,120 4,7601,121.3 5,881123.98100.35Northern Cape 1,303,047 25 17,831 1,263287.6 1,550118.9596.90North West 4,141,774 62 27,526 2,923381.0 3,30479.7770.57\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 11: Top 10 conditions: DALY rate per 100,000 by province",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1602,7 +1602,7 @@
     "href": "burden-of-disease/index.html#trends",
     "title": "Burden of Disease",
     "section": "Temporal Trends",
-    "text": "Temporal Trends\n\nYear-over-year trends in burden indicators reveal emerging and declining conditions.\n\n\nDALY TrendsYLL TrendsDeaths by Age",
+    "text": "Temporal Trends\n\nYear-over-year trends in burden indicators reveal emerging and declining conditions.\n\n\nDALY TrendsYLL TrendsDeaths by Age\n\n\n\n\n\n\n\n\n\n\nFigure 12: Annual DALY trends for top 10 NMC conditions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 13: Annual YLL trends for top 10 NMC conditions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 14: Age distribution of NMC deaths (top 10 conditions)",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1612,7 +1612,7 @@
     "href": "burden-of-disease/index.html#pyramids",
     "title": "Burden of Disease",
     "section": "Demographics",
-    "text": "Demographics\n\nAge-sex pyramids reveal which demographic groups bear the greatest notification burden — useful for targeting surveillance and intervention.\n\n\nNational PyramidBy Condition",
+    "text": "Demographics\n\nAge-sex pyramids reveal which demographic groups bear the greatest notification burden — useful for targeting surveillance and intervention.\n\n\nNational PyramidBy Condition\n\n\n\n\n\n\n\n\n\n\nFigure 15: Age-sex pyramid of all notified NMC cases\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 16: Age-sex pyramids for the top 6 conditions by case volume",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1622,7 +1622,7 @@
     "href": "burden-of-disease/index.html#bump-chart",
     "title": "Burden of Disease",
     "section": "Condition Rankings Over Time",
-    "text": "Condition Rankings Over Time\n\nTracking year-over-year rank changes in DALY burden identifies emerging threats and declining conditions.\n\n\nBump ChartRanking Table\n\n\n\n\n\n\n\n\nTable 10: DALY ranking change from earliest to latest year",
+    "text": "Condition Rankings Over Time\n\nTracking year-over-year rank changes in DALY burden identifies emerging threats and declining conditions.\n\n\nBump ChartRanking Table\n\n\n\n\n\n\n\n\n\n\nFigure 17: Year-over-year DALY ranking for top 10 conditions\n\n\n\n\n\n\n\n\n\n\n\nTable 10: DALY ranking change from earliest to latest year",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1632,7 +1632,7 @@
     "href": "burden-of-disease/index.html#downloads",
     "title": "Burden of Disease",
     "section": "Data Exports",
-    "text": "Data Exports\n\n\n\nTable 11\n\n\n\n\n\n\n\n\n\n\n\nTable 12\n\n\n\n\n\n\n\n\n\n\n\nTable 13",
+    "text": "Data Exports\n\nDALY Summary — All Conditions\nUse the search box and column filters below, then use the CSV or Copy buttons to export.\n\n\n\n\nTable 11\n\n\n\n\n\n\n\n\n\n\n\n\n\nTable 12\n\n\nProvince Summary\n\n\n\n\n\n\n\nTable 13",
     "crumbs": [
       "Burden of Disease"
     ]
@@ -1890,7 +1890,7 @@
     "href": "special-reports/agricultural-poisoning/index.html#unique-reporting-facilities-per-year",
     "title": "Agricultural & Stock Remedy Poisoning",
     "section": "Unique reporting facilities per year",
-    "text": "Unique reporting facilities per year\n\n\n\n\n\n\n\n\nFigure 16: Number of unique health facilities reporting at least one agricultural or stock remedy poisoning notification per year, South Africa.\n\n\n\n\n\n\nReport generated: 17 March 2026 | NMC Surveillance Unit",
+    "text": "Unique reporting facilities per year\n\n\n\n\n\n\n\n\nFigure 16: Number of unique health facilities reporting at least one agricultural or stock remedy poisoning notification per year, South Africa.\n\n\n\n\n\n\nReport generated: 26 March 2026 | NMC Surveillance Unit",
     "crumbs": [
       "Home",
       "Poisoning",
