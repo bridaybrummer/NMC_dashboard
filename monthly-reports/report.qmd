@@ -1,0 +1,853 @@
+---
+title: "NOTIFIABLE MEDICAL CONDITIONS SURVEILLANCE SYSTEM"
+author: "The National Institute for Communicable Diseases"
+date: today
+params:
+  reporting_month: "2025-05-01"   # ← set to the 1st of the target month (YYYY-MM-01)
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-float: true
+    number-sections: false
+    embed-resources: true          # single self-contained HTML file
+    theme: cosmo
+    css: "../styles.css"
+  docx:
+    reference-doc: "../NMC_reports_scripts/extras/weekly_IDSR_V2_template.docx"
+    reference-location: "section"
+    number-sections: true
+    fig-caption: true
+    toc: true
+    toc-depth: 3
+execute:
+  echo: false
+  warning: false
+  message: false
+  error: false
+---
+
+```{r setup}
+#| label: setup
+#| include: false
+
+# ── Package management ─────────────────────────────────────────────────────────
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+
+library(NMCleaner)
+conflicts_prefer(dplyr::filter)
+library(stringdist)
+library(kableExtra)
+library(data.table)
+
+# ── Global flextable settings ──────────────────────────────────────────────────
+flextable::set_flextable_defaults(
+  font.family  = "Century Gothic",
+  font.size    = 8,
+  header.font.size = 8,
+  border.color = "black",
+  padding      = 0.1
+)
+
+gtsummary::theme_gtsummary_language(
+  language = "en", big.mark = " ", decimal.mark = "."
+)
+
+knitr::opts_chunk$set(
+  ft.align  = "left",
+  echo      = FALSE,
+  warning   = FALSE,
+  message   = FALSE,
+  out.width = "100%"
+)
+
+# ── Helper: trim gtsummary header row ─────────────────────────────────────────
+trim_tbl <- function(gt_summary_object) {
+  n <- nrow(gt_summary_object$table_body)
+  gt_summary_object$table_body <- gt_summary_object$table_body[2:n, ]
+  gt_summary_object
+}
+
+# ── ggplot theme (matches report style) ───────────────────────────────────────
+as_excel <- function() {
+  theme_minimal() +
+    theme(
+      text             = element_text(family = "Century Gothic", size = 10, color = "#333333"),
+      panel.background = element_rect(fill = "#F8F8F8"),
+      plot.background  = element_rect(fill = "#F8F8F8"),
+      panel.grid       = element_line(color = "#DDDDDD"),
+      legend.text      = element_text(color = "#333333", size = 8),
+      legend.title     = element_text(color = "#333333", size = 10),
+      plot.title       = element_text(size = 10, color = "#666666"),
+      plot.subtitle    = element_text(size = 8,  color = "#666666"),
+      plot.caption     = element_text(size = 8,  color = "#666666"),
+      legend.position  = "right",
+      legend.direction = "vertical",
+      legend.key       = element_blank(),
+      axis.text.x      = element_text(angle = 30),
+      axis.title       = element_text(size = 10, color = "#666666"),
+      panel.grid.minor = element_blank(),
+      axis.ticks       = element_line(linewidth = 0.15, color = "grey20"),
+      legend.background = element_rect(fill = "#F8F8F8", linewidth = 0.25,
+                                       linetype = "solid", colour = "grey50")
+    )
+}
+
+# ── Load master dataset ────────────────────────────────────────────────────────
+# Path is absolute so it works regardless of working directory.
+new_master <- arrow::read_feather(
+  "~/Desktop/SAFETP/CLA/NMC_database/master/new_master.feather"
+)
+
+new_master <- new_master %>%
+  mutate(
+    nmccategories = if_else(
+      condition %in% "Agricultural or stock remedy poisoning", "1", nmccategories
+    )
+  )
+
+exported_date <- new_master$export_date %>% as_date() %>% max()
+
+# ── Set reporting period from params ──────────────────────────────────────────
+reporting_date          <- as_date(params$reporting_month)
+last_dat_reporting_month <- ceiling_date(reporting_date, "month") - days(1)
+
+reporting_date_month_year <- format(reporting_date, "%B, %Y")
+reporting_date_month      <- format(reporting_date, "%B")
+
+# ── Filter master to the reporting month ──────────────────────────────────────
+new_master <- new_master %>%
+  mutate(across(c(nmccategories, case_type), as.factor)) 
+
+new_master %>%
+  dplyr::filter(notification_date < as_date(last_dat_reporting_month)) ->
+  new_master1
+
+reporting_yearmonth_grates <- last_dat_reporting_month %>% grates::as_yearmonth()
+
+df <- new_master1 %>%
+  dplyr::filter(Month_notification %in% reporting_yearmonth_grates) %>%
+  mutate(reporting = 1) %>%
+  dplyr::filter(!condition %in% "Leprosy") %>%
+  dplyr::filter(!case_id %in% c("231005_4441991", "240126_46621391")) %>%
+  mutate(condition = ifelse(condition == "Covid-19", "COVID-19", condition)) %>%
+  dplyr::filter(
+    !is.na(prov_),
+    !condition %in% c("COVID-19", "Waterborne illness outbreak - undefined")
+  ) %>%
+  ungroup()
+
+df1 <- df %>% dplyr::filter(back_capture_new %in% c("Current", "Delayed", "unknown"))
+df2 <- df %>% dplyr::filter(!back_capture_new %in% c("Current", "Delayed", "unknown"))
+
+# ── Source shared scripts ──────────────────────────────────────────────────────
+# Use here::here() so the path resolves from the project root (anchored by .here)
+# regardless of the working directory at render time.
+source(here::here("NMC_reports_scripts", "scripts_and_functions", "context_table.R"))
+
+flextable::set_flextable_defaults(
+  font.family      = "Century Gothic",
+  font.size        = 6,
+  header.font.size = 6,
+  border.color     = "black",
+  padding          = 0.1
+)
+```
+
+# Introduction {.unnumbered}
+
+Data used in this report was drawn from the NMC-SS on **`r format(exported_date, "%d %B %Y")`**.
+The most recent report should always be viewed and can be found at
+[NMCSS surveillance reports](https://www.nicd.ac.za/nmc-overview/nmc-monthly-surveillance-report/).
+
+The purpose of this report is to describe the number of notifications received by the Notifiable
+Medical Conditions Surveillance System (NMCSS). The report is publicly available and can be used
+by health professionals, researchers, the general public, or any other stakeholder.
+
+Category 4 NMCs, COVID-19, and multi-system inflammatory syndrome (MIS-C) have been excluded from
+this report. Where weeks are presented, the epiweek according to the CDC epiweeks are used.
+
+## Highlights {.unnumbered}
+
+```{r highlights-prep}
+#| include: false
+
+tbl_notifications <- df1 %>%
+  select(nmccategories, time_to_notification) %>%
+  mutate(time_to_notification = as.numeric(time_to_notification)) %>%
+  tbl_summary(
+    by     = nmccategories,
+    label  = list(time_to_notification ~ "Time to Notification"),
+    digits = list(everything() ~ c(0, 0))
+  ) %>%
+  modify_footnote(update = everything() ~ NA)
+
+cat1_notif_time <- tbl_notifications[["table_body"]][["stat_1"]][[1]] %>% as.character()
+
+nmc_url        <- "https://nmc.nicd.ac.za/Account/Login"
+surveillance_url <- "https://www.nicd.ac.za/nmc-overview/nmc-monthly-surveillance-report/"
+report_url     <- "https://www.nicd.ac.za/wp-content/uploads/2022/09/NMCSS-Data-Interpretation-Infographic-final2.pdf"
+```
+
+-   A total of **`r format(nrow(df), big.mark = " ")`** cases were notified in `r reporting_date_month_year` and most were category 2 conditions.
+-   Category 1 cases were reported in a median (IQR) of **`r cat1_notif_time`** days.
+-   The most common conditions notified were `r df1$condition %>% unique() %>% sort() %>% paste(collapse = ", ")`.
+
+```{r tbl-highlights}
+#| label: tbl-highlightsNotifications
+#| tbl-cap: !expr 'paste0("Highlights of notifications reported to the NMC, in South Africa; January 2022–", reporting_date_month_year)'
+
+df1 %>%
+  select(nmccategories, case_type) %>%
+  mutate(nmccategories = paste0("Category ", nmccategories)) %>%
+  tbl_summary(
+    by      = case_type,
+    percent = "row",
+    label   = list(nmccategories ~ "NMC Category")
+  ) %>%
+  modify_header(label = "") -> tbl_by_case_type
+
+df1 %>%
+  select(nmccategories, case_definition) %>%
+  mutate(nmccategories = paste0("Category ", nmccategories)) %>%
+  tbl_summary(
+    by         = case_definition,
+    percent    = "row",
+    statistic  = list(all_categorical() ~ "{n}/{N} ({p}%)"),
+    label      = list(nmccategories ~ "NMC Category")
+  ) %>%
+  gtsummary::modify_column_hide(stat_2) %>%
+  modify_footnote_header(
+    columns  = everything(),
+    footnote = "n confirmed / N (proportion confirmed %)"
+  ) -> tbl_of_confirmed
+
+df1 %>%
+  mutate(
+    nmccategories  = paste0("Category ", nmccategories),
+    case_definition = if_else(
+      grepl("lab|rapid", ignore.case = TRUE, diagnosis_method), "Confirmed", case_definition
+    )
+  ) %>%
+  select(nmccategories, case_definition) %>%
+  tbl_summary(
+    by         = case_definition,
+    percent    = "row",
+    label      = list(nmccategories ~ "NMC Category")
+  ) %>%
+  modify_header(label = "") %>%
+  gtsummary::modify_column_hide(stat_2) %>%
+  modify_footnote_header(
+    columns  = everything(),
+    footnote = "n confirmed / N (proportion confirmed %) — by reported diagnosis method"
+  ) -> tbl_by_diagnosis_method
+
+tbl_merge(
+  tbls        = list(tbl_by_case_type, tbl_of_confirmed, tbl_by_diagnosis_method),
+  tab_spanner = c("**Case Type**", "**Confirmed by Centre**", "**Reported by Diagnosis Method**")
+) %>%
+  as_flex_table() %>%
+  theme_zebra() %>%
+  bg(bg = "#A5CA64", part = "header") %>%
+  flextable::color(color = "white", part = "header") %>%
+  flextable::set_table_properties(layout = "autofit", width = 1)
+```
+
+---
+
+# Category 1 Conditions {.unnumbered}
+
+Category 1 conditions must be notified within 24 hours of diagnosis. A total of
+**`r format(nrow(df1 %>% filter(nmccategories == 1)), big.mark = " ")`** category 1 conditions
+were notified in `r reporting_date_month_year`. The majority were notified with a median (IQR)
+time to notification of **`r cat1_notif_time`** days.
+
+## NMC Reporting Application {.unnumbered}
+
+-   [NMC Reporting App](`r nmc_url`) is available on both web and mobile platforms.
+-   Use recommended browsers to access the NMC reporting App for notifications, searching of cases and reports.
+-   Register if you have no NMC account; you can reset your password if you have not used the application in over 12 months.
+
+```{r note-image}
+#| fig-align: center
+# Image path is relative to the project root (execute-dir: project)
+if (file.exists("NMC_reports_scripts/images/NOTE.png")) {
+  knitr::include_graphics("NMC_reports_scripts/images/NOTE.png")
+}
+```
+
+## Current Notification Trends {.unnumbered}
+
+Trends of notifications of selected conditions are presented below.
+
+### Confirmed Notifications {.unnumbered}
+
+#### Epitable {.unnumbered}
+
+```{r tbl-epitable1}
+#| label: tbl-epitable1
+#| tbl-cap: !expr 'paste0("Confirmed notifications of selected category 1 conditions reported to the NMC, in South Africa; January 2022–", reporting_date_month_year)'
+
+conflicts_prefer(dplyr::filter)
+
+confirmed_new_master1 <- new_master1 %>%
+  dplyr::filter(grepl("confirmed", ignore.case = TRUE, case_definition))
+
+context_table(confirmed_new_master1, as_date(last_dat_reporting_month)) -> ft
+
+df1 %>%
+  group_by(epiweek, day) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(epiweek) %>%
+  summarise(n_days = n(), .groups = "drop") %>%
+  filter(n_days >= 7) %>%
+  pull(epiweek) %>%
+  as.numeric() -> full_epiweeks
+
+max_full_epiweek <- if (length(full_epiweeks) > 0) max(full_epiweeks) else 0
+
+grey_column <- max_full_epiweek - df1$notification_date %>%
+  as_date() %>% max() %>% as_epiweek() %>%
+  gsub(".*W", "", .) %>% as.numeric() + 4
+
+col_length             <- ft[[1]]$col_keys %>% length()
+number_of_conditions   <- ft[[1]]$body[[1]]$label %>% length()
+std_border             <- officer::fp_border(color = "black", width = 1)
+
+ft[[1]] %>%
+  autofit() %>%
+  fontsize(size = 7, part = "all") %>%
+  bg(j = (col_length - 5):col_length, bg = "grey90", part = "body") %>%
+  theme_zebra() %>%
+  bg(bg = "#A5CA64", part = "header") %>%
+  flextable::color(color = "white", part = "header") %>%
+  surround(j = (col_length - 5), border.left  = std_border, part = "body") %>%
+  surround(j = col_length,        border.right = std_border, part = "body") %>%
+  surround(i = 1,                 j = (col_length - 5):col_length, border.top    = std_border) %>%
+  surround(i = number_of_conditions, j = (col_length - 5):col_length, border.bottom = std_border)
+```
+
+#### Trends Plot {.unnumbered}
+
+```{r epicurve-confirmed-prep}
+#| include: false
+
+flextable::set_flextable_defaults(
+  font.family = "Century Gothic", font.size = 8, header.font.size = 8,
+  border.color = "black", padding = 0.1
+)
+
+current_year <- as.numeric(as_year(Sys.Date()))
+
+df_epicurve_confirmed <- new_master1 %>%
+  dplyr::filter(case_definition %in% "Confirmed") %>%
+  dplyr::filter(nmccategories == 1) %>%
+  epicurve_df(., date_index = "notification_date", grouping_vars = "condition")
+
+df_epicurve_confirmed1 <- df_epicurve_confirmed %>%
+  dplyr::filter(year %in% 2022:current_year) %>%
+  mutate(year = factor(year, levels = 2022:current_year))
+
+plot_confirmed <- df_epicurve_confirmed1 %>%
+  dplyr::filter(condition %in% c(
+    "Cholera", "Covid-19", "Diphtheria", "Malaria",
+    "Measles", "Mpox", "Pertussis", "Rubella"
+  )) %>%
+  plot_epicurve_df(.,
+    x_axis_option  = "epiweek",
+    grouping_vars  = "condition",
+    color_select   = "olivedrab"
+  )
+```
+
+```{r fig-epicurve-confirmed}
+#| label: fig-epicurve-confirmed
+#| fig-cap: !expr 'paste0("Trend of weekly confirmed notifications for selected category 1 conditions, South Africa; January 2022–", reporting_date_month_year)'
+
+plot_confirmed$plot
+```
+
+## All Category 1 Conditions at a Glance {.unnumbered}
+
+```{r tbl-cat1-glance}
+#| label: tbl-IDSR_snapshot
+#| tbl-cap: !expr 'paste0("Confirmed notifications (by diagnosis method) for category 1 conditions notified during ", reporting_date_month_year)'
+
+category_1 <- condition_df %>%
+  filter(nmccategories %in% 1) %>%
+  pull(condition) %>%
+  sort()
+
+df1 %>%
+  filter(nmccategories == 1) %>%
+  mutate(
+    condition = factor(condition, levels = category_1),
+    case_definition = factor(
+      if_else(grepl("lab|rapid", ignore.case = TRUE, diagnosis_method), "Confirmed", case_definition),
+      levels = c("Suspected", "Confirmed")
+    )
+  ) %>%
+  dplyr::select(condition, case_definition) %>%
+  tbl_summary(
+    by        = case_definition,
+    percent   = "row",
+    statistic = list(all_categorical() ~ "{n}/{N} ({p})%")
+  ) %>%
+  modify_header(stat_2 = "**Category 1**") %>%
+  trim_tbl() %>%
+  modify_column_hide(stat_1) %>%
+  modify_footnote(update = everything() ~ NA) %>%
+  modify_footnote(all_stat_cols() ~ "n confirmed / N notified (proportion confirmed %)") ->
+  cat_1_glance
+
+ft_glance <- cat_1_glance %>%
+  as_flex_table() %>%
+  fontsize(size = 9, part = "header") %>%
+  flextable::set_table_properties(layout = "autofit", width = 0.99)
+
+to_bold <- which(!grepl("0\\/", ignore.case = TRUE, cat_1_glance$table_body$stat_2))
+
+bold(ft_glance, i = to_bold, j = 1) %>%
+  bg(i = to_bold, bg = "grey90", part = "body") %>%
+  bg(j = 1:2, bg = "#A5CA64", part = "header") %>%
+  flextable::color(part = "header", color = "white")
+```
+
+---
+
+# NMC Data Summary, `r reporting_date_month_year` {.unnumbered}
+
+```{r nmc-summary-prep}
+#| include: false
+
+df1 %>%
+  ungroup() %>%
+  select(case_type, nmccategories) %>%
+  mutate(nmccategories = factor(nmccategories, levels = c(1, 2, 3))) %>%
+  tbl_summary(
+    by      = case_type,
+    missing = "ifany",
+    label   = list(nmccategories ~ "")
+  ) %>%
+  modify_header(
+    all_stat_cols() ~ "**{level}**, \n n = {scales::number(n)}",
+    label = "**NMC Category**"
+  ) %>%
+  add_overall() %>%
+  modify_footnote(update = everything() ~ NA) ->
+  table_summary
+
+table_summary[["table_body"]][["label"]] <- c("", "Category 1", "Category 2", "Category 3")
+len <- nrow(table_summary[["table_body"]])
+table_summary[["table_body"]] <- table_summary[["table_body"]][2:len, ]
+
+cat1 <- table_summary[["table_body"]][["stat_0"]][
+  grep("^category 1", table_summary[["table_body"]][["label"]], ignore.case = TRUE)
+] %>% as.character()
+
+cat2 <- table_summary[["table_body"]][["stat_0"]][
+  grep("^category 2", table_summary[["table_body"]][["label"]], ignore.case = TRUE)
+] %>% as.character()
+
+cat3 <- table_summary[["table_body"]][["stat_0"]][
+  grep("^category 3", table_summary[["table_body"]][["label"]], ignore.case = TRUE)
+] %>% as.character()
+
+back_captured <- df2 %>%
+  select(prov_, condition) %>%
+  tbl_summary(
+    by        = prov_,
+    statistic = all_categorical() ~ "{n}",
+    label     = condition ~ "",
+    sort      = list(everything() ~ "frequency")
+  ) %>%
+  modify_header(
+    all_stat_cols() ~ "**{level}**, \n ({scales::number(n)})",
+    label = "**Condition**"
+  ) %>%
+  modify_footnote(update = everything() ~ NA)
+
+back_captured_overall <- df2 %>%
+  select(condition) %>%
+  tbl_summary(
+    label = condition ~ "",
+    sort  = list(everything() ~ "frequency")
+  ) %>%
+  modify_header(
+    all_stat_cols() ~ "**Overall**, ({scales::number(n)})",
+    label = "**Condition**"
+  ) %>%
+  modify_footnote(update = everything() ~ NA)
+
+most_common_back_captured_condition <- back_captured_overall[["table_body"]][["label"]][2]
+most_common_back_captured_number    <- back_captured_overall[["table_body"]][["stat_0"]][2] %>%
+  as.character() %>% sub("\\s*\\(", ", ", .) %>% sub("\\)", "", .)
+```
+
+In `r reporting_date_month_year` the NMCSS received a total of
+**`r format(nrow(df1), big.mark = " ")`** notifications.
+Of these, `r cat1` were Category 1 notifications, `r cat2` were Category 2, and `r cat3` were Category 3.
+
+## Category 1 Notifications {.unnumbered}
+
+```{r cat1-notifications}
+#| include: false
+#| warnings: false
+
+category_number <- 1
+tbl_df2 <- df1 %>% filter(nmccategories == category_number) %>% setDT()
+
+category_1 <- condition_df %>%
+  filter(nmccategories %in% 1) %>% pull(condition) %>% sort()
+
+tbl_province_cat1 <- tbl_df2 %>%
+  select(prov_, condition) %>%
+  mutate(condition = factor(condition, levels = sort(unique(tbl_df2$condition)))) %>%
+  tbl_summary(
+    by      = prov_,
+    label   = condition ~ "",
+    percent = "row"
+  ) %>%
+  add_overall() %>%
+  modify_header(
+    all_stat_cols() ~ "**{level}**, n = {scales::number(n)} ({style_percent(p)}%)",
+    label = "**Category 1 Condition**"
+  )
+
+tbl_province_cat1_total <- tbl_df2 %>%
+  select(condition) %>%
+  mutate(condition = factor(condition, levels = sort(unique(tbl_df2$condition)))) %>%
+  tbl_summary(percent = "column") %>%
+  modify_header(label = "**Category 1 Condition**")
+
+tbl_province_cat1_total[["table_body"]] %>%
+  mutate(
+    n = as.numeric(gsub("\\(.*", "", tbl_province_cat1_total[["table_body"]][["stat_0"]])),
+    n_percent = as.numeric(gsub("[^0-9.]+", "", gsub(".*\\((.*?)%\\).*", "\\1",
+                  tbl_province_cat1_total[["table_body"]][["stat_0"]]))),
+    na.rm = TRUE
+  ) %>%
+  select(label, stat_0, n, n_percent) %>%
+  na.omit() %>%
+  arrange(-n) %>%
+  as.data.table() -> tbl_province_cat1_totals_dt
+
+max_cat1_disease   <- tbl_province_cat1_totals_dt$label[1]
+max_cat1_disease_N <- tbl_province_cat1_totals_dt$stat_0[1]
+```
+
+The most commonly notified category 1 condition was
+**`r max_cat1_disease`** (`r max_cat1_disease_N`).
+
+```{r tbl-cat1-province}
+#| label: tbl-cat1-province
+#| tbl-cap: !expr 'paste0("Category 1 notifications by province, South Africa; ", reporting_date_month_year)'
+
+tbl_province_cat1 %>%
+  as_flex_table() %>%
+  theme_zebra() %>%
+  bg(bg = "#A5CA64", part = "header") %>%
+  flextable::color(color = "white", part = "header") %>%
+  fontsize(size = 7, part = "all") %>%
+  flextable::set_table_properties(layout = "autofit", width = 1)
+```
+
+## Category 2 Notifications {.unnumbered}
+
+Category 2 conditions must be notified within 7 days of diagnosis.
+
+```{r cat2-prep}
+#| include: false
+
+category_number <- 2
+tbl_df2 <- df1 %>% filter(nmccategories == category_number) %>% setDT()
+
+conditions_category <- condition_df %>%
+  filter(nmccategories %in% category_number) %>%
+  select(condition) %>%
+  mutate(condition = case_when(
+    condition == "Cholera"    ~ "Cholera §",
+    condition == "Diphtheria" ~ "Diphtheria *",
+    grepl("tuberculosis", ignore.case = TRUE, condition) ~ paste0(condition, "*"),
+    .default = condition
+  )) %>%
+  pull()
+
+tbl_province_cat2 <- tbl_df2 %>%
+  select(prov_, condition) %>%
+  mutate(condition = case_when(
+    condition == "Cholera"    ~ "Cholera §",
+    condition == "Diphtheria" ~ "Diphtheria *",
+    grepl("tuberculosis", ignore.case = TRUE, condition) ~ paste0(condition, "*"),
+    TRUE ~ condition
+  )) %>%
+  mutate(condition = factor(condition, levels = conditions_category)) %>%
+  tbl_summary(
+    by    = prov_,
+    label = condition ~ ""
+  ) %>%
+  add_overall() %>%
+  modify_header(
+    all_stat_cols() ~ "**{level}**, n = {scales::number(n)} ({style_percent(p)}%)",
+    label = "**Category 2 Condition**"
+  )
+
+tbl_province_cat2[["table_body"]] %>%
+  mutate(
+    label = gsub("\\*", "", label),
+    n = as.numeric(gsub(" ", "", gsub("\\(.*", "", tbl_province_cat2[["table_body"]][["stat_0"]]))),
+    n_percent = as.numeric(gsub("[^0-9.]+", "", gsub(".*\\((.*?)%\\).*", "\\1",
+                  tbl_province_cat2[["table_body"]][["stat_0"]]))),
+    na.rm = TRUE
+  ) %>%
+  select(label, stat_0, n, n_percent) %>%
+  na.omit() %>%
+  arrange(-n) %>%
+  as.data.table() -> tbl_province_cat2_total_conditions
+
+max_cat2_disease   <- tbl_province_cat2_total_conditions$label[1]
+max_cat2_disease_N <- tbl_province_cat2_total_conditions$stat_0[1]
+```
+
+The most common Category 2 condition was **`r max_cat2_disease`** (`r max_cat2_disease_N`).
+
+```{r tbl-cat2-province}
+#| label: tbl-cat2-province
+#| tbl-cap: !expr 'paste0("Category 2 notifications by province, South Africa; ", reporting_date_month_year)'
+
+tbl_province_cat2 %>%
+  as_flex_table() %>%
+  theme_zebra() %>%
+  bg(bg = "#A5CA64", part = "header") %>%
+  flextable::color(color = "white", part = "header") %>%
+  fontsize(size = 7, part = "all") %>%
+  flextable::set_table_properties(layout = "autofit", width = 1)
+```
+
+---
+
+# NMC App Statistics {.unnumbered}
+
+## Notification Types and Merging {.unnumbered}
+
+```{r app-notification-types}
+#| label: fig-notification-types
+#| fig-cap: !expr 'paste0("Notification source trends, South Africa; January 2022–", reporting_date_month_year)'
+
+new_master1 %>%
+  mutate(
+    case_source2 = case_when(
+      grepl("iOS|Android", case_source)       ~ "App (iOS/Android)",
+      grepl("Web",         case_source)       ~ "App (Web)",
+      grepl("Paper",       case_source)       ~ "Paper-based",
+      grepl("micro",  ignore.case = TRUE, case_source) ~ "SDW/Microstrategy",
+      TRUE ~ case_source
+    ),
+    ym = as.Date(floor_date(as_date(notification_date), "month"))
+  ) %>%
+  count(ym, case_source2) %>%
+  ggplot(aes(x = ym, y = n, colour = case_source2, group = case_source2)) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 1.5) +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %Y") +
+  scale_y_continuous(labels = scales::comma) +
+  labs(
+    x      = NULL,
+    y      = "Number of notifications",
+    colour = "Notification source",
+    title  = "Monthly notifications by case source"
+  ) +
+  as_excel() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+---
+
+# Data Quality {.unnumbered}
+
+## Completeness {.unnumbered}
+
+```{r completeness-prep}
+#| include: false
+
+vars_completeness <- c(
+  "folder_no", "patient_name", "patient_surname",
+  "symptom_date", "diagnosis_date", "patient_vital_status"
+)
+
+missing_df <- df1 %>%
+  mutate(across(all_of(vars_completeness),
+    .fns = ~ ifelse(is.na(.) | grepl("Unknown", ignore.case = TRUE, .), 0, 1)
+  )) %>%
+  mutate(
+    case_source1 = factor(case_when(
+      grepl("iOS|Web|Android", case_source)           ~ "App",
+      grepl("Paper",           case_source)           ~ "Paper-based",
+      grepl("micro", ignore.case = TRUE, case_source) ~ "Laboratory notification",
+      TRUE ~ "Other"
+    ))
+  )
+```
+
+```{r fig-completeness}
+#| label: fig-completeness
+#| fig-cap: !expr 'paste0("Completeness of key variables by notification source, ", reporting_date_month_year)'
+
+missing_df %>%
+  select(case_source1, all_of(vars_completeness)) %>%
+  pivot_longer(-case_source1, names_to = "variable", values_to = "present") %>%
+  group_by(case_source1, variable) %>%
+  summarise(pct_complete = mean(present, na.rm = TRUE) * 100, .groups = "drop") %>%
+  ggplot(aes(x = variable, y = pct_complete, fill = case_source1)) +
+  geom_col(position = "dodge") +
+  scale_y_continuous(limits = c(0, 100), labels = function(x) paste0(x, "%")) +
+  scale_fill_brewer(palette = "Set2") +
+  labs(
+    x    = "Variable",
+    y    = "% Complete",
+    fill = "Notification source",
+    title = "Field completeness by notification source"
+  ) +
+  as_excel() +
+  theme(axis.text.x = element_text(angle = 35, hjust = 1))
+```
+
+## ID Number Completeness {.unnumbered}
+
+```{r id-completeness}
+#| label: fig-id-completeness
+#| fig-cap: !expr 'paste0("ID number completeness by province, ", reporting_date_month_year)'
+
+df1 %>%
+  mutate(
+    has_id = !is.na(folder_no) & nchar(trimws(as.character(folder_no))) == 13
+  ) %>%
+  group_by(prov_) %>%
+  summarise(pct_id = mean(has_id, na.rm = TRUE) * 100, n = n(), .groups = "drop") %>%
+  ggplot(aes(x = reorder(prov_, pct_id), y = pct_id)) +
+  geom_col(fill = "#A5CA64") +
+  geom_text(aes(label = paste0(round(pct_id, 1), "%")), hjust = -0.1, size = 3) +
+  scale_y_continuous(limits = c(0, 110), labels = function(x) paste0(x, "%")) +
+  coord_flip() +
+  labs(x = "Province", y = "% with valid ID (13 digits)", title = "ID number completeness") +
+  as_excel()
+```
+
+## Timeliness {.unnumbered}
+
+```{r timeliness-prep}
+#| include: false
+
+timeliness_df <- df1 %>%
+  mutate(
+    time_to_notification = as.numeric(time_to_notification),
+    nmccategories        = factor(paste0("Category ", nmccategories), levels = c("Category 1", "Category 2", "Category 3"))
+  ) %>%
+  filter(!is.na(time_to_notification))
+```
+
+```{r tbl-timeliness}
+#| label: tbl-timeliness
+#| tbl-cap: !expr 'paste0("Timeliness of notifications (days from diagnosis to notification), ", reporting_date_month_year)'
+
+timeliness_df %>%
+  select(nmccategories, time_to_notification) %>%
+  tbl_summary(
+    by     = nmccategories,
+    label  = list(time_to_notification ~ "Days to notification"),
+    digits = list(everything() ~ c(0, 0))
+  ) %>%
+  modify_footnote(update = everything() ~ NA) %>%
+  as_flex_table() %>%
+  theme_zebra() %>%
+  bg(bg = "#A5CA64", part = "header") %>%
+  flextable::color(color = "white", part = "header") %>%
+  flextable::set_table_properties(layout = "autofit", width = 1)
+```
+
+---
+
+# Conclusion {.unnumbered}
+
+The majority of notifications were clinical notifications.
+Patients who are hospitalised with a category 1 condition and notified still have poor completeness
+of the hospital form, with the majority of notifications only having symptoms completed.
+ID numbers are poorly completed in notifications from SDW.
+
+# Recommendations {.unnumbered}
+
+-   We recommend that clinicians complete all patient clinical and demographic details to improve hospital form completeness.
+-   We strongly recommend complete ID number capture in the SDW system to improve data quality and the ability for the NMCSS to merge clinical and laboratory notifications.
+-   Feedback and suggestions are welcome at **brianb\@nicd.ac.za** and **matimbam\@nicd.ac.za**.
+
+---
+
+# Appendices {.unnumbered}
+
+## Appendix 1: Back-Captured Clinical Notifications {.unnumbered}
+
+```{r appendix1}
+#| label: tbl-backcapture
+#| tbl-cap: !expr 'paste0("Back-captured and delayed notifications by condition and case source, ", reporting_date_month_year)'
+
+df2 %>%
+  select(case_source, condition) %>%
+  mutate(case_source = ifelse(case_source == "Microstrategy/SDW", "SDW", case_source)) %>%
+  tbl_summary(
+    by        = case_source,
+    label     = condition ~ "",
+    statistic = everything() ~ "{n}",
+    sort      = list(everything() ~ "frequency")
+  ) %>%
+  modify_header(
+    label = "",
+    all_stat_cols() ~ "**{level}**, \n ({scales::number(n)})"
+  ) %>%
+  modify_footnote(update = everything() ~ NA) %>%
+  as_flex_table() %>%
+  theme_zebra() %>%
+  bg(bg = "#A5CA64", part = "header") %>%
+  flextable::color(color = "white", part = "header") %>%
+  fontsize(size = 7, part = "all") %>%
+  flextable::set_table_properties(layout = "autofit", width = 1)
+```
+
+## Appendix 2: Summary of NMCSS Data Flow {.unnumbered}
+
+The NMCSS receives notifications from:
+
+1.  **NMC App** — web, iOS, Android (clinical and laboratory notifications)
+2.  **Paper forms** — submitted by facilities and captured into the system
+3.  **SDW/Microstrategy** — laboratory notifications drawn from the NHLS system
+
+Notifications are merged where clinical and laboratory notifications relate to the same case.
+
+## Appendix 3: NMC Categories and Case Classification {.unnumbered}
+
+| Category | Notification period | Description |
+|---|---|---|
+| Category 1 | Within 24 hours | Immediately notifiable; notify on clinical suspicion |
+| Category 2 | Within 7 days   | Routine surveillance; notify after diagnosis |
+| Category 3 | Within 7 days   | Outbreak-prone; aggregate reporting |
+| Category 4 | Excluded from this report | |
+
+: {.striped tbl-colwidths="[15,20,65]"}
+
+## Appendix 4: Full Category 1 Epitable (2022–`r reporting_date_month_year`) {.unnumbered}
+
+```{r appendix4-all-notifications}
+#| label: tbl-all-notifications
+#| tbl-cap: !expr 'paste0("All notifications of category 1 conditions, South Africa; January 2022–", reporting_date_month_year)'
+
+source(here::here("NMC_reports_scripts", "scripts_and_functions", "context_table.R"))
+
+context_table(new_master1, as_date(last_dat_reporting_month)) -> ft_all
+
+ft_all[[1]] %>%
+  autofit() %>%
+  fontsize(size = 7, part = "all") %>%
+  theme_zebra() %>%
+  bg(bg = "#A5CA64", part = "header") %>%
+  flextable::color(color = "white", part = "header") %>%
+  flextable::set_table_properties(layout = "autofit", width = 1)
+```

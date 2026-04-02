@@ -1,0 +1,58 @@
+---
+title: "Monthly Surveillance Reports"
+subtitle: "Notifiable Medical Conditions Surveillance System — National Monthly Summaries"
+sidebar: monthly-reports
+listing:
+  id: reports-listing
+  contents: posts
+  type: grid
+  sort: "date desc"
+  categories: true
+  fields: [date, title, description, categories]
+  grid-columns: 3
+  date-format: "MMMM YYYY"
+---
+
+::: {.callout-note appearance="minimal"}
+These reports summarise all notifications received by the **NMC Surveillance System (NMCSS)** for a given calendar month. Each report covers notification volumes, Category 1 & 2 conditions, provincial breakdown, data quality, and NMC App usage statistics.
+:::
+
+::: {#reports-listing}
+:::
+
+::: {.callout-tip collapse="true" title="How to generate reports"}
+**Single month:**
+
+```r
+# Edit REPORTING_MONTH and source:
+source("monthly-reports/run_report.R")
+```
+
+**Last 12 months (pre-deployment):**
+
+```r
+source("monthly-reports/run_all_reports.R")
+```
+
+Then run `quarto render` — the HTML and Word files in `monthly-reports/rendered/` are copied into `_site/` automatically. A listing stub is created automatically in `monthly-reports/posts/` for each rendered month.
+:::
+
+---
+
+## Report structure
+
+Each monthly report covers:
+
+| Section | Content |
+|---|---|
+| Introduction | Data export date, reporting month context |
+| Highlights | Key notification counts, timeliness summary |
+| Category 1 Conditions | Epitable, confirmed trends, epicurve |
+| NMC Data Summary | Overall breakdown by category, province, back-capture |
+| Category 1 — Detail | Condition-specific notification tables & CFR |
+| Category 2 — Detail | Notification tables, trends |
+| NMC App Statistics | Active users, notification types, newly registered users |
+| Data Quality | Completeness, ID numbers, symptomatology, hospital forms, timeliness |
+| Appendices | Back-capture analysis, IDSR table, full Category 1 epitable |
+
+: {.striped .hover tbl-colwidths="[25,75]"}

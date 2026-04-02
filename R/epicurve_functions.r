@@ -47,7 +47,7 @@ plot_epicurve <- function(dt,
               by = c("epiweek", fill_col)]
     p <- ggplot(agg, aes(x = epiweek, y = n, fill = .data[[fill_col]])) +
       geom_col(width = 6, colour = NA) +
-      scale_fill_nmc(name = fill_col)
+      scale_fill_nmc(name = format_col_title(fill_col))
   } else {
     agg <- dt[, .(n = sum(get(count_col), na.rm = TRUE)), by = .(epiweek)]
     p <- ggplot(agg, aes(x = epiweek, y = n)) +
@@ -140,12 +140,26 @@ plot_epicurve_faceted <- function(dt,
   agg <- dt[, .(n = sum(get(count_col), na.rm = TRUE)),
             by = c("epiweek", facet_col, fill_col)]
 
+  # Build province-name labeller if faceting by province code
+  facet_labeller <- if (facet_col == "prov_") {
+    labeller(.cols = as_labeller(province_names))
+  } else {
+    label_value
+  }
+
   ggplot(agg, aes(x = epiweek, y = n, fill = .data[[fill_col]])) +
-    geom_col(width = 6, colour = NA, show.legend = FALSE) +
-    facet_wrap(as.formula(paste("~", facet_col)), ncol = ncol, scales = "free_y") +
+    geom_col(width = 6, colour = NA) +
+    facet_wrap(as.formula(paste("~", facet_col)), ncol = ncol, scales = "free_y",
+               labeller = facet_labeller) +
     scale_x_date(date_labels = "%b %y", date_breaks = date_breaks) +
-    scale_fill_nmc() +
-    labs(title = title, x = NULL, y = "n") +
+    scale_fill_nmc(name = format_col_title(fill_col)) +
+    labs(title = title, x = NULL, y = "Notifications") +
     theme_nmc(base_size = 9) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      legend.position = "bottom",
+      legend.title    = element_text(size = 8),
+      legend.text     = element_text(size = 7),
+      legend.key.size = unit(0.5, "lines")
+    )
 }

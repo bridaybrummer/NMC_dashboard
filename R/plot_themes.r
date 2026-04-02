@@ -84,12 +84,40 @@ scale_colour_nmc <- function(...) {
   scale_colour_manual(values = nmc_palette, ...)
 }
 
-#' Province fill scale (9 fixed colours)
-scale_fill_province <- function(...) {
-  scale_fill_manual(values = province_colours, ...)
+#' Province fill scale (9 fixed colours) — legend labels show full province names
+scale_fill_province <- function(name = "Province", ...) {
+  scale_fill_manual(values = province_colours, labels = province_names, name = name, ...)
 }
 
-#' Province colour scale (9 fixed colours)
-scale_colour_province <- function(...) {
-  scale_colour_manual(values = province_colours, ...)
+#' Province colour scale (9 fixed colours) — legend labels show full province names
+scale_colour_province <- function(name = "Province", ...) {
+  scale_colour_manual(values = province_colours, labels = province_names, name = name, ...)
+}
+
+#' Helper: format a column name as a readable legend/axis title
+#' e.g. "prov_" -> "Province", "condition" -> "Condition", "case_type" -> "Case Type"
+format_col_title <- function(col) {
+  # Explicit lookup for common NMC column names
+  lookup <- c(
+    prov_         = "Province",
+    prov          = "Province",
+    condition     = "Condition",
+    case_type     = "Case Type",
+    case_definition = "Case Definition",
+    nmc_category  = "NMC Category",
+    incidence_100k = "Incidence per 100 000",
+    notification_date = "Notification Date",
+    diagnosis_date = "Diagnosis Date",
+    symptom_date  = "Symptom Date"
+  )
+  if (col %in% names(lookup)) return(unname(lookup[col]))
+  # Fallback: strip trailing underscores, replace remaining with spaces, then title-case
+  label <- gsub("_+$", "", col)
+  label <- gsub("_", " ", label)
+  tools::toTitleCase(label)
+}
+
+#' Discrete x-axis scale that replaces province codes with full names
+scale_x_province <- function(name = "Province", ...) {
+  scale_x_discrete(labels = province_names, name = name, ...)
 }

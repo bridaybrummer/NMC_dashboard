@@ -91,6 +91,11 @@ if (run_all_scripts) {
     cat("run_all_scripts = FALSE — skipping additional preparation scripts.\n")
 }
 
+# 3c. Generate monthly reports (last 12 months).
+cat("Generating monthly surveillance reports...\n")
+source("monthly-reports/run_all_reports.R")
+cat("✓ Monthly reports complete.\n")
+
 # 4. Render your Quarto site.
 cat("Rendering Quarto site...\n")
 system("quarto render")

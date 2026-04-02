@@ -2,6 +2,8 @@ project:
   execute-dir: project
   type: website
   output-dir: _site
+  resources:
+    - monthly-reports/rendered/
   render:
     - index.qmd
     - overview.qmd
@@ -27,6 +29,8 @@ project:
     - special-reports/index.qmd
     - special-reports/agricultural-poisoning/index.qmd
     - linkage/index.qmd
+    - monthly-reports/index.qmd
+    - monthly-reports/posts/*.qmd
   #pre-render: Rscript R/prepare_dashboard_data.r
 
 website:
@@ -82,6 +86,9 @@ website:
       - text: Explorer
         href: explorer/index.html
         icon: search
+      - text: "Monthly Reports"
+        href: monthly-reports/index.html
+        icon: calendar3
       - text: "In Focus"
         icon: journal-richtext
         menu:
@@ -146,6 +153,13 @@ website:
         - section: "Poisoning"
           contents:
             - special-reports/agricultural-poisoning/index.qmd
+    - id: monthly-reports
+      title: "Monthly Reports"
+      style: floating
+      collapse-level: 1
+      contents:
+        - text: "Monthly Reports — Overview"
+          href: monthly-reports/index.qmd
     - id: docs
       title: "Documentation"
       style: floating

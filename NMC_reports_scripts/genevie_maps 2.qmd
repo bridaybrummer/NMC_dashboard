@@ -1,0 +1,889 @@
+---
+title: "Genevie Maps"
+format: 
+#docx: default
+    html:
+        embed-resources: true
+        theme: cosmo
+        scrolling: true
+dpi: 300
+fig-dpi: 300
+execute:
+  echo: false          # Show code output, but not code itself by default
+  warning: false       # Suppress warnings
+  message: false       # Suppress messages
+  error: false         # Suppress errors in output (optional, if you want to prevent error messages)
+---
+
+```{r}
+#| label: setup 
+#| include: false
+
+pacman::p_load(ggplot2, plotly, gtsummary, tidyverse, magrittr, rmapshaper, conflicted, scales
+)
+
+
+arrow::read_feather("~/Desktop/SAFETP/CLA/NMC_database/master/new_master.feather") -> new_master
+# Implementing time series parts
+source( "scripts_and_functions/time_series_functions.r")
+source( "scripts_and_functions/make_fever_rash.r")
+conflicts_prefer(dplyr::lag)
+
+# load NMCleaner package 
+library(NMCleaner)
+conflicted::conflicts_prefer( dplyr::filter)
+conflicted::conflicts_prefer( dplyr::lag)
+conflicted::conflicts_prefer(tidyr::extract)
+
+```
+# Maps 
+
+```{r}
+#| label: new_map_function
+#| include: false
+
+map_n <- function(data, condition_select) {
+    #condition_select <- "Agricultural or stock remedy poisoning"
+    #data <- new_master %>%
+    #    filter(
+    #        date %in% seq(as_date("2024-10-01"), as_date(Sys.Date()), by = #"day"),
+   #     )
+
+    # handle any brackets in condition_select if they exist
+    gsub("\\)", "\\\\)", condition_select) %>% gsub("\\(", "\\\\(", .) -> condition_select
+
+    data %>%
+        # if condition_select == "Fever-Rash" then apply fucntion make_fever_rash
+        {
+            if (condition_select == "Fever-Rash") make_fever_rash(.) else .
+        } %>%
+        dplyr::filter(!district %in% c("Unknown", "Isazi Import", "Not Applicable")) %>%
+        dplyr::filter(
+            !condition %in% "Covid-19",
+            # nmccategories ==1 ,
+            grepl(condition_select, condition, ignore.case = TRUE),
+            # year %in% 2024
+        ) %>%
+        group_by(district) %>%
+        summarise(n = n()) %>%
+        mutate_district_name(., district_variable = "district") ->
+    notifications_df
+
+    # ?NMCleaner::mutate_district_name
+    # standardise pop data
+    # NMCleaner::pop$Name
+    NMCleaner::pop ->
+    pop
+
+    # pop$district_standard %>% unique()
+
+    pop %>%
+        mutate(district = district_standard) ->
+    pop
+
+
+
+    NMCleaner::pop %>%
+        dplyr::filter(
+         #   Year %in% 2024
+        ) %>%
+        mutate(district = gsub(".*- ", "", Name)) %>%
+        select(-Name) %>%
+        group_by(district) %>%
+        summarise(pop = sum(Population)) %>%
+        mutate_district_name(., "district") ->
+    pop_df
+
+
+    shape_files[["districts"]]$district %>% unique()
+    shape_files[["sub_districts"]]$district %>% unique()
+
+    # standardsie the district names in these two datasets.
+    shape_files[c("districts", "sub_districts")] <-
+        map(
+            c("districts", "sub_districts"), ~
+                shape_files[[.x]] %>%
+                    as_tibble() %>%
+                    mutate_district_name("district") %>%
+                    st_as_sf() # %>%
+            # rmapshaper::ms_simplify(, keep  = 0.01)
+        )
+
+
+    shape_files$districts %>%
+        as_tibble() %>%
+        mutate_district_name(., "district") %>%
+        st_as_sf() ->
+    shape_df
+
+pop_df$district_standard%>%unique()
+notifications_df$district_standard%>%unique()
+    
+    shape_df %>%
+        left_join(pop_df, by = c("district_standard")) %>%
+        left_join(notifications_df, by = "district_standard") %>%
+        mutate(
+            #  incidence = n/pop*100000
+        ) ->
+    final_df
+
+
+
+    ###########
+
+    # Case counts
+
+    ###########
+
+    final_df %>%
+        # maybe in the last 5 weeks?
+        arrange(-n) %>%
+        slice(1:10) %>%
+        group_by(district) %>%
+        filter(n == max(n)) ->
+    peaks_df
+
+
+    # GGrepel
+    geom_sf_label_variants <- function(mapping = NULL,
+                                       data = NULL,
+                                       fun.geometry,
+                                       geom_fun,
+                                       ...) {
+        if (is.null(mapping$geometry)) {
+            geometry_col <- attr(data, "sf_column") %||% "geometry"
+            mapping$geometry <- as.name(geometry_col)
+        }
+
+        geom_fun(
+            mapping = mapping,
+            data = data,
+            stat = StatSfCoordinates,
+            fun.geometry = fun.geometry,
+            ...
+        )
+    }
+
+    pacman::p_load(ggpattern)
+    ?geom_sf_pattern
+
+final_df%>%sf::st_sf()-> final_sf
+        
+        final_sf%>%
+        ggplot() +
+         ggpattern::geom_sf_pattern(
+            data = final_sf%>% filter(is.na(n))%>%sf::st_sf(),
+            aes(geometry = geometry),
+            pattern = "stripe",
+            pattern_fill = "grey75",
+            pattern_colour = NA,
+            pattern_spacing = 0.02,
+            fill = "white",
+            linewidth = 0
+
+        )      +
+    geom_sf(aes(fill = n, group = district))+
+    scale_fill_viridis_c(
+        na.value = "transparent"
+    ) +
+        ggrepel::geom_label_repel(
+            data = peaks_df,
+            aes(
+                label = district_standard,
+                geometry = geometry
+            ),
+            label.size = 0.1,
+            size = 2,
+            stat = "sf_coordinates",
+            nudge_x = 1
+            # min.segment.length = 0,
+            # direction = c( "y"),
+            # arrow = arrow(length = unit(0.1, "npc"))
+        ) +
+        # geom_sf_label(data = peaks_df,
+        #  aes(label = district_standard), size = 2.5)+
+        theme_classic() +
+        labs(
+            x = "",
+            y = ""
+        ) +
+        coord_sf(expand = FALSE) +
+        theme(
+            axis.line.x = element_blank(),
+            axis.ticks.x = element_blank(),
+            axis.text.x = element_blank(),
+            axis.line.y = element_blank(),
+            axis.ticks.y = element_blank(),
+            axis.text.y = element_blank(),
+            plot.margin = margin(5, 5, 5, 5),
+            legend.position = "bottom"
+        ) +
+        theme(
+            panel.spacing = unit(0.17, "lines"),
+            strip.background = element_rect(color = NA, fill = NA),
+            strip.placement = "outside",
+            text = element_text(family = "Century Gothic", size = 15, color = "#333333"),
+            panel.background = element_rect(fill = "#F8F8F8"),
+            plot.background = element_rect(fill = "#F8F8F8"),
+            panel.grid = element_line(color = "#DDDDDD"), legend.text = element_text(
+                color = "#333333",
+                size = 8
+            ), legend.title = element_text(
+                color = "#333333",
+                size = 10
+            ), plot.title = element_text(
+                size = 15,
+                color = "#666666"
+            ), plot.subtitle = element_text(
+                size = 8,
+                color = "#666666"
+            ), plot.caption = element_text(
+                size = 8,
+                color = "#666666"
+            ), legend.position = "bottom",
+            legend.direction = "horizontal", legend.key = element_blank(),
+            legend.title.align = 0.5, panel.grid.major = element_blank(),
+            axis.title = element_text(size = 15, color = "#666666"),
+            panel.grid.minor.x = element_blank(), panel.grid.minor.y = element_blank(),
+            axis.ticks = element_line(size = 0.15, color = "grey20"),
+            legend.background = element_rect(
+                fill = "#F8F8F8",
+                size = 0.25, linetype = "solid", colour = "grey50"
+            ),
+            strip.text.y.right = element_text(angle = 0)
+        ) ->
+    notifications_map_n
+
+
+    # plotly::ggplotly(notifications_map_n)
+    return(notifications_map_n)
+
+}
+
+
+map_n(
+    data =
+        new_master , 
+    condition_select = "Food borne illness outbreak"
+)-> fbi_practice_plot## FBI 
+
+```
+
+
+```{r}
+#| label: fig-map_incidence
+#| fig-cap: Incidence map for Agricultural or stock remedy poisoning from 1 October 2024 to present.
+
+
+map_incidence <- function(data, condition_select) {
+    # data <- new_master
+    # condition_select <- "Agricultural or stock remedy poisoning"
+
+    safe_condition <- condition_select %>%
+        gsub("\\)", "\\\\)", .) %>%
+        gsub("\\(", "\\\\(", .)
+
+    notifications_df <- data %>%
+        {
+            if (condition_select == "Fever-Rash") make_fever_rash(.) else .
+        } %>%
+        dplyr::filter(!district %in% c("Unknown", "Isazi Import", "Not Applicable")) %>%
+        dplyr::filter(
+            !condition %in% "Covid-19",
+            grepl(safe_condition, condition, ignore.case = TRUE)
+        ) %>%
+        group_by(district, year) %>%
+        summarise(n = n(), .groups = "drop") %>%
+        mutate_district_name("district")
+
+    pop_df <- NMCleaner::pop %>%
+        # dplyr::filter(Year == 2024) %>%
+        # mutate(district = gsub(".*- ", "", Name)) %>%
+        rename(year = Year) %>%
+        select(-Name) %>%
+        group_by(district_standard, year) %>%
+        summarise(pop = sum(Population), .groups = "drop")
+
+    shape_files[c("districts", "sub_districts")] <- purrr::map(
+        c("districts", "sub_districts"),
+        ~ shape_files[[.x]] %>%
+            as_tibble() %>%
+            mutate_district_name("district") %>%
+            sf::st_as_sf()
+    )
+
+    shape_df <- shape_files$districts %>%
+        as_tibble() %>%
+        mutate_district_name("district") %>%
+        sf::st_as_sf()
+
+    # years
+    data$year %>%
+        unique() %>%
+        length()
+
+    # faster version
+    final_sf <- shape_df %>%
+        select(district_standard, geometry) %>%
+        left_join(
+            pop_df %>%
+                group_by(district_standard) %>%
+                summarise(pop = sum(pop, na.rm = TRUE), .groups = "drop"),
+            by = "district_standard"
+        ) %>%
+        left_join(
+            notifications_df %>%
+                group_by(district_standard) %>%
+                summarise(n = sum(n, na.rm = TRUE), .groups = "drop"),
+            by = "district_standard"
+        ) %>%
+        mutate(
+            district = district_standard,
+            incidence = (n / pop) * 100000
+        ) %>%
+        sf::st_as_sf()
+
+
+    final_sf %>%
+        ungroup() %>%
+        arrange(desc(incidence)) %>%
+        slice(1:10) %>%
+        # filter(incidence == max(incidence, na.rm = TRUE)) %>%
+        ungroup() -> peaks_df
+
+    ggplot(final_sf) +
+        ggpattern::geom_sf_pattern(
+            data = final_sf %>% dplyr::filter(is.na(incidence)),
+            aes(geometry = geometry),
+            inherit.aes = FALSE,
+            linewidth = 0,
+            fill = "white",
+            color = NA,
+            pattern = "stripe",
+            pattern_fill = "grey75",
+            pattern_colour = NA,
+            pattern_spacing = 0.02
+        ) +
+        geom_sf(aes(fill = incidence, group = district)) +
+        scale_fill_viridis_c(na.value = "transparent") +
+        ggrepel::geom_label_repel(
+            data = peaks_df,
+            aes(label = district, geometry = geometry),
+            label.size = 0.1,
+            size = 2,
+            stat = "sf_coordinates",
+            nudge_x = 1
+        ) +
+        theme_classic() +
+        labs(x = "", y = "") +
+        coord_sf(expand = FALSE) +
+        theme(
+            axis.line = element_blank(),
+            axis.ticks = element_blank(),
+            axis.text = element_blank(),
+            plot.margin = margin(5, 5, 5, 5),
+            legend.position = "bottom",
+            panel.spacing = unit(0.17, "lines"),
+            strip.background = element_rect(color = NA, fill = NA),
+            strip.placement = "outside",
+            text = element_text(family = "Century Gothic", size = 15, color = "#333333"),
+            panel.background = element_rect(fill = "#F8F8F8"),
+            plot.background = element_rect(fill = "#F8F8F8"),
+            panel.grid = element_line(color = "#DDDDDD"),
+            legend.text = element_text(color = "#333333", size = 8),
+            legend.title = element_text(color = "#333333", size = 10),
+            plot.title = element_text(size = 15, color = "#666666"),
+            plot.subtitle = element_text(size = 8, color = "#666666"),
+            plot.caption = element_text(size = 8, color = "#666666"),
+            legend.direction = "horizontal",
+            legend.key = element_blank(),
+            legend.background = element_rect(
+                fill = "#F8F8F8",
+                size = 0.25, linetype = "solid",
+                colour = "grey50"
+            ),
+            strip.text.y.right = element_text(angle = 0)
+        ) -> incidence_plot
+
+    return(incidence_plot)
+}
+
+
+
+map_incidence(
+    data =
+        new_master, # %>%
+    #    filter(
+    #        date %in% seq(as_date("2020-10-01"), as_date(Sys.Date()), by = "day")
+    #    ),
+    condition_select = "Agricultural or stock remedy poisoning"
+) -> notifications_map_incidence_ASRP
+
+notifications_map_incidence_ASRP
+
+graphics.off()
+
+
+notifications_map_incidence_ASRP +
+    scale_fill_gradient(
+        low = "blanchedalmond",
+        high = "darkred",
+        na.value = "transparent",
+        name = "incidence per 100,000",
+        limits = c(0, max(notifications_map_incidence_ASRP$data$incidence, na.rm = TRUE)), # adjust as needed
+        breaks = pretty_breaks(n = 4)
+    ) ->
+notifications_map_incidence_ASRP
+
+notifications_map_incidence_ASRP
+
+ggsave(
+    "figures/map_incidence_ASRP.png",
+    notifications_map_incidence_ASRP,
+    width = 8,
+    height = 5,
+    dpi = 300
+)
+
+knitr::include_graphics("figures/map_incidence_ASRP.png")
+```
+
+```{r}
+# last full epiweek
+new_master %>%
+    filter(
+        date %in% seq(as_date("2024-10-01"), as_date(Sys.Date()), by = "day"),
+    ) %>%
+    select(
+        year, month, epiweek, day, date
+    ) %>%
+    unique() %>%
+    group_by(epiweek) %>%
+    filter(
+        n() == 7,
+    ) %>%
+    ungroup() %>%
+    filter(date == max(date)) %>%
+    slice(1) %>%
+    select(date) %>%
+    pull() -> end_date_of_most_recent_epiweek
+
+map_n(
+    data =
+        new_master ,#%>%
+            #filter(
+            #    date %in% seq(as_date("2024-10-01"), as_date(end_date_of_most_recent_epiweek), by = "day"),
+             #   condition %in% "Food borne illness outbreak"
+            #), 
+            condition_select = "Food borne illness outbreak"
+) ->
+genevie_map_FBI
+
+genevie_map_FBI +
+    scale_fill_gradient(
+        low = "blanchedalmond",
+        high = "darkred",
+        na.value = "transparent",
+        name = "Number of notifications",
+        limits = c(0, max(genevie_map_FBI$data$n, na.rm = TRUE)) # adjust as needed
+    ) -> genevie_map_FBI
+
+ggsave(
+    "figures/genevie_map_FBI.png",
+    genevie_map_FBI,
+    width = 8,
+    height = 5,
+    dpi = 300
+)
+
+#knitr::include_graphics("figures/genevie_map_FBI.png")
+
+```
+
+```{r}
+new_master %>%
+    filter(
+        date %in% seq(as_date("2024-10-01"), as_date(end_date_of_most_recent_epiweek), by = "day"),
+        condition %in% "Food borne illness outbreak"
+    ) %>%
+    group_by(
+        district, prov_
+    ) %>%
+    summarise(n = n()) %>%
+    arrange(-n) 
+```
+
+## Agricultural or stock remedy poisoning
+
+```{r}
+map_n(
+    data =
+        new_master, # %>%
+          #  filter(
+          #      date %in% seq(as_date("2024-10-01"), as_date(end_date_of_most_recent_epiweek), by = "day"),
+          #      condition %in% "Agricultural or stock remedy poisoning"
+           # ),
+            condition_select = "Agricultural or stock remedy poisoning"
+) ->
+genevie_map_ASRP
+
+genevie_map_ASRP +
+    scale_fill_gradient(
+        low = "lightgoldenrodyellow",
+        high = "darkgreen",
+        na.value = "transparent",
+        name = "Number of notifications",
+        limits = c(0, max(genevie_map_ASRP$data$n, na.rm = TRUE)) # adjust as needed
+    ) -> genevie_map_ASRP
+
+
+
+ggsave(
+    "figures/genevie_map_ASRP.png",
+    genevie_map_ASRP,
+    width = 8,
+    height = 5,
+    dpi = 300
+)
+
+knitr::include_graphics("figures/genevie_map_ASRP.png")
+
+```
+
+```{r}
+#| include: false
+
+
+new_master %>%
+    filter(
+        date %in% seq(as_date("2024-10-01"), as_date(end_date_of_most_recent_epiweek), by = "day"),
+        condition %in% "Agricultural or stock remedy poisoning"
+    ) %>%
+    group_by(
+        district, prov_
+    ) %>%
+    summarise(n = n()) %>%
+    arrange(-n)
+    
+```
+
+
+```{r}
+#| include: false
+
+
+new_master %>% setDT()
+new_master[condition %in% "Agricultural or stock remedy poisoning", ] %>%
+    group_by(year, prov_) %>%
+    summarise(
+        n_notifications = n()
+    ) %>%
+    print(n = 100)
+
+new_master[condition %in% "Agricultural or stock remedy poisoning", ] %>%
+    filter(prov_ %in% "MP") %>%
+    group_by(year, district) %>%
+    summarise(
+        n_notifications = n()
+    )
+
+
+new_master %>% setDT()
+new_master[condition %in% "Lead poisoning",
+    .(n = .N),
+    by = .(year, prov_)
+]
+
+map_n(
+    data =
+        new_master, # %>%
+    #  filter(
+    #      date %in% seq(as_date("2024-10-01"), as_date(end_date_of_most_recent_epiweek), by = "day"),
+    #      condition %in% "Agricultural or stock remedy poisoning"
+    # ),
+    condition_select = "Lead poisoning"
+) -> lead_poisoning_map
+
+lead_poisoning_map +
+    scale_fill_gradient(
+        low = "lightyellow",
+        high = "darkblue",
+        na.value = "transparent",
+        name = "Number of notifications",
+        limits = c(0, max(lead_poisoning_map$data$n, na.rm = TRUE)) # adjust as needed
+    ) -> lead_poisoning_map
+
+ggsave(
+      "figures/lead_poisoning_map.png",
+    lead_poisoning_map,
+    width = 8,
+    height = 5,
+    dpi = 300
+)
+
+lead_poisoning_map
+condition_df$condition %>% unique()
+
+NMCleaner::epicurve_df(
+    data = new_master[condition %in% "Lead poisoning", ],
+    date_index = "notification_date"
+) ->
+df_for_plot
+
+df_for_plot %>%
+    plot_epicurve_df(
+        x_axis_option = "month_year"
+    ) ->
+
+epicurve_lead$plot
+
+```
+
+```{r}
+# loop
+
+wrapper <- function(x, ...) {
+    paste(strwrap(x, ...), collapse = "\n")
+}
+
+
+gg_save_docx_pptx <- function(plot, filename, dpi = 300) {
+    # width for pptx
+    width_pptx <- 10 # cm
+    height_pptx <- 6 # cm
+
+    # for docx
+    width_docx <- 5
+    height_docx <- 6
+
+
+
+    # save in pptx
+
+    path_pptx <- "figures/landscape/"
+    if (!dir.exists(path_pptx)) {
+        dir.create(path_pptx)
+    }
+    filename_pptx <- paste0(path_pptx, filename, ".png")
+    ggsave(
+        plot,
+        filename = filename_pptx,
+        width = width_pptx,
+        height = height_pptx,
+        dpi = dpi
+    )
+
+    # save in docx
+    path_docx <- "figures/portrait/"
+    if (!dir.exists(path_docx)) {
+        dir.create(path_docx)
+    }
+    filename_docx <- paste0(path_docx, filename, ".png")
+
+
+    plot +
+        ggtitle(
+            wrapper(plot$labels$title, width = 25)
+        ) ->
+    plot
+
+
+
+    ggsave(
+        plot,
+        filename = filename_docx,
+        width = width_docx,
+        height = height_docx,
+        dpi = dpi
+    )
+}
+
+
+# Create output directories
+dir.create("figures_N", showWarnings = FALSE)
+dir.create("figures_incidence", showWarnings = FALSE)
+
+years <- c(2020:2025)
+condition_to_map <- "Agricultural or stock remedy poisoning"
+
+# Loop through years to create and save maps
+purrr::walk(years, function(yr) {
+    
+    # Filter data for the year
+    year_data <- new_master %>%
+        filter(year %in% yr)
+    
+    # Skip if no data for this year
+    if (nrow(year_data) == 0) {
+        message(paste("No data for year:", yr))
+        return(NULL)
+    }
+    
+    # Create map_n (count map)
+    tryCatch({
+        map_n_plot <- map_n(
+            data = year_data,
+            condition_select = condition_to_map
+        )
+        
+        # Customize scale
+        map_n_plot <- map_n_plot +
+            scale_fill_gradient(
+                low = "lightgoldenrodyellow",
+                high = "darkgreen",
+                na.value = "transparent",
+                name = "Number of notifications",
+                limits = c(0, max(map_n_plot$data$n, na.rm = TRUE))
+            ) +
+            ggtitle(paste(condition_to_map, "-", yr))
+        
+        # Save to figures_N folder
+        ggsave(
+            filename = paste0("figures_N/map_n_", gsub(" ", "_", condition_to_map), "_", yr, ".png"),
+            plot = map_n_plot,
+            width = 8,
+            height = 5,
+            dpi = 300
+        )
+        message(paste("Saved map_n for year:", yr))
+    }, error = function(e) {
+        message(paste("Error creating map_n for year", yr, ":", e$message))
+    })
+    
+    # Create map_incidence (incidence map)
+    tryCatch({
+        map_inc_plot <- map_incidence(
+            data = year_data,
+            condition_select = condition_to_map
+        )
+        
+        # Customize scale
+        map_inc_plot <- map_inc_plot +
+            scale_fill_gradient(
+                low = "blanchedalmond",
+                high = "darkred",
+                na.value = "transparent",
+                name = "Incidence per 100,000",
+                limits = c(0, max(map_inc_plot$data$incidence, na.rm = TRUE)),
+                breaks = pretty_breaks(n = 4)
+            ) +
+            ggtitle(paste(condition_to_map, "- Incidence -", yr))
+        
+        # Save to figures_incidence folder
+        ggsave(
+            filename = paste0("figures_incidence/map_incidence_", gsub(" ", "_", condition_to_map), "_", yr, ".png"),
+            plot = map_inc_plot,
+            width = 8,
+            height = 5,
+            dpi = 300
+        )
+        message(paste("Saved map_incidence for year:", yr))
+    }, error = function(e) {
+        message(paste("Error creating map_incidence for year", yr, ":", e$message))
+    })
+})
+
+message("All maps generated and saved!")
+
+```
+
+
+
+```{r}
+#| label: tbl-years_n
+new_master %>%
+    filter(
+        condition %in% "Agricultural or stock remedy poisoning",
+        !is.na(prov_)
+    ) %>%
+    group_by(prov_, year) %>%
+    summarise(n_notifications = n(), .groups = "drop") %>%
+    tidyr::pivot_wider(
+        names_from = year,
+        values_from = n_notifications,
+        values_fill = 0
+    ) %>%
+    arrange(prov_) -> n_wide
+
+# Get year columns for coloring
+year_cols_n <- setdiff(names(n_wide), "prov_")
+
+# Create flextable with color scale
+n_wide %>%
+    flextable::flextable() %>%
+    flextable::set_header_labels(prov_ = "Province") %>%
+    flextable::set_caption("Agricultural or stock remedy poisoning notifications by province and year") %>%
+    flextable::bg(
+        j = year_cols_n,
+        bg = scales::col_numeric(
+            palette = c("white", "lightgoldenrodyellow", "darkgreen"),
+            domain = c(0, max(n_wide[year_cols_n], na.rm = TRUE))
+        )
+    ) %>%
+    flextable::colformat_num(j = year_cols_n, big.mark = ",") %>%
+    flextable::autofit() %>%
+    flextable::theme_vanilla() %>%
+    set_table_properties( 
+        width = 1, 
+        layout = "autofit" )  -> years_n_table
+
+years_n_table %>%
+    save_as_docx(., 
+    path = "poisoning_tables/years_n_table.docx")
+```
+
+
+```{r}
+#| label: save-years_incidence
+new_master %>%
+    filter(
+        condition %in% "Agricultural or stock remedy poisoning", 
+        !is.na(prov_)
+    ) %>%
+    group_by(prov_, year) %>%
+    summarise(n_notifications = n(), .groups = "drop") %>%
+    left_join(
+        NMCleaner::pop %>%
+            group_by(prov, Year) %>%
+            summarise(pop = sum(Population), .groups = "drop") %>%
+            rename(prov_ = prov, year = Year),
+        by = c("prov_", "year")
+    ) %>%
+    mutate(
+        incidence_per_100k = round((n_notifications / pop) * 100000, 2)
+    ) %>%
+    select(prov_, year, incidence_per_100k) %>%
+    tidyr::pivot_wider(
+        names_from = year,
+        values_from = incidence_per_100k,
+        values_fill = 0
+    ) %>%
+    arrange(prov_) -> incidence_wide
+
+# Get year columns for coloring
+year_cols <- setdiff(names(incidence_wide), "prov_")
+
+# Create flextable with color scale
+incidence_wide %>%
+    flextable::flextable() %>%
+    flextable::set_header_labels(prov_ = "Province") %>%
+    flextable::set_caption("Agricultural or stock remedy poisoning incidence per 100,000 by province and year") %>%
+    flextable::bg(
+        j = year_cols,
+        bg = scales::col_numeric(
+            palette = c("white", "blanchedalmond", "darkred"),
+            domain = c(0, max(incidence_wide[year_cols], na.rm = TRUE))
+        )
+    ) %>%
+    flextable::colformat_double(j = year_cols, digits = 2) %>%
+    flextable::autofit() %>%
+    flextable::theme_vanilla() %>%
+    set_table_properties( 
+        width = 1, 
+        layout = "autofit" ) -> years_incidence_table
+
+    years_incidence_table%>%
+    save_as_docx(., 
+    path = "poisoning_tables/years_incidence_table.docx")
+
+```

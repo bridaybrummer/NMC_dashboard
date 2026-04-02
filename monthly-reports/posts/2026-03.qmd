@@ -1,0 +1,13 @@
+---
+title: "March 2026"
+date: 2026-03-01
+categories: [2026, Q1]
+description: "National monthly summary of NMC notifications for March 2026 — Category 1 & 2 conditions, provincial breakdown, data quality, and NMC App statistics."
+---
+
+::: {.callout-note appearance="minimal"}
+Reporting period: **1 – 31 March 2026**. Data sourced from the NMC Surveillance System (NMCSS).
+:::
+
+[View Report](../rendered/2026-03-monthly-report.html){.btn .btn-primary target="_blank"} &nbsp;
+[Download Word](../rendered/2026-03-monthly-report.docx){.btn .btn-outline-primary download="2026-03-monthly-report.docx"}

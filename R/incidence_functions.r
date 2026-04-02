@@ -101,7 +101,8 @@ plot_incidence_province <- function(inci_dt,
   ggplot(inci_dt, aes(x = prov_, y = incidence, fill = condition)) +
     geom_col(colour = "white", linewidth = 0.2) +
     scale_fill_nmc(name = "Condition") +
-    labs(title = title, x = "Province", y = "Per 100 000") +
+    scale_x_province(name = "Province") +
+    labs(title = title, y = "Per 100 000") +
     theme_nmc() +
     theme(axis.text.x = element_text(angle = 30, hjust = 1))
 }
@@ -127,7 +128,7 @@ plot_incidence_age <- function(inci_dt,
     scale_fill_nmc(name = "Condition") +
     labs(title = title, x = "Age group", y = "Per 100 000") +
     theme_nmc() +
-    theme(axis.text.x = element_text(angle = 30, hjust = 1))
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
 }
 
 

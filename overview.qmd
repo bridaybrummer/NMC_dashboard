@@ -311,9 +311,10 @@ if (!is.null(agg_time) && nrow(agg_time) > 0) {
     subset_time <- subset_time[condition %in% top_conds]
     
     plot_ly(subset_time, x = ~month, y = ~condition, z = ~median_days,
-            type = "heatmap", colors = "Reds") %>%
+            type = "heatmap", colors = "Reds",
+            colorbar = list(title = "Median<br>days")) %>%
       layout(xaxis = list(title = "Month"),
-             yaxis = list(title = "", automargin=TRUE))
+             yaxis = list(title = "Condition", automargin = TRUE))
 
 } else {
     cat("Data for Timeliness not available.")

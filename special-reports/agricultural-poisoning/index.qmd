@@ -38,7 +38,9 @@ conflicted::conflicts_prefer(lubridate::quarter)
 library(NMCleaner)
 
 # ── Load master dataset ───────────────────────────────────────────────────────
-load("~/Desktop/SAFETP/CLA/NMC_database/master/new_master.rda")
+
+
+new_master <- arrow::read_feather("~/Desktop/SAFETP/CLA/NMC_database/master/new_master.feather")
 
 # ── Filter to Agricultural poisoning only ────────────────────────────────────
 CONDITION <- "Agricultural or stock remedy poisoning"
@@ -249,7 +251,7 @@ start_date <- floor_date(end_date - months(11), "month")
 poison %>%
   filter(!is.na(notification_date)) %>%
   mutate(month_date = floor_date(as_date(notification_date), "month")) %>%
-  filter(month_date >= start_date, month_date <= end_date) %>%
+  #filter(month_date >= start_date, month_date <= end_date) %>%
   count(month_date) %>%
   arrange(month_date) %>%
   mutate(
@@ -260,7 +262,9 @@ poison %>%
 # Highlight rectangle for peak season months in this 12-month window
 peak_rects <- trend12_df %>%
   filter(is_peak) %>%
-  summarise(xmin = min(month_date) - days(15), xmax = max(month_date) + days(15))
+  summarise(xmin = min(month_date, na.rm = TRUE) - days(15),
+            xmax = max(month_date, na.rm = TRUE) + days(15)) %>%
+  slice(1)
 
 ggplot(trend12_df, aes(x = month_date)) +
   {if (nrow(peak_rects) > 0) annotate("rect",
@@ -270,7 +274,7 @@ ggplot(trend12_df, aes(x = month_date)) +
   geom_line(aes(y = rolling3), colour = "#C62828", linewidth = 1.3, na.rm = TRUE) +
   geom_point(aes(y = rolling3), colour = "#C62828", size = 2.5, na.rm = TRUE) +
   geom_text(aes(y = n, label = n), vjust = -0.5, size = 3.2, colour = "#333333") +
-  scale_x_date(date_labels = "%b\n%Y", date_breaks = "1 month", expand = expansion(add = c(10, 10))) +
+  scale_x_date(date_labels = "%b\n%Y", date_breaks = "1 month", expand = expansion(mult = c(0.02, 0.02))) +
   scale_y_continuous(name = "Notifications", expand = expansion(mult = c(0, 0.15))) +
   labs(x = NULL,
        caption = "Red line = 3-month rolling average. Yellow shading = Sep–Nov seasonal peak.") +

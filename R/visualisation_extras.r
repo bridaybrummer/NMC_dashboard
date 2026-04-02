@@ -128,9 +128,13 @@ plot_bubble_matrix <- function(dt,
     geom_point(alpha = 0.8) +
     scale_size_area(max_size = max_size, name = "Cases") +
     scale_colour_viridis_d(option = "turbo", guide = "none") +
-    labs(title = title, x = "Province", y = NULL) +
+    scale_x_province(name = "Province") +
+    labs(title = title, y = "Condition") +
     theme_nmc() +
-    theme(panel.grid.major = element_line(colour = "#EBEBEB"))
+    theme(
+      panel.grid.major = element_line(colour = "#EBEBEB"),
+      axis.text.x      = element_text(angle = 30, hjust = 1)
+    )
 }
 
 

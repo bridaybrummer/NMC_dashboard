@@ -61,6 +61,16 @@ if (file.exists(agg_source_path)) {
 }
 setDT(lnk_prov); setDT(lnk_cond); setDT(id_lens)
 
+# Province code → full name lookup for display
+prov_labels <- c(
+  EC = "Eastern Cape", FS = "Free State",    GP  = "Gauteng",
+  KZN = "KwaZulu-Natal", LP = "Limpopo",    MP  = "Mpumalanga",
+  NC  = "Northern Cape", NW = "North West",  WC  = "Western Cape"
+)
+
+# Recode province codes to full names in all linkage tables
+if ("prov_" %in% names(lnk_prov)) lnk_prov[, prov_ := prov_labels[prov_]]
+
 mrn_available <- isTRUE(meta$mrn_col_found)
 
 latest_month <- max(lnk_prov$month)

@@ -10,7 +10,10 @@
 suppressPackageStartupMessages({
   library(data.table)
   library(dplyr)
+  library(ggplot2)
 })
+
+source(file.path(here::here(), "R/plot_themes.r"))
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -584,17 +587,11 @@ plot_province_comparison <- function(daly_prov,
   setnames(dt, metric_col, "metric", skip_absent = TRUE)
   dt[, prov_ := factor(prov_, levels = dt[order(metric)]$prov_)]
 
-  # Province population for reference
-  prov_colours <- c(
-    EC = "#1b9e77", FS = "#d95f02", GP = "#7570b3",
-    KZN = "#e7298a", LP = "#66a61e", MP = "#e6ab02",
-    NC = "#a6761d", NW = "#666666", WC = "#1f78b4"
-  )
-
   ggplot(dt, aes(x = prov_, y = metric, colour = prov_)) +
     geom_point(size = 4) +
     geom_segment(aes(xend = prov_, y = 0, yend = metric), linewidth = 1) +
-    scale_colour_manual(values = prov_colours, guide = "none") +
+    scale_colour_manual(values = province_colours, guide = "none") +
+    scale_x_discrete(labels = province_names) +
     coord_flip() +
     scale_y_continuous(expand = expansion(mult = c(0, 0.1)),
                        labels = scales::comma) +
@@ -646,7 +643,7 @@ plot_bod_trend <- function(trend_dt,
     labs(
       title    = title,
       subtitle = paste("Top", min(top_n, length(top_conds)), "conditions by total burden"),
-      x = "Year", y = metric_col, colour = NULL
+      x = "Year", y = format_col_title(metric_col), colour = NULL
     ) +
     theme_minimal(base_size = 12) +
     theme(

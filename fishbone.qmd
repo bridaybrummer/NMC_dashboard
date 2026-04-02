@@ -1,0 +1,186 @@
+---
+title: "Fishbone Diagram: Poisoning in South Africa"
+format: html
+editor: source
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+*Keyword labels on the diagram are cross-referenced to the table below for full descriptions.*
+
+```{r}
+#| label: fishbone-diagram
+#| fig-width: 22
+#| fig-height: 13
+#| out-width: "100%"
+#| dpi: 150
+
+# install.packages("SixSigma", repos = "http://cran.us.r-project.org")
+library(SixSigma)
+
+# Short codes shown on the diagram — format: [category letter][number]
+ss.ceDiag(
+  effect = "Poisoning in\nSouth Africa",
+  causes.gr = c(
+    "A — Law & Bans",
+    "B — Enforcement",
+    "C — Occupational",
+    "D — Community",
+    "E — Structural",
+    "F — Surveillance",
+    "G — Coordination",
+    "H — Mental Health",
+    "I — Clinical"
+  ),
+  causes = list(
+    # A — Law & Bans
+    c("Pesticide phase-out", "Legacy registrations", "WHO alignment",
+      "Ingredient review", "Upstream bans"),
+    # B — Enforcement
+    c("Regulation enforcement", "Market access", "Informal inspection",
+      "Repackaging control", "Too few EHPs", "Seizure authority"),
+    # C — Occupational
+    c("Worker protections", "Handling monitoring", "PPE access",
+      "Exposure despite training", "On-farm storage"),
+    # D — Community
+    c("Parent awareness", "Shop owner awareness", "Home storage",
+      "Unlabelled packaging", "Misleading containers", "Safer alternatives"),
+    # E — Structural
+    c("Waste management", "Poverty & crowding", "Rural governance",
+      "Pesticide dependence", "Limited alternatives"),
+    # F — Surveillance
+    c("Burden unknown", "Exposure tracking", "Notification detail",
+      "Agent profiling", "Death intent data", "Data linkage"),
+    # G — Coordination
+    c("Inter-dept coordination", "Notification → investigation",
+      "Investigation → action", "Response delays", "Accountability loops"),
+    # H — Mental Health
+    c("MH service access", "Self-harm pathways", "GBV & conflict",
+      "Psychosocial distress", "Post-harm follow-up"),
+    # I — Clinical
+    c("Recognition delays", "Treatment pathways", "Poison information",
+      "Referral systems", "Emergency–MH integration")
+  ),
+  main = "Cause-and-Effect Diagram",
+  sub  = "Data-to-policy framing for poisoning prevention in South Africa — see table below for full descriptions"
+)
+```
+
+```{r}
+#| label: reference-table
+
+library(dplyr)
+library(knitr)
+
+ref <- data.frame(
+  Code = c(
+    # A
+    "Pesticide phase-out", "Legacy registrations", "WHO alignment",
+    "Ingredient review", "Upstream bans",
+    # B
+    "Regulation enforcement", "Market access", "Informal inspection",
+    "Repackaging control", "Too few EHPs", "Seizure authority",
+    # C
+    "Worker protections", "Handling monitoring", "PPE access",
+    "Exposure despite training", "On-farm storage",
+    # D
+    "Parent awareness", "Shop owner awareness", "Home storage",
+    "Unlabelled packaging", "Misleading containers", "Safer alternatives",
+    # E
+    "Waste management", "Poverty & crowding", "Rural governance",
+    "Pesticide dependence", "Limited alternatives",
+    # F
+    "Burden unknown", "Exposure tracking", "Notification detail",
+    "Agent profiling", "Death intent data", "Data linkage",
+    # G
+    "Inter-dept coordination", "Notification → investigation",
+    "Investigation → action", "Response delays", "Accountability loops",
+    # H
+    "MH service access", "Self-harm pathways", "GBV & conflict",
+    "Psychosocial distress", "Post-harm follow-up",
+    # I
+    "Recognition delays", "Treatment pathways", "Poison information",
+    "Referral systems", "Emergency–MH integration"
+  ),
+  Category = c(
+    rep("A — Law, Bans & Registration Review", 5),
+    rep("B — Regulation, Enforcement & Supply Chains", 6),
+    rep("C — Occupational Protection", 5),
+    rep("D — Community, Household Exposure & Packaging", 6),
+    rep("E — Structural & Environmental Drivers", 5),
+    rep("F — Surveillance, Death Data & Toxicology", 6),
+    rep("G — Coordination & Closed-Loop Response", 5),
+    rep("H — Mental Health, GBV & Psychosocial Drivers", 5),
+    rep("I — Clinical Readiness & Poison Information", 5)
+  ),
+  Description = c(
+    # A
+    "Slow phase-out of highly hazardous pesticides",
+    "Legacy registrations remain in active use",
+    "Incomplete alignment with WHO hazard classifications",
+    "Weak routine review of high-risk active ingredients",
+    "Underuse of upstream bans and restrictions",
+    # B
+    "Weak enforcement of pesticide regulations",
+    "Restricted products remain accessible in informal markets",
+    "Weak inspection of informal trade and retail",
+    "Poor control of repackaging into unlabelled containers",
+    "Too few inspectors and Environmental Health Practitioners",
+    "Limited legal authority to seize or remove products",
+    # C
+    "Weak implementation of farmworker protection legislation",
+    "Limited monitoring of agricultural chemical handling",
+    "PPE access and affordability barriers",
+    "Continued occupational exposure despite awareness campaigns",
+    "Unsafe on-farm storage and handling practices",
+    # D
+    "Low poisoning awareness among parents and communities",
+    "Low awareness among informal shop owners and traders",
+    "Unsafe household storage of pesticides and chemicals",
+    "Informal packaging sold without hazard warnings",
+    "Toxic products stored or sold in misleading containers",
+    "Limited knowledge of safer pest-control alternatives",
+    # E
+    "Poor waste management leading to pest infestations",
+    "Poverty and overcrowding increasing exposure risk",
+    "Weak local and rural governance of chemical use",
+    "Community dependence on hazardous pesticides",
+    "Limited availability of practical safer alternatives",
+    # F
+    "Poor understanding of the true poisoning burden",
+    "Weak real-time exposure and incident surveillance",
+    "Insufficient detail captured in case notifications",
+    "Limited toxicological agent profiling in non-fatal cases",
+    "Poor manner-of-death and intent detail in mortality data",
+    "Weak data linkage across health, forensic and administrative systems",
+    # G
+    "Weak interdepartmental coordination on chemical safety",
+    "Case notification not systematically linked to field investigation",
+    "Investigation findings not linked to regulatory or policy action",
+    "Delays between complaint receipt and field response",
+    "Weak accountability mechanisms and feedback loops",
+    # H
+    "Poor community access to mental health support services",
+    "Inadequate crisis pathways for self-poisoning presentations",
+    "GBV and family conflict as drivers of intentional poisoning",
+    "Underlying psychosocial distress and hopelessness",
+    "Poor clinical and social follow-up after self-harm events",
+    # I
+    "Delayed clinical recognition of poisoning presentations",
+    "Variable and inconsistent treatment pathways across facilities",
+    "Poor access to poison information by clinicians (no 24 h line)",
+    "Weak inter-facility referral systems for severe cases",
+    "Limited integration of emergency and mental-health services"
+  ),
+  stringsAsFactors = FALSE
+)
+
+knitr::kable(
+  ref,
+  col.names = c("Diagram Label", "Category", "Full Description"),
+  caption   = "Table 1. Reference descriptions for fishbone diagram labels",
+  align     = c("c", "l", "l")
+)
+```
