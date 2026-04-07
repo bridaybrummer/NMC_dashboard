@@ -1,0 +1,954 @@
+---
+title: "Agricultural & Stock Remedy Poisoning"
+subtitle: "Epidemiological Description, South Africa · NMC Surveillance"
+date: today
+sidebar: special-reports
+execute:
+  echo: false
+  warning: false
+  message: false
+  error: false
+  cache: false
+---
+
+::: {.callout-important appearance="minimal"}
+**Priority condition** — Agricultural and stock remedy poisoning is a current public health priority in South Africa. This report describes the epidemiology based on NMC notifiable conditions surveillance data, 2020–present.
+:::
+
+```{r setup}
+#| label: setup
+#| include: false
+#| cache: false
+
+pacman::p_load(
+  ggplot2, gtsummary, tidyverse, magrittr,
+  conflicted, scales, data.table, lubridate,
+  flextable, gt, ggrepel, zoo,
+  janitor
+)
+
+conflicted::conflicts_prefer(dplyr::filter)
+conflicted::conflicts_prefer(dplyr::lag)
+conflicted::conflicts_prefer(tidyr::extract)
+conflicted::conflicts_prefer(dplyr::first)
+conflicted::conflicts_prefer(lubridate::year)
+conflicted::conflicts_prefer(lubridate::month)
+conflicted::conflicts_prefer(lubridate::quarter)
+
+library(NMCleaner)
+
+# ── Load master dataset ───────────────────────────────────────────────────────
+
+
+new_master <- arrow::read_feather("~/Desktop/SAFETP/CLA/NMC_database/master/new_master.feather")
+
+# ── Filter to Agricultural poisoning only ────────────────────────────────────
+CONDITION <- "Agricultural or stock remedy poisoning"
+
+new_master %>%
+  filter(
+    condition %in% CONDITION,
+    as.integer(Year_notification) %in% 2020:year(Sys.Date()),
+    !is.na(prov_)
+  ) %>%
+  mutate(
+    Year_notification = as.integer(Year_notification),
+    patient_vital_status = if_else(
+      patient_vital_status %like% "Unknown", "Alive", patient_vital_status
+    ),
+    Age_years = as.numeric(Age_years),
+    age_group = cut(
+      Age_years,
+      breaks = c(-Inf, 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, Inf),
+      labels = c("<1", "1\u20134", "5\u20139", "10\u201314", "15\u201319",
+                 "20\u201324", "25\u201329", "30\u201334", "35\u201339",
+                 "40\u201344", "45\u201349", "50\u201354", "55\u201359",
+                 "60\u201364", "65+"),
+      right  = FALSE
+    ),
+    sex = case_when(
+      patient_gender %in% c("Male", "M")   ~ "Male",
+      patient_gender %in% c("Female", "F") ~ "Female",
+      TRUE                                  ~ NA_character_
+    ),
+    deceased = patient_vital_status %in% "Deceased"
+  ) -> poison
+
+# ── Province code → full name lookup ─────────────────────────────────────────
+prov_labels <- c(
+  "EC"  = "Eastern Cape",  "FS"  = "Free State",    "GP"  = "Gauteng",
+  "KZN" = "KwaZulu-Natal", "LP"  = "Limpopo",       "MP"  = "Mpumalanga",
+  "NC"  = "Northern Cape", "NW"  = "North West",    "WC"  = "Western Cape"
+)
+poison <- poison %>%
+  mutate(Province = factor(prov_labels[prov_], levels = unname(prov_labels)))
+
+# ── Shared theme ──────────────────────────────────────────────────────────────
+theme_nmc <- function(...) {
+  theme_classic() +
+    theme(
+      text              = element_text(family = "Century Gothic", size = 10, color = "#333333"),
+      panel.background  = element_rect(fill = "#F8F8F8"),
+      plot.background   = element_rect(fill = "#F8F8F8"),
+      panel.grid.major  = element_blank(),
+      panel.grid.minor  = element_blank(),
+      axis.ticks        = element_line(linewidth = 0.15, color = "grey40"),
+      legend.background = element_rect(fill = "#F8F8F8", linewidth = 0.25,
+                                       linetype = "solid", colour = "grey50"),
+      legend.key        = element_blank(),
+      legend.title      = element_text(face = "bold", size = 9, color = "#333333"),
+      legend.text       = element_text(size = 9, color = "#333333"),
+      strip.background  = element_rect(color = NA, fill = NA),
+      ...
+    )
+}
+```
+
+::: {.callout-note appearance="minimal" collapse="true"}
+## Report metadata
+| | |
+|---|---|
+| **Condition** | `r CONDITION` |
+| **Years** | 2020 – `r lubridate::year(Sys.Date())` |
+| **Data source** | NMC Notifiable Medical Conditions surveillance database |
+| **Generated** | `r format(Sys.Date(), "%d %B %Y")` |
+:::
+
+---
+
+# Situation Update for Policy Makers {#sec-executive}
+
+```{r exec-setup}
+#| label: exec-setup
+#| include: false
+
+# ── Current year and comparison calculations ──────────────────────────────────
+current_year <- year(Sys.Date())
+prev_year    <- current_year - 1
+current_month <- month(Sys.Date())
+
+# Year-to-date (Jan 1 to current date) for current and previous year
+ytd_current <- poison %>%
+ filter(Year_notification == current_year,
+         month(as_date(notification_date)) <= current_month)
+ytd_prev <- poison %>%
+  filter(Year_notification == prev_year,
+         month(as_date(notification_date)) <= current_month)
+
+n_ytd_current   <- nrow(ytd_current)
+n_ytd_prev      <- nrow(ytd_prev)
+deaths_ytd_curr <- sum(ytd_current$deceased, na.rm = TRUE)
+deaths_ytd_prev <- sum(ytd_prev$deceased, na.rm = TRUE)
+cfr_ytd_curr    <- round(deaths_ytd_curr / max(n_ytd_current, 1) * 100, 1)
+cfr_ytd_prev    <- round(deaths_ytd_prev / max(n_ytd_prev, 1) * 100, 1)
+
+pct_change_n      <- round((n_ytd_current - n_ytd_prev) / max(n_ytd_prev, 1) * 100)
+pct_change_deaths <- round((deaths_ytd_curr - deaths_ytd_prev) / max(deaths_ytd_prev, 1) * 100)
+
+# Direction arrows and colours
+arrow_n      <- if (pct_change_n > 0) "↑" else if (pct_change_n < 0) "↓" else "→"
+arrow_deaths <- if (pct_change_deaths > 0) "↑" else if (pct_change_deaths < 0) "↓" else "→"
+col_n        <- if (pct_change_n > 10) "#C62828" else if (pct_change_n < -10) "#2E7D32" else "#F57C00"
+col_deaths   <- if (pct_change_deaths > 10) "#C62828" else if (pct_change_deaths < -10) "#2E7D32" else "#F57C00"
+
+# Children under 5 burden — current and previous year
+under5_ytd_curr <- ytd_current %>% filter(Age_years < 5)
+under5_ytd_prev <- ytd_prev %>% filter(Age_years < 5)
+n_under5_curr   <- nrow(under5_ytd_curr)
+n_under5_prev   <- nrow(under5_ytd_prev)
+deaths_under5_curr <- sum(under5_ytd_curr$deceased, na.rm = TRUE)
+deaths_under5_prev <- sum(under5_ytd_prev$deceased, na.rm = TRUE)
+pct_change_under5 <- round((n_under5_curr - n_under5_prev) / max(n_under5_prev, 1) * 100)
+pct_change_deaths_under5 <- round((deaths_under5_curr - deaths_under5_prev) / max(deaths_under5_prev, 1) * 100)
+arrow_under5 <- if (pct_change_under5 > 0) "↑" else if (pct_change_under5 < 0) "↓" else "→"
+arrow_deaths_under5 <- if (pct_change_deaths_under5 > 0) "↑" else if (pct_change_deaths_under5 < 0) "↓" else "→"
+
+# Children under 12 burden — current and previous year
+under12_ytd_curr <- ytd_current %>% filter(Age_years < 12)
+under12_ytd_prev <- ytd_prev %>% filter(Age_years < 12)
+n_under12_curr   <- nrow(under12_ytd_curr)
+n_under12_prev   <- nrow(under12_ytd_prev)
+deaths_under12_curr <- sum(under12_ytd_curr$deceased, na.rm = TRUE)
+deaths_under12_prev <- sum(under12_ytd_prev$deceased, na.rm = TRUE)
+pct_change_under12 <- round((n_under12_curr - n_under12_prev) / max(n_under12_prev, 1) * 100)
+pct_change_deaths_under12 <- round((deaths_under12_curr - deaths_under12_prev) / max(deaths_under12_prev, 1) * 100)
+arrow_under12 <- if (pct_change_under12 > 0) "↑" else if (pct_change_under12 < 0) "↓" else "→"
+arrow_deaths_under12 <- if (pct_change_deaths_under12 > 0) "↑" else if (pct_change_deaths_under12 < 0) "↓" else "→"
+
+# Top 3 provinces this year
+top3_prov <- ytd_current %>%
+  count(Province, sort = TRUE) %>%
+  slice(1:3) %>%
+  pull(Province) %>%
+  paste(collapse = ", ")
+```
+
+::: {.panel-tabset}
+
+## Key Metrics
+
+```{r exec-metrics}
+#| label: tbl-exec-metrics
+#| tbl-cap: !expr 'paste0("Year-to-date comparison: Jan–", format(Sys.Date(), "%b %Y"), " vs same period ", prev_year)'
+
+tibble(
+  Indicator = c(
+    "Notifications (YTD)",
+    "Deaths (YTD)",
+    "Case Fatality Ratio",
+    "Children <5 (notifications)",
+    "Children <5 (deaths)",
+    "Children <12 (notifications)",
+    "Children <12 (deaths)",
+    "Top 3 provinces (by case count)"
+  ),
+  `Current Year` = c(
+    scales::comma(n_ytd_current),
+    scales::comma(deaths_ytd_curr),
+    paste0(cfr_ytd_curr, "%"),
+    scales::comma(n_under5_curr),
+    scales::comma(deaths_under5_curr),
+    scales::comma(n_under12_curr),
+    scales::comma(deaths_under12_curr),
+    top3_prov
+  ),
+  `Same Period Last Year` = c(
+    scales::comma(n_ytd_prev),
+    scales::comma(deaths_ytd_prev),
+    paste0(cfr_ytd_prev, "%"),
+    scales::comma(n_under5_prev),
+    scales::comma(deaths_under5_prev),
+    scales::comma(n_under12_prev),
+    scales::comma(deaths_under12_prev),
+    "—"
+  ),
+  `Change` = c(
+    paste0(arrow_n, " ", ifelse(pct_change_n >= 0, "+", ""), pct_change_n, "%"),
+    paste0(arrow_deaths, " ", ifelse(pct_change_deaths >= 0, "+", ""), pct_change_deaths, "%"),
+    paste0(ifelse(cfr_ytd_curr >= cfr_ytd_prev, "↑", "↓"), " ",
+           ifelse(cfr_ytd_curr - cfr_ytd_prev >= 0, "+", ""),
+           round(cfr_ytd_curr - cfr_ytd_prev, 1), " pp"),
+    paste0(arrow_under5, " ", ifelse(pct_change_under5 >= 0, "+", ""), pct_change_under5, "%"),
+    paste0(arrow_deaths_under5, " ", ifelse(pct_change_deaths_under5 >= 0, "+", ""), pct_change_deaths_under5, "%"),
+    paste0(arrow_under12, " ", ifelse(pct_change_under12 >= 0, "+", ""), pct_change_under12, "%"),
+    paste0(arrow_deaths_under12, " ", ifelse(pct_change_deaths_under12 >= 0, "+", ""), pct_change_deaths_under12, "%"),
+    "—"
+  )
+) %>%
+  flextable() %>%
+  bold(part = "header") %>%
+  bold(i = 1:3, j = 1) %>%
+  color(i = 1, j = 4, color = col_n) %>%
+  color(i = 2, j = 4, color = col_deaths) %>%
+  bg(i = 4:7, bg = "#FFF8E1") %>%
+  set_table_properties(layout = "autofit", width = 1) %>%
+  fontsize(size = 11, part = "all") %>%
+  align(j = 2:4, align = "center", part = "all") %>%
+  add_footer_lines(paste0("Data extracted: ", format(Sys.Date(), "%d %B %Y"),
+                          ". YTD = Year-to-date (Jan 1 – ", format(Sys.Date(), "%d %b"), "). pp = percentage points."))
+```
+
+## 12-Month Trend
+
+```{r exec-trend}
+#| label: fig-exec-trend
+#| fig-cap: "Monthly notification trend — last 12 months with 3-month rolling average. Shaded area highlights the Sep–Nov seasonal peak period."
+#| fig-height: 4
+
+# Last 12 complete months
+end_date   <- floor_date(Sys.Date(), "month") - days(1)
+start_date <- floor_date(end_date - months(11), "month")
+
+poison %>%
+  filter(!is.na(notification_date)) %>%
+  mutate(month_date = floor_date(as_date(notification_date), "month")) %>%
+  #filter(month_date >= start_date, month_date <= end_date) %>%
+  count(month_date) %>%
+  arrange(month_date) %>%
+  mutate(
+    rolling3 = zoo::rollmean(n, k = 3, fill = NA, align = "right"),
+    is_peak  = month(month_date) %in% c(9, 10, 11)  # Sep-Nov peak season
+  ) -> trend12_df
+
+# Highlight rectangle for peak season months in this 12-month window
+peak_rects <- trend12_df %>%
+  filter(is_peak) %>%
+  summarise(xmin = min(month_date, na.rm = TRUE) - days(15),
+            xmax = max(month_date, na.rm = TRUE) + days(15)) %>%
+  slice(1)
+
+ggplot(trend12_df, aes(x = month_date)) +
+  {if (nrow(peak_rects) > 0) annotate("rect",
+    xmin = peak_rects$xmin, xmax = peak_rects$xmax,
+    ymin = -Inf, ymax = Inf, fill = "#FFECB3", alpha = 0.5)} +
+  geom_col(aes(y = n), fill = "#90CAF9", colour = "#64B5F6", width = 22) +
+  geom_line(aes(y = rolling3), colour = "#C62828", linewidth = 1.3, na.rm = TRUE) +
+  geom_point(aes(y = rolling3), colour = "#C62828", size = 2.5, na.rm = TRUE) +
+  geom_text(aes(y = n, label = n), vjust = -0.5, size = 3.2, colour = "#333333") +
+  scale_x_date(date_labels = "%b\n%Y", date_breaks = "1 month", expand = expansion(mult = c(0.02, 0.02))) +
+  scale_y_continuous(name = "Notifications", expand = expansion(mult = c(0, 0.15))) +
+  labs(x = NULL,
+       caption = "Red line = 3-month rolling average. Yellow shading = Sep–Nov seasonal peak.") +
+  theme_nmc() +
+  theme(axis.text.x = element_text(size = 8))
+```
+
+## Provincial Burden
+
+```{r exec-prov-heatmap}
+#| label: fig-exec-prov
+#| fig-cap: "Provincial burden heatmap — quarterly notifications, deaths, and incidence per 100,000, last 2 years. Darker = higher incidence."
+#| fig-height: 5.5
+
+# Get provincial population for incidence calculation
+prov_pop <- NMCleaner::pop %>%
+  filter(as.integer(Year) == year(Sys.Date())) %>%
+  group_by(prov) %>%
+  summarise(population = sum(Population), .groups = "drop")
+
+# Last 8 quarters with incidence
+poison %>%
+  filter(!is.na(notification_date)) %>%
+  mutate(
+    nd = as_date(notification_date),
+    qtr = paste0(year(nd), " Q", quarter(nd))
+  ) %>%
+  filter(nd >= (Sys.Date() - years(2))) %>%
+  group_by(prov_, qtr) %>%
+  summarise(n = n(), deaths = sum(deceased, na.rm = TRUE), .groups = "drop") %>%
+  complete(prov_, qtr, fill = list(n = 0, deaths = 0)) %>%
+  left_join(prov_pop, by = c("prov_" = "prov")) %>%
+  mutate(
+    Province = factor(prov_labels[prov_], levels = unname(prov_labels)),
+    # Quarterly incidence annualized (multiply by 4) per 100k
+    inc = round(n / population * 1e5 * 4, 1)
+  ) -> prov_qtr_df
+
+# Order quarters chronologically
+qtr_order <- prov_qtr_df %>% distinct(qtr) %>% arrange(qtr) %>% pull(qtr)
+prov_qtr_df$qtr <- factor(prov_qtr_df$qtr, levels = qtr_order)
+
+ggplot(prov_qtr_df, aes(x = qtr, y = Province, fill = inc)) +
+  geom_tile(color = "white", linewidth = 0.5) +
+  geom_text(aes(label = paste0(n, ifelse(deaths > 0, paste0(" (", deaths, "†)"), ""),
+                               "\n", inc)),
+            size = 2.5, colour = "black", lineheight = 0.85) +
+  scale_fill_gradient(low = "#E3F2FD", high = "#0D47A1", name = "Incidence\n(per 100k/yr)") +
+  labs(x = "Quarter", y = NULL,
+       caption = "Top number = notifications (†deaths); bottom = annualized incidence per 100,000.") +
+  theme_nmc() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 9),
+    legend.position = "right",
+    panel.grid = element_blank()
+  )
+```
+
+:::
+
+---
+
+# Summary Statistics {#sec-summary}
+
+```{r summary-stats}
+#| label: tbl-summary
+#| tbl-cap: "Summary of agricultural or stock remedy poisoning notifications, South Africa, 2020–present."
+
+total_n      <- nrow(poison)
+total_deaths <- sum(poison$deceased, na.rm = TRUE)
+overall_cfr  <- round(total_deaths / total_n * 100, 1)
+
+tibble(
+  Metric = c(
+    "Total notifications",
+    "Total deaths reported",
+    "Overall case fatality ratio",
+    "Provinces affected",
+    "Districts affected",
+    "Unique reporting facilities",
+    "Date range"
+  ),
+  Value = c(
+    scales::comma(total_n),
+    scales::comma(total_deaths),
+    paste0(overall_cfr, "%"),
+    as.character(poison$prov_ %>% na.omit() %>% n_distinct()),
+    as.character(poison$district %>% na.omit() %>% n_distinct()),
+    as.character(poison$facility %>% na.omit() %>% n_distinct()),
+    paste(
+      format(as_date(min(poison$notification_date, na.rm = TRUE)), "%d %b %Y"),
+      "to",
+      format(as_date(max(poison$notification_date, na.rm = TRUE)), "%d %b %Y")
+    )
+  )
+) %>%
+  flextable() %>%
+  bold(part = "header") %>%
+  set_table_properties(layout = "autofit") %>%
+  fontsize(size = 10, part = "all")
+```
+
+---
+
+# Temporal Trends {#sec-trends}
+
+## Annual notifications and CFR
+
+```{r annual-trend}
+#| label: fig-annual-trend
+#| fig-cap: "Annual count of agricultural or stock remedy poisoning notifications and case fatality ratio (CFR), South Africa, 2020–present."
+
+poison %>%
+  group_by(year = Year_notification) %>%
+  summarise(n = n(), deaths = sum(deceased, na.rm = TRUE),
+            cfr = deaths / n * 100, .groups = "drop") -> annual_df
+
+sf_ax <- max(annual_df$n) / max(annual_df$cfr, na.rm = TRUE) * 1.1
+
+ggplot(annual_df, aes(x = year)) +
+  geom_col(aes(y = n, fill = "Notifications"), alpha = 0.8, width = 0.6) +
+  geom_line(aes(y = cfr * sf_ax, colour = "CFR (%)"), linewidth = 1.2, group = 1) +
+  geom_point(aes(y = cfr * sf_ax, colour = "CFR (%)"), size = 3) +
+  geom_text(aes(y = n + max(n) * 0.02, label = scales::comma(n)),
+            size = 3.2, vjust = 0, color = "#333333") +
+  scale_y_continuous(
+    name     = "Notifications (n)",
+    sec.axis = sec_axis(~ . / sf_ax, name = "CFR (%)", breaks = pretty_breaks(4))
+  ) +
+  scale_fill_manual(values   = c("Notifications" = "#90CAF9"), name = NULL) +
+  scale_colour_manual(values = c("CFR (%)" = "#C62828"), name = NULL) +
+  scale_x_continuous(breaks = annual_df$year) +
+  labs(x = "Year") +
+  theme_nmc() +
+  theme(legend.position = "bottom")
+```
+
+## Monthly epicurve
+
+```{r epicurve-monthly}
+#| label: fig-epicurve-monthly
+#| fig-cap: "Monthly notification counts for agricultural or stock remedy poisoning, South Africa, 2020–present. Line = 3-month rolling average."
+
+poison %>%
+  filter(!is.na(notification_date)) %>%
+  mutate(month_date = floor_date(as_date(notification_date), "month")) %>%
+  count(month_date) %>%
+  arrange(month_date) %>%
+  mutate(rolling3 = zoo::rollmean(n, k = 3, fill = NA, align = "right")) -> epicurve_df
+
+ggplot(epicurve_df, aes(x = month_date)) +
+  geom_col(aes(y = n), fill = "#90CAF9", colour = "#64B5F6", width = 25) +
+  geom_line(aes(y = rolling3), colour = "#C62828", linewidth = 1.1, na.rm = TRUE) +
+  scale_x_date(date_labels = "%b\n%Y", date_breaks = "6 months",
+               date_minor_breaks = "3 months", expand = expansion(add = c(0, 0))) +
+  scale_y_continuous(name = "Notifications (n)", breaks = pretty_breaks(5)) +
+  labs(x = "Date",
+       caption = "Red line = 3-month rolling average") +
+  theme_nmc() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 8))
+```
+
+## Seasonal pattern — epiweek heatmap
+
+```{r seasonal-heatmap}
+#| label: fig-seasonal-heatmap
+#| fig-cap: "Epiweek × year heatmap of agricultural or stock remedy poisoning notification counts, South Africa. The Sep–Nov seasonal peak is clearly visible."
+#| fig-height: 5
+
+poison %>%
+  filter(!is.na(notification_date)) %>%
+  mutate(
+    nd      = as_date(notification_date),
+    yr      = lubridate::year(nd),
+    epiweek = lubridate::isoweek(nd)
+  ) %>%
+  count(year = yr, epiweek) %>%
+  complete(year = 2020:year(Sys.Date()), epiweek = 1:52, fill = list(n = 0)) -> heat_df
+
+ggplot(heat_df, aes(x = epiweek,
+                    y = factor(year, levels = rev(sort(unique(year)))),
+                    fill = n)) +
+  geom_tile(color = "white", linewidth = 0.3) +
+  scale_fill_gradient2(
+    low = "white", mid = "#FFF9C4", high = "#B71C1C",
+    midpoint = median(heat_df$n[heat_df$n > 0], na.rm = TRUE),
+    name = "Notifications (n)"
+  ) +
+  scale_x_continuous(breaks = c(1, seq(5, 52, 5)), expand = c(0, 0)) +
+  labs(x = "Epiweek", y = "Year") +
+  theme_nmc() +
+  theme(legend.position = "bottom", legend.key.width = unit(1.5, "cm"),
+        panel.grid.major = element_blank())
+```
+
+---
+
+# Age & Sex Demographics {#sec-demographics}
+
+## Population pyramid
+
+```{r age-sex-pyramid}
+#| label: fig-age-sex-pyramid
+#| fig-cap: "Age–sex population pyramid of agricultural or stock remedy poisoning notifications, South Africa, 2020–present."
+#| fig-height: 5
+
+poison %>%
+  filter(!is.na(age_group), !is.na(sex)) %>%
+  count(age_group, sex) %>%
+  mutate(n_plot = if_else(sex == "Male", -n, n)) -> pyramid_df
+
+max_n <- max(abs(pyramid_df$n))
+step  <- ifelse(max_n > 500, 200, ifelse(max_n > 200, 50, 25))
+br    <- seq(0, ceiling(max_n / step) * step, step)
+
+ggplot(pyramid_df, aes(x = age_group, y = n_plot, fill = sex)) +
+  geom_col(width = 0.8) +
+  coord_flip() +
+  scale_y_continuous(breaks = c(-br, br), labels = abs(c(-br, br))) +
+  scale_fill_manual(values = c("Male" = "#1565C0", "Female" = "#C62828"), name = NULL) +
+  geom_hline(yintercept = 0, colour = "white", linewidth = 0.5) +
+  annotate("text", x = nlevels(pyramid_df$age_group) + 0.4,
+           y = -max_n * 0.5, label = "Male",   color = "#1565C0", fontface = "bold", size = 3.5) +
+  annotate("text", x = nlevels(pyramid_df$age_group) + 0.4,
+           y =  max_n * 0.5, label = "Female", color = "#C62828", fontface = "bold", size = 3.5) +
+  labs(x = "Age group (years)", y = "Number of notifications") +
+  theme_nmc() +
+  theme(legend.position = "none",
+        panel.grid.major.x = element_line(color = "#DDDDDD", linewidth = 0.3))
+```
+
+## Population pyramid by vital status
+
+```{r pyramid-by-vital}
+#| label: fig-pyramid-vital
+#| fig-cap: "Age–sex pyramid overlaid with vital status. Solid fill = alive; faded = deceased."
+#| fig-height: 5.5
+
+poison %>%
+  filter(!is.na(age_group), !is.na(sex),
+         patient_vital_status %in% c("Alive", "Deceased")) %>%
+  count(age_group, sex, patient_vital_status) %>%
+  mutate(n_plot = if_else(sex == "Male", -n, n)) -> pyr_vital_df
+
+ggplot(pyr_vital_df,
+       aes(x = age_group, y = n_plot, fill = sex, alpha = patient_vital_status)) +
+  geom_col(width = 0.8, position = "stack") +
+  coord_flip() +
+  scale_alpha_manual(values = c("Alive" = 0.9, "Deceased" = 0.35), name = "Vital status") +
+  scale_fill_manual(values = c("Male" = "#1565C0", "Female" = "#C62828"), name = "Sex") +
+  scale_y_continuous(breaks = c(-br, br), labels = abs(c(-br, br))) +
+  geom_hline(yintercept = 0, colour = "white") +
+  labs(x = "Age group (years)", y = "Notifications (n)") +
+  theme_nmc() +
+  theme(legend.position = "bottom") +
+  guides(fill = guide_legend(order = 1), alpha = guide_legend(order = 2))
+```
+
+## Age group distribution over time
+
+```{r age-time}
+#| label: fig-age-time
+#| fig-cap: "Annual proportion of agricultural or stock remedy poisoning notifications by age group, South Africa."
+#| fig-height: 5
+
+poison %>%
+  filter(!is.na(age_group)) %>%
+  count(Year_notification, age_group) %>%
+  group_by(Year_notification) %>%
+  mutate(pct = n / sum(n) * 100) -> age_time_df
+
+ggplot(age_time_df, aes(x = factor(Year_notification), y = pct, fill = age_group)) +
+  geom_col(position = "fill", width = 0.75) +
+  scale_y_continuous(labels = scales::percent_format(scale = 100)) +
+  scale_fill_viridis_d(option = "turbo", direction = -1, name = "Age group") +
+  labs(x = "Year", y = "Proportion of notifications (%)") +
+  theme_nmc() +
+  theme(legend.position = "bottom") +
+  guides(fill = guide_legend(nrow = 3))
+```
+
+## Sex distribution over time
+
+```{r sex-time}
+#| label: fig-sex-time
+#| fig-cap: "Annual proportion of agricultural or stock remedy poisoning notifications by sex, South Africa."
+#| fig-height: 4.5
+
+poison %>%
+  filter(!is.na(sex)) %>%
+  count(Year_notification, sex) %>%
+  group_by(Year_notification) %>%
+  mutate(pct = n / sum(n) * 100) -> sex_time_df
+
+ggplot(sex_time_df, aes(x = factor(Year_notification), y = pct, fill = sex)) +
+  geom_col(position = "fill", width = 0.75) +
+  geom_text(aes(label = paste0(round(pct), "%")),
+            position = position_fill(vjust = 0.5),
+            size = 3.2, color = "white", fontface = "bold") +
+  scale_y_continuous(labels = scales::percent_format(scale = 100)) +
+  scale_fill_manual(values = c("Male" = "#1565C0", "Female" = "#C62828"), name = NULL) +
+  labs(x = "Year", y = "Proportion of notifications (%)") +
+  theme_nmc() +
+  theme(legend.position = "bottom")
+```
+
+## Case fatality ratio by age group and sex
+
+```{r cfr-age-sex}
+#| label: fig-cfr-age-sex
+#| fig-cap: "Case fatality ratio (%) by age group and sex for agricultural or stock remedy poisoning, South Africa, 2020–present."
+#| fig-height: 5
+
+poison %>%
+  filter(!is.na(age_group), !is.na(sex)) %>%
+  group_by(age_group, sex) %>%
+  summarise(n = n(), deaths = sum(deceased, na.rm = TRUE),
+            cfr = deaths / n * 100, .groups = "drop") -> cfr_df
+
+ggplot(cfr_df, aes(x = age_group, y = cfr, fill = sex)) +
+  geom_col(position = "dodge", width = 0.7) +
+  geom_text(aes(label = paste0(round(cfr, 1), "%")),
+            position = position_dodge(width = 0.7),
+            vjust = -0.4, size = 3, color = "#333333") +
+  scale_fill_manual(values = c("Male" = "#1565C0", "Female" = "#C62828"), name = NULL) +
+  scale_y_continuous(limits = c(0, max(cfr_df$cfr, na.rm = TRUE) * 1.25)) +
+  labs(x = "Age group (years)", y = "Case fatality ratio (%)") +
+  theme_nmc() +
+  theme(legend.position = "bottom")
+```
+
+## Summary demographics table
+
+```{r demo-table}
+#| label: tbl-demographics
+#| tbl-cap: "Summary demographics of agricultural or stock remedy poisoning notifications by year and vital status, South Africa."
+
+poison %>%
+  mutate(year_chr = factor(Year_notification)) %>%
+  select(year_chr, sex, age_group, Age_years, patient_vital_status, Province) %>%
+  tbl_strata(
+    strata   = year_chr,
+    .tbl_fun = ~ .x %>%
+      tbl_summary(
+        by        = patient_vital_status,
+        missing   = "no",
+        label     = list(sex ~ "Sex", age_group ~ "Age group",
+                         Age_years ~ "Age (years)", Province ~ "Province"),
+        type      = list(Age_years ~ "continuous"),
+        statistic = list(
+          all_categorical() ~ "{n}/{N} ({p}%)",
+          Age_years ~ "{median} ({p25}\u2013{p75})"
+        )
+      ) %>%
+      bold_labels()
+  ) %>%
+  as_flex_table()
+```
+
+---
+
+# Geographical Distribution {#sec-geo}
+
+```{r geo-setup}
+#| include: false
+
+# ── Provincial incidence ──────────────────────────────────────────────────────
+NMCleaner::pop %>%
+  mutate(Year = as.integer(Year)) %>%
+  group_by(prov, Year) %>%
+  summarise(population = sum(Population), .groups = "drop") -> pop_prov
+
+poison %>%
+  group_by(prov_, Province, year = Year_notification) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  left_join(pop_prov, by = c("prov_" = "prov", "year" = "Year")) %>%
+  mutate(incidence = n / population * 1e5) -> incidence_prov_df
+
+# ── District incidence ────────────────────────────────────────────────────────
+NMCleaner::pop %>%
+  filter(as.integer(Year) %in% 2020:year(Sys.Date())) %>%
+  group_by(district_standard) %>%
+  summarise(pop_total = sum(Population), .groups = "drop") -> pop_dist
+
+poison %>%
+  filter(!district %in% c("Unknown", "Isazi Import", "Not Applicable"),
+         !is.na(district)) %>%
+  mutate_district_name("district") %>%
+  group_by(Province, district_standard) %>%
+  summarise(
+    Notifications = n(),
+    Deaths        = sum(deceased, na.rm = TRUE),
+    CFR           = round(Deaths / Notifications * 100, 1),
+    .groups = "drop"
+  ) %>%
+  left_join(pop_dist, by = "district_standard") %>%
+  mutate(
+    Incidence = round(Notifications / pop_total * 1e5, 1),
+    pop_total = round(pop_total / 1e3, 1)          # display in thousands
+  ) -> incidence_dist_df
+```
+
+## Provincial incidence over time
+
+```{r prov-incidence-line}
+#| label: fig-prov-incidence-line
+#| fig-cap: "Incidence of agricultural or stock remedy poisoning notifications per 100,000 population by province and year, South Africa."
+#| fig-height: 5.5
+
+incidence_prov_df %>%
+  group_by(Province) %>%
+  filter(incidence == max(incidence, na.rm = TRUE)) %>%
+  ungroup() -> peak_prov_df
+
+ggplot(incidence_prov_df, aes(x = year, y = incidence, colour = Province, group = Province)) +
+  geom_line(linewidth = 1.1) +
+  geom_point(size = 2.5) +
+  ggrepel::geom_label_repel(data = peak_prov_df, aes(label = Province),
+    size = 2.8, show.legend = FALSE, label.size = 0.15, max.overlaps = 25) +
+  scale_colour_brewer(palette = "Paired", name = "Province") +
+  scale_x_continuous(breaks = unique(incidence_prov_df$year)) +
+  labs(x = "Year", y = "Incidence per 100,000 population") +
+  theme_nmc() +
+  theme(legend.position = "none")
+```
+
+## Provincial incidence table
+
+```{r prov-table}
+#| label: tbl-prov-incidence
+#| tbl-cap: "Notifications and incidence per 100,000 by province and year, South Africa."
+
+incidence_prov_df %>%
+  mutate(year = as.character(year)) %>%
+  pivot_wider(id_cols = Province, names_from = year,
+              values_from = c(n, incidence), names_glue = "{.value}_{year}") %>%
+  gt(rowname_col = "Province") %>%
+  tab_spanner_delim(delim = "_") %>%
+  fmt_number(starts_with("n_"),         decimals = 0, use_seps = TRUE) %>%
+  fmt_number(starts_with("incidence_"), decimals = 1) %>%
+  tab_header(title = md("**Provincial notifications and incidence per 100,000**")) %>%
+  tab_source_note("Incidence per 100,000 using mid-year provincial population estimates.")
+```
+
+## Top 20 districts by notification count
+
+```{r top-districts}
+#| label: tbl-top-districts
+#| tbl-cap: "Top 20 districts by total notification count, South Africa, 2020–present. Pink = CFR > 5%."
+
+incidence_dist_df %>%
+  arrange(desc(Notifications)) %>%
+  slice(1:20) %>%
+  rename(District = district_standard, `Pop (k)` = pop_total) %>%
+  select(Province, District, Notifications, Deaths, `CFR (%)` = CFR,
+         `Incidence per 100k` = Incidence, `Pop (k)`) %>%
+  flextable() %>%
+  bold(part = "header") %>%
+  bg(i = ~ `CFR (%)` > 5, j = "CFR (%)", bg = "#FFCDD2") %>%
+  bg(i = ~ `Incidence per 100k` > median(incidence_dist_df$Incidence, na.rm = TRUE) * 2,
+     j = "Incidence per 100k", bg = "#FFF3E0") %>%
+  set_table_properties(layout = "autofit") %>%
+  fontsize(size = 9, part = "all")
+```
+
+## Top 30 districts by incidence rate
+
+```{r district-incidence-lollipop}
+#| label: fig-district-incidence
+#| fig-cap: "Top 30 districts ranked by incidence per 100,000 population, agricultural or stock remedy poisoning, South Africa, 2020–present. Districts with high incidence but low absolute counts are often missed by count-only rankings."
+#| fig-height: 8
+
+incidence_dist_df %>%
+  filter(!is.na(Incidence)) %>%
+  arrange(desc(Incidence)) %>%
+  slice(1:30) %>%
+  mutate(
+    district_standard = fct_reorder(district_standard, Incidence),
+    label = paste0(Province, " · ", round(Incidence, 1))
+  ) -> top_inc_df
+
+ggplot(top_inc_df, aes(x = Incidence, y = district_standard)) +
+  geom_segment(aes(x = 0, xend = Incidence,
+                   y = district_standard, yend = district_standard),
+               colour = "grey75", linewidth = 0.5) +
+  geom_point(aes(size = Notifications, colour = Province), alpha = 0.85) +
+  geom_text(aes(label = round(Incidence, 1)), hjust = -0.5, size = 2.8,
+            colour = "#333333") +
+  scale_size_continuous(range = c(2, 9), name = "Notifications (n)") +
+  scale_colour_brewer(palette = "Paired", name = "Province") +
+  labs(
+    x = "Incidence per 100,000 population",
+    y = NULL,
+    caption = "Point size proportional to number of notifications. Colour = province."
+  ) +
+  theme_nmc() +
+  theme(legend.position = "bottom",
+        panel.grid.major.x = element_line(colour = "#EEEEEE", linewidth = 0.3))
+```
+
+## Count vs incidence — identifying overlooked high-burden districts
+
+```{r district-scatter}
+#| label: fig-district-scatter
+#| fig-cap: "Notification count versus incidence rate per 100,000 population for all districts, South Africa, 2020–present. Quadrant lines = national median count and median incidence. Districts in the top-left quadrant have high incidence relative to their case count (small, high-burden populations)."
+#| fig-height: 6
+
+med_n   <- median(incidence_dist_df$Notifications, na.rm = TRUE)
+med_inc <- median(incidence_dist_df$Incidence,     na.rm = TRUE)
+
+incidence_dist_df %>%
+  filter(!is.na(Incidence)) %>%
+  mutate(quadrant = case_when(
+    Notifications > med_n   & Incidence > med_inc ~ "High count, high incidence",
+    Notifications <= med_n  & Incidence > med_inc ~ "Low count, high incidence",
+    Notifications > med_n   & Incidence <= med_inc ~ "High count, low incidence",
+    TRUE                                           ~ "Low count, low incidence"
+  )) -> scatter_df
+
+# label top 10 by incidence + top 10 by count
+top_labels <- scatter_df %>%
+  arrange(desc(Incidence)) %>% slice(1:10) %>%
+  bind_rows(scatter_df %>% arrange(desc(Notifications)) %>% slice(1:10)) %>%
+  distinct(district_standard, .keep_all = TRUE)
+
+ggplot(scatter_df, aes(x = Notifications, y = Incidence)) +
+  geom_hline(yintercept = med_inc, linetype = "dashed", colour = "grey60", linewidth = 0.4) +
+  geom_vline(xintercept = med_n,   linetype = "dashed", colour = "grey60", linewidth = 0.4) +
+  geom_point(aes(colour = Province, size = pop_total), alpha = 0.75) +
+  ggrepel::geom_label_repel(
+    data = top_labels,
+    aes(label = district_standard),
+    size = 2.4, label.size = 0.1, max.overlaps = 25,
+    fill = "white", colour = "#333333"
+  ) +
+  scale_colour_brewer(palette = "Paired", name = "Province") +
+  scale_size_continuous(range = c(1.5, 7), name = "Pop (thousands)") +
+  scale_x_continuous(labels = scales::comma) +
+  labs(
+    x = "Total notifications (n)",
+    y = "Incidence per 100,000 population",
+    caption = "Dashed lines = national medians. Top 10 districts by incidence and by count labelled."
+  ) +
+  theme_nmc() +
+  theme(legend.position = "bottom")
+```
+
+## Full district incidence table
+
+```{r tbl-district-incidence}
+#| label: tbl-district-incidence
+#| tbl-cap: "All districts with at least 5 notifications ranked by incidence per 100,000 population, South Africa, 2020–present."
+
+incidence_dist_df %>%
+  filter(Notifications >= 5, !is.na(Incidence)) %>%
+  arrange(desc(Incidence)) %>%
+  rename(District = district_standard, `Pop (k)` = pop_total,
+         `Incidence per 100k` = Incidence, `CFR (%)` = CFR) %>%
+  select(Province, District, Notifications, Deaths, `CFR (%)`,
+         `Incidence per 100k`, `Pop (k)`) %>%
+  flextable() %>%
+  bold(part = "header") %>%
+  color(i = ~ `Incidence per 100k` > quantile(incidence_dist_df$Incidence,
+                                               0.9, na.rm = TRUE),
+        j = "Incidence per 100k", color = "#C62828") %>%
+  bg(i = ~ `CFR (%)` > 5, j = "CFR (%)", bg = "#FFCDD2") %>%
+  set_table_properties(layout = "autofit") %>%
+  fontsize(size = 9, part = "all") %>%
+  add_footer_lines("Red = top 10% incidence districts. Pink = CFR > 5%.")
+```
+
+---
+
+# Mortality Profile {#sec-mortality}
+
+## Deaths by province and year
+
+```{r deaths-prov}
+#| label: fig-deaths-prov
+#| fig-cap: "Annual deaths from agricultural or stock remedy poisoning by province, South Africa."
+#| fig-height: 5
+
+poison %>%
+  filter(deceased) %>%
+  count(year = Year_notification, Province) %>%
+  ggplot(aes(x = factor(year), y = n, fill = Province)) +
+  geom_col(position = "stack", width = 0.75) +
+  scale_fill_brewer(palette = "Paired", name = "Province") +
+  labs(x = "Year", y = "Deaths (n)") +
+  theme_nmc() +
+  theme(legend.position = "bottom", legend.key.size = unit(0.4, "cm"))
+```
+
+## CFR by province and year
+
+```{r cfr-prov}
+#| label: fig-cfr-prov
+#| fig-cap: "Case fatality ratio (%) by province and year for agricultural or stock remedy poisoning, South Africa."
+#| fig-height: 5
+
+poison %>%
+  group_by(year = Year_notification, Province) %>%
+  summarise(n = n(), deaths = sum(deceased, na.rm = TRUE),
+            cfr = deaths / n * 100, .groups = "drop") %>%
+  ggplot(aes(x = factor(year), y = cfr, fill = Province)) +
+  geom_col(position = "dodge", width = 0.85) +
+  scale_fill_brewer(palette = "Paired", name = "Province") +
+  labs(x = "Year", y = "CFR (%)") +
+  theme_nmc() +
+  theme(legend.position = "bottom", legend.key.size = unit(0.4, "cm"))
+```
+
+## Deaths in children under 12
+
+```{r under12-deaths}
+#| label: tbl-under12-deaths
+#| tbl-cap: "Vital status of agricultural or stock remedy poisoning notifications in children under 12 years, by year, South Africa."
+
+poison %>%
+  filter(Year_notification %in% 2023:year(Sys.Date())) %>%
+  mutate(
+    under_12 = factor(if_else(Age_years <= 12, "Under 12 years", "12 years and over"),
+                      levels = c("Under 12 years", "12 years and over"))
+  ) %>%
+  select(year = Year_notification, under_12, patient_vital_status, Age_years, sex, prov_) %>%
+  tbl_strata(
+    strata   = year,
+    .tbl_fun = ~ .x %>%
+      tbl_summary(
+        by      = patient_vital_status, missing = "no",
+        label   = list(under_12 ~ "Age category", Age_years ~ "Age (years)",
+                       sex ~ "Sex", prov_ ~ "Province"),
+        type    = list(Age_years ~ "continuous"), percent = "row"
+      ) %>% bold_labels()
+  ) %>%
+  as_flex_table()
+```
+
+---
+
+# Reporting & Facility Analysis {#sec-facilities}
+
+## Unique reporting facilities per year
+
+```{r facilities-trend}
+#| label: fig-facilities
+#| fig-cap: "Number of unique health facilities reporting at least one agricultural or stock remedy poisoning notification per year, South Africa."
+#| fig-height: 4
+
+poison %>%
+  filter(!is.na(facility)) %>%
+  group_by(Year_notification) %>%
+  summarise(n_facilities = n_distinct(facility), .groups = "drop") -> fac_df
+
+ggplot(fac_df, aes(x = factor(Year_notification))) +
+  geom_col(aes(y = n_facilities, fill = "Unique facilities"), width = 0.6, alpha = 0.85) +
+  geom_text(aes(y = n_facilities, label = n_facilities), vjust = -0.4, size = 3.5) +
+  scale_fill_manual(values = c("Unique facilities" = "#4CAF50"), name = NULL) +
+  labs(x = "Year", y = "Unique reporting facilities (n)") +
+  theme_nmc() +
+  theme(legend.position = "bottom")
+```
+
+---
+
+*Report generated: `r format(Sys.Date(), "%d %B %Y")` | NMC Surveillance Unit*

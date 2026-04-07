@@ -27,7 +27,7 @@
 
 N_MONTHS       <- 2                      # how many past months to render
 OUTPUT_FORMATS <- c("html", "docx")    # formats to render for each month
-SKIP_EXISTING  <- TRUE                  # set FALSE to re-render reports that already exist
+SKIP_EXISTING  <- FALSE                  # set FALSE to re-render reports that already exist
 OUTPUT_DIR     <- file.path("monthly-reports", "rendered")
 
 # ── 2. Derived months list ────────────────────────────────────────────────────

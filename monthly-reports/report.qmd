@@ -39,6 +39,7 @@ conflicts_prefer(dplyr::filter)
 library(stringdist)
 library(kableExtra)
 library(data.table)
+library(ragg)
 
 # ── Global flextable settings ──────────────────────────────────────────────────
 flextable::set_flextable_defaults(
@@ -58,7 +59,9 @@ knitr::opts_chunk$set(
   echo      = FALSE,
   warning   = FALSE,
   message   = FALSE,
-  out.width = "100%"
+  out.width = "100%",
+  dev       = "ragg_png",
+  dpi       = 300
 )
 
 # ── Helper: trim gtsummary header row ─────────────────────────────────────────
@@ -72,15 +75,15 @@ trim_tbl <- function(gt_summary_object) {
 as_excel <- function() {
   theme_minimal() +
     theme(
-      text             = element_text(family = "Century Gothic", size = 10, color = "#333333"),
+      text             = element_text(family = "Arial", size = 10, color = "#333333"),
       panel.background = element_rect(fill = "#F8F8F8"),
       plot.background  = element_rect(fill = "#F8F8F8"),
       panel.grid       = element_line(color = "#DDDDDD"),
-      legend.text      = element_text(color = "#333333", size = 8),
-      legend.title     = element_text(color = "#333333", size = 10),
-      plot.title       = element_text(size = 10, color = "#666666"),
-      plot.subtitle    = element_text(size = 8,  color = "#666666"),
-      plot.caption     = element_text(size = 8,  color = "#666666"),
+      legend.text      = element_text(family = "Arial", color = "#333333", size = 8),
+      legend.title     = element_text(family = "Arial", color = "#333333", size = 10),
+      plot.title       = element_text(family = "Arial", size = 10, color = "#666666"),
+      plot.subtitle    = element_text(family = "Arial", size = 8,  color = "#666666"),
+      plot.caption     = element_text(family = "Arial", size = 8,  color = "#666666"),
       legend.position  = "right",
       legend.direction = "vertical",
       legend.key       = element_blank(),

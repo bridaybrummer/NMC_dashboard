@@ -24,8 +24,10 @@ pacman::p_load(
   ggplot2, gtsummary, tidyverse, magrittr,
   conflicted, scales, data.table, lubridate,
   flextable, gt, ggrepel, zoo,
-  janitor
+  janitor, ragg
 )
+
+knitr::opts_chunk$set(dev = "ragg_png")
 
 conflicted::conflicts_prefer(dplyr::filter)
 conflicted::conflicts_prefer(dplyr::lag)
@@ -74,11 +76,20 @@ new_master %>%
     deceased = patient_vital_status %in% "Deceased"
   ) -> poison
 
+# ── Province code → full name lookup ─────────────────────────────────────────
+prov_labels <- c(
+  "EC"  = "Eastern Cape",  "FS"  = "Free State",    "GP"  = "Gauteng",
+  "KZN" = "KwaZulu-Natal", "LP"  = "Limpopo",       "MP"  = "Mpumalanga",
+  "NC"  = "Northern Cape", "NW"  = "North West",    "WC"  = "Western Cape"
+)
+poison <- poison %>%
+  mutate(Province = factor(prov_labels[prov_], levels = unname(prov_labels)))
+
 # ── Shared theme ──────────────────────────────────────────────────────────────
 theme_nmc <- function(...) {
   theme_classic() +
     theme(
-      text              = element_text(family = "Century Gothic", size = 10, color = "#333333"),
+      text              = element_text(family = "Arial", size = 10, color = "#333333"),
       panel.background  = element_rect(fill = "#F8F8F8"),
       plot.background   = element_rect(fill = "#F8F8F8"),
       panel.grid.major  = element_blank(),
@@ -87,6 +98,8 @@ theme_nmc <- function(...) {
       legend.background = element_rect(fill = "#F8F8F8", linewidth = 0.25,
                                        linetype = "solid", colour = "grey50"),
       legend.key        = element_blank(),
+      legend.title      = element_text(face = "bold", size = 9, color = "#333333"),
+      legend.text       = element_text(size = 9, color = "#333333"),
       strip.background  = element_rect(color = NA, fill = NA),
       ...
     )
@@ -166,9 +179,9 @@ arrow_deaths_under12 <- if (pct_change_deaths_under12 > 0) "↑" else if (pct_ch
 
 # Top 3 provinces this year
 top3_prov <- ytd_current %>%
-  count(prov_, sort = TRUE) %>%
+  count(Province, sort = TRUE) %>%
   slice(1:3) %>%
-  pull(prov_) %>%
+  pull(Province) %>%
   paste(collapse = ", ")
 ```
 
@@ -308,6 +321,7 @@ poison %>%
   complete(prov_, qtr, fill = list(n = 0, deaths = 0)) %>%
   left_join(prov_pop, by = c("prov_" = "prov")) %>%
   mutate(
+    Province = factor(prov_labels[prov_], levels = unname(prov_labels)),
     # Quarterly incidence annualized (multiply by 4) per 100k
     inc = round(n / population * 1e5 * 4, 1)
   ) -> prov_qtr_df
@@ -316,7 +330,7 @@ poison %>%
 qtr_order <- prov_qtr_df %>% distinct(qtr) %>% arrange(qtr) %>% pull(qtr)
 prov_qtr_df$qtr <- factor(prov_qtr_df$qtr, levels = qtr_order)
 
-ggplot(prov_qtr_df, aes(x = qtr, y = prov_, fill = inc)) +
+ggplot(prov_qtr_df, aes(x = qtr, y = Province, fill = inc)) +
   geom_tile(color = "white", linewidth = 0.5) +
   geom_text(aes(label = paste0(n, ifelse(deaths > 0, paste0(" (", deaths, "†)"), ""),
                                "\n", inc)),
@@ -528,7 +542,8 @@ ggplot(pyr_vital_df,
   geom_hline(yintercept = 0, colour = "white") +
   labs(x = "Age group (years)", y = "Notifications (n)") +
   theme_nmc() +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  guides(fill = guide_legend(order = 1), alpha = guide_legend(order = 2))
 ```
 
 ## Age group distribution over time
@@ -550,7 +565,8 @@ ggplot(age_time_df, aes(x = factor(Year_notification), y = pct, fill = age_group
   scale_fill_viridis_d(option = "turbo", direction = -1, name = "Age group") +
   labs(x = "Year", y = "Proportion of notifications (%)") +
   theme_nmc() +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  guides(fill = guide_legend(nrow = 3))
 ```
 
 ## Sex distribution over time
@@ -611,7 +627,7 @@ ggplot(cfr_df, aes(x = age_group, y = cfr, fill = sex)) +
 
 poison %>%
   mutate(year_chr = factor(Year_notification)) %>%
-  select(year_chr, sex, age_group, Age_years, patient_vital_status, prov_) %>%
+  select(year_chr, sex, age_group, Age_years, patient_vital_status, Province) %>%
   tbl_strata(
     strata   = year_chr,
     .tbl_fun = ~ .x %>%
@@ -619,7 +635,7 @@ poison %>%
         by        = patient_vital_status,
         missing   = "no",
         label     = list(sex ~ "Sex", age_group ~ "Age group",
-                         Age_years ~ "Age (years)", prov_ ~ "Province"),
+                         Age_years ~ "Age (years)", Province ~ "Province"),
         type      = list(Age_years ~ "continuous"),
         statistic = list(
           all_categorical() ~ "{n}/{N} ({p}%)",
@@ -645,7 +661,7 @@ NMCleaner::pop %>%
   summarise(population = sum(Population), .groups = "drop") -> pop_prov
 
 poison %>%
-  group_by(prov_, year = Year_notification) %>%
+  group_by(prov_, Province, year = Year_notification) %>%
   summarise(n = n(), .groups = "drop") %>%
   left_join(pop_prov, by = c("prov_" = "prov", "year" = "Year")) %>%
   mutate(incidence = n / population * 1e5) -> incidence_prov_df
@@ -660,7 +676,7 @@ poison %>%
   filter(!district %in% c("Unknown", "Isazi Import", "Not Applicable"),
          !is.na(district)) %>%
   mutate_district_name("district") %>%
-  group_by(Province = prov_, district_standard) %>%
+  group_by(Province, district_standard) %>%
   summarise(
     Notifications = n(),
     Deaths        = sum(deceased, na.rm = TRUE),
@@ -682,15 +698,15 @@ poison %>%
 #| fig-height: 5.5
 
 incidence_prov_df %>%
-  group_by(prov_) %>%
+  group_by(Province) %>%
   filter(incidence == max(incidence, na.rm = TRUE)) %>%
   ungroup() -> peak_prov_df
 
-ggplot(incidence_prov_df, aes(x = year, y = incidence, colour = prov_, group = prov_)) +
+ggplot(incidence_prov_df, aes(x = year, y = incidence, colour = Province, group = Province)) +
   geom_line(linewidth = 1.1) +
   geom_point(size = 2.5) +
-  ggrepel::geom_label_repel(data = peak_prov_df, aes(label = prov_),
-    size = 2.8, show.legend = FALSE, label.size = 0.15, max.overlaps = 20) +
+  ggrepel::geom_label_repel(data = peak_prov_df, aes(label = Province),
+    size = 2.8, show.legend = FALSE, label.size = 0.15, max.overlaps = 25) +
   scale_colour_brewer(palette = "Paired", name = "Province") +
   scale_x_continuous(breaks = unique(incidence_prov_df$year)) +
   labs(x = "Year", y = "Incidence per 100,000 population") +
@@ -706,9 +722,8 @@ ggplot(incidence_prov_df, aes(x = year, y = incidence, colour = prov_, group = p
 
 incidence_prov_df %>%
   mutate(year = as.character(year)) %>%
-  pivot_wider(id_cols = prov_, names_from = year,
+  pivot_wider(id_cols = Province, names_from = year,
               values_from = c(n, incidence), names_glue = "{.value}_{year}") %>%
-  rename(Province = prov_) %>%
   gt(rowname_col = "Province") %>%
   tab_spanner_delim(delim = "_") %>%
   fmt_number(starts_with("n_"),         decimals = 0, use_seps = TRUE) %>%
@@ -857,8 +872,8 @@ incidence_dist_df %>%
 
 poison %>%
   filter(deceased) %>%
-  count(year = Year_notification, prov_) %>%
-  ggplot(aes(x = factor(year), y = n, fill = prov_)) +
+  count(year = Year_notification, Province) %>%
+  ggplot(aes(x = factor(year), y = n, fill = Province)) +
   geom_col(position = "stack", width = 0.75) +
   scale_fill_brewer(palette = "Paired", name = "Province") +
   labs(x = "Year", y = "Deaths (n)") +
@@ -874,10 +889,10 @@ poison %>%
 #| fig-height: 5
 
 poison %>%
-  group_by(year = Year_notification, prov_) %>%
+  group_by(year = Year_notification, Province) %>%
   summarise(n = n(), deaths = sum(deceased, na.rm = TRUE),
             cfr = deaths / n * 100, .groups = "drop") %>%
-  ggplot(aes(x = factor(year), y = cfr, fill = prov_)) +
+  ggplot(aes(x = factor(year), y = cfr, fill = Province)) +
   geom_col(position = "dodge", width = 0.85) +
   scale_fill_brewer(palette = "Paired", name = "Province") +
   labs(x = "Year", y = "CFR (%)") +

@@ -218,43 +218,37 @@ cat("Main branch updated.\n")
 
 cat("\nUpdating gh-pages branch...\n")
 
-# Remove any existing local 'gh-pages' branch.
-local_branches <- system("git branch", intern = TRUE)
-if (any(grepl("gh-pages", local_branches))) {
-    system("git branch -D gh-pages")
-    cat("Deleted local 'gh-pages' branch.\n")
-}
+# Deploy entirely from a throw-away temporary git repo so the main working
+# directory is NEVER modified — no local files are deleted or overwritten.
+deploy_tmp <- "/tmp/_ghpages_deploy"
+system(paste("rm -rf", shQuote(deploy_tmp)))
+dir.create(deploy_tmp, recursive = TRUE)
 
-# Copy _site/ to a temp location so it survives branch switching.
-system("rm -rf /tmp/_site_deploy && cp -r _site /tmp/_site_deploy")
-cat("Copied _site/ to temp location.\n")
+# Copy the rendered site into the temp directory and add .nojekyll.
+system(paste0("cp -r _site/. ", shQuote(deploy_tmp), "/"))
+file.create(file.path(deploy_tmp, ".nojekyll"))
+cat("Copied _site/ to temp directory.\n")
 
-# Create an orphan gh-pages branch (no history, clean slate).
-system("git checkout --orphan gh-pages")
-system("git rm -rf . 2>/dev/null")              # remove all tracked files
+# Capture the remote URL from the current repo.
+remote_url <- system("git remote get-url origin", intern = TRUE)
 
-# Remove ALL remaining untracked/ignored files (data/, caches, etc.)
-# so they are not accidentally staged and pushed to the public gh-pages branch.
-system("find . -not -name '.git' -not -path './.git/*' -mindepth 1 -delete 2>/dev/null")
-
-# Copy the rendered site into the repo root and add .nojekyll.
-system("cp -r /tmp/_site_deploy/* .")
-system("touch .nojekyll")
-
-# Stage everything and commit.
+# Init a throw-away git repo, commit the site, and force-push to gh-pages.
+old_wd <- getwd()
+setwd(deploy_tmp)
+system("git init -b gh-pages")
 system("git add .")
 system("git commit -m 'Deploy site to gh-pages'")
-cat("Created gh-pages commit from _site/ contents.\n")
+system(paste("git remote add origin", shQuote(remote_url)))
+ghpages_push_result <- system("git push origin gh-pages --force")
+setwd(old_wd)
 
-# Force push the new 'gh-pages' branch to GitHub.
-system("git push origin gh-pages --force")
+# Remove the temporary directory — nothing sensitive was in the main tree.
+system(paste("rm -rf", shQuote(deploy_tmp)))
+
+if (ghpages_push_result != 0) {
+    stop("Push to gh-pages failed.")
+}
 cat("Pushed 'gh-pages' branch to remote.\n")
-
-# Return to main and clean up.
-system("git checkout main")
-system("git branch -D gh-pages")
-system("rm -rf /tmp/_site_deploy")
-cat("Cleaned up local 'gh-pages' branch and temp files.\n")
 
 # Final status check.
 cat("\nFinal Git status:\n")
