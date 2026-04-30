@@ -1,0 +1,14 @@
+---
+title: "Epiweek 34, 2025"
+date: 2025-08-17
+categories: [2025, Q3]
+description: "Weekly IDSR summary: Category 1 & 2 notifications, confirmed trends, and epitable for 17 August – 23 August 2025."
+---
+
+::: {.callout-note appearance="minimal"}
+Reporting period: **17 August – 23 August 2025** (CDC Epiweek 34, 2025)
+:::
+
+[View Report](../rendered/2025-W34-weekly-report.html){.btn .btn-primary target="_blank"} &nbsp;
+[Download Word](../rendered/2025-W34-weekly-report.docx){.btn .btn-outline-primary download="2025-W34-weekly-report.docx"}
+

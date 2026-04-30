@@ -4,6 +4,7 @@ project:
   output-dir: _site
   resources:
     - monthly-reports/rendered/
+    - weekly-reports/rendered/
   render:
     - index.qmd
     - overview.qmd
@@ -31,6 +32,8 @@ project:
     - linkage/index.qmd
     - monthly-reports/index.qmd
     - monthly-reports/posts/*.qmd
+    - weekly-reports/index.qmd
+    - weekly-reports/posts/*.qmd
   #pre-render: Rscript R/prepare_dashboard_data.r
 
 website:
@@ -89,6 +92,9 @@ website:
       - text: "Monthly Reports"
         href: monthly-reports/index.html
         icon: calendar3
+      - text: "Weekly Reports"
+        href: weekly-reports/index.html
+        icon: calendar-week
       - text: "In Focus"
         icon: journal-richtext
         menu:
@@ -160,6 +166,13 @@ website:
       contents:
         - text: "Monthly Reports — Overview"
           href: monthly-reports/index.qmd
+    - id: weekly-reports
+      title: "Weekly Reports"
+      style: floating
+      collapse-level: 1
+      contents:
+        - text: "Weekly Reports — Overview"
+          href: weekly-reports/index.qmd
     - id: docs
       title: "Documentation"
       style: floating

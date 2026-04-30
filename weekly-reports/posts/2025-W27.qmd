@@ -1,0 +1,14 @@
+---
+title: "Epiweek 27, 2025"
+date: 2025-06-29
+categories: [2025, Q2]
+description: "Weekly IDSR summary: Category 1 & 2 notifications, confirmed trends, and epitable for 29 June – 05 July 2025."
+---
+
+::: {.callout-note appearance="minimal"}
+Reporting period: **29 June – 05 July 2025** (CDC Epiweek 27, 2025)
+:::
+
+[View Report](../rendered/2025-W27-weekly-report.html){.btn .btn-primary target="_blank"} &nbsp;
+[Download Word](../rendered/2025-W27-weekly-report.docx){.btn .btn-outline-primary download="2025-W27-weekly-report.docx"}
+

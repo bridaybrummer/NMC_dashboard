@@ -1,0 +1,306 @@
+---
+title: "Weekly IDSR Reports"
+subtitle: "Notifiable Medical Conditions Surveillance System — Weekly Integrated Disease Surveillance & Response"
+sidebar: weekly-reports
+listing:
+  id: reports-listing
+  contents: posts
+  type: grid
+  sort: "date desc"
+  categories: true
+  fields: [title, description, categories]
+  grid-columns: 3
+  page-size: 12
+  filter-ui: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{=html}
+<style>
+/* ── Latest Report Hero ───────────────────────────────────────────────────── */
+.latest-hero {
+  background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.latest-hero-label {
+  display: inline-block;
+  background: #2563eb;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 0.2rem 0.65rem;
+  border-radius: 99px;
+  margin-bottom: 0.5rem;
+}
+.latest-hero-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin: 0 0 0.2rem 0;
+}
+.latest-hero-sub {
+  color: #475569;
+  font-size: 0.9rem;
+  margin: 0;
+}
+.latest-hero-actions {
+  display: flex;
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+
+/* ── Listing card text tweaks ─────────────────────────────────────────────── */
+.quarto-listing-grid .card-description {
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+/* ── Report structure format badges ──────────────────────────────────────── */
+.fmt-text, .fmt-table, .fmt-fig {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.55rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.fmt-text  { background: #e2e8f0; color: #334155; }
+.fmt-table { background: #dbeafe; color: #1d4ed8; }
+.fmt-fig   { background: #dcfce7; color: #166534; }
+
+@media (max-width: 600px) {
+  .latest-hero { flex-direction: column; }
+}
+</style>
+```
+
+```{r setup}
+#| label: setup
+#| include: false
+
+library(NMCleaner)
+library(ragg)
+library(DT)
+
+conflicted::conflicts_prefer(
+  magrittr::extract,
+  dplyr::between,
+  lubridate::isoweek,
+  dplyr::filter,
+  lubridate::week
+)
+
+`%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a
+
+# ── Load surveillance data ────────────────────────────────────────────────────
+load("~/Desktop/SAFETP/CLA/NMC_database/master/new_master.rda")
+load("~/Desktop/SAFETP/CLA/NMC_database/database_scraper_database.rda")
+
+export_date  <- database_scraper_database$export_date[1]
+export_label <- format(as.POSIXct(export_date), "%d %B %Y")
+current_year <- as.integer(format(Sys.Date(), "%Y"))
+
+# ── Locate most-recent post stub (drives the dynamic hero) ───────────────────
+posts_dir  <- here::here("weekly-reports", "posts")
+stub_files <- sort(
+  list.files(posts_dir, pattern = "^[0-9]{4}-W[0-9]+\\.qmd$", full.names = TRUE),
+  decreasing = TRUE
+)
+
+if (length(stub_files) > 0) {
+  latest_meta   <- rmarkdown::yaml_front_matter(stub_files[1])
+  latest_title  <- latest_meta$title  %||% "Latest Report"
+  latest_date   <- as.Date(as.character(latest_meta$date %||% Sys.Date()))
+  latest_period <- paste0(
+    format(latest_date,     "%d %B"), " \u2013 ",
+    format(latest_date + 6, "%d %B %Y")
+  )
+  latest_stem   <- tools::file_path_sans_ext(basename(stub_files[1]))
+} else {
+  latest_title  <- "No reports yet"
+  latest_period <- ""
+  latest_stem   <- ""
+}
+```
+
+::: {.callout-note appearance="minimal"}
+These reports summarise conditions notified to the **NMC Surveillance System (NMCSS)** for each CDC epiweek. They cover Category 1 & 2 notifications flagged for WHO IDSR reporting, with confirmed trends, epitable, and all-notifications overview.
+:::
+
+```{r hero}
+#| output: asis
+cat(sprintf(
+'<div class="latest-hero">
+  <div>
+    <span class="latest-hero-label">Latest Report</span>
+    <p class="latest-hero-title">%s</p>
+    <p class="latest-hero-sub">%s</p>
+  </div>
+  <div class="latest-hero-actions">
+    <a href="rendered/%s-weekly-report.html" class="btn btn-primary" target="_blank">View Report</a>
+    <a href="rendered/%s-weekly-report.docx" class="btn btn-outline-secondary" download="%s-weekly-report.docx">&#8595;&nbsp;Download Word</a>
+  </div>
+</div>\n',
+  latest_title, latest_period,
+  latest_stem, latest_stem, latest_stem
+))
+```
+
+---
+
+## What's currently circulating
+
+Confirmed Category 1 & 2 notifications for selected conditions — last two years. *Rolling 4-week average shown in red.*
+
+```{r fig-overview-epicurve}
+#| label: fig-overview-epicurve
+#| fig-cap: !expr 'paste0("Confirmed Cat 1 & 2 notifications, key conditions — South Africa (data to ", export_label, ")")'
+#| fig-height: 5
+#| fig-width: 11
+#| out-width: "100%"
+#| dev: ragg_png
+#| dpi: 180
+
+spotlight <- c(
+  "Cholera", "Malaria", "Mpox", "Measles",
+  "Pertussis", "Hepatitis A"
+)
+
+df_ov <- new_master %>%
+  dplyr::filter(case_definition %in% "Confirmed") %>%
+  dplyr::filter(nmccategories %in% c(1, 2)) %>%
+  dplyr::filter(condition %in% spotlight) %>%
+  epicurve_df(., date_index = "notification_date", grouping_vars = "condition") %>%
+  dplyr::filter(year %in% (current_year - 1):current_year) %>%
+  dplyr::mutate(year = factor(year, levels = (current_year - 1):current_year))
+
+p_ov <- df_ov %>%
+  plot_epicurve_df(
+    x_axis_option   = "epiweek",
+    grouping_vars   = "condition",
+    color_select    = "olivedrab",
+    add_bar         = TRUE,
+    add_rolling_avg = c(TRUE, 4),
+    axis_text_size  = 7
+  )
+
+p_ov$plot +
+  theme(strip.text.y.right = element_text(hjust = 0))
+```
+
+---
+
+## Reports
+
+::: {.panel-tabset}
+
+### Browse
+
+::: {#reports-listing}
+:::
+
+### All Reports
+
+```{r archive-table}
+#| label: archive-table
+
+read_stub <- function(path) {
+  meta <- tryCatch(rmarkdown::yaml_front_matter(path), error = function(e) NULL)
+  if (is.null(meta)) return(NULL)
+  stem     <- tools::file_path_sans_ext(basename(path))
+  date_val <- as.Date(as.character(meta$date %||% "1970-01-01"))
+  data.frame(
+    Epiweek     = meta$title       %||% stem,
+    `Week start` = format(date_val, "%d %b %Y"),
+    Description = meta$description %||% "",
+    stem        = stem,
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+}
+
+all_stubs <- sort(
+  list.files(posts_dir, pattern = "^[0-9]{4}-W[0-9]+\\.qmd$", full.names = TRUE),
+  decreasing = TRUE
+)
+
+archive_rows <- Filter(Negate(is.null), lapply(all_stubs, read_stub))
+
+if (length(archive_rows) > 0) {
+  arch <- do.call(rbind, archive_rows)
+  arch$View <- sprintf(
+    '<a href="rendered/%s-weekly-report.html" target="_blank" class="btn btn-sm btn-primary">View</a>',
+    arch$stem
+  )
+  arch$Word <- sprintf(
+    '<a href="rendered/%s-weekly-report.docx" download="%s-weekly-report.docx" class="btn btn-sm btn-outline-secondary">&#8595;</a>',
+    arch$stem, arch$stem
+  )
+  arch$stem <- NULL
+
+  DT::datatable(
+    arch,
+    escape    = FALSE,
+    rownames  = FALSE,
+    options   = list(
+      pageLength = 20,
+      dom        = "ftp",
+      columnDefs = list(
+        list(width = "120px", targets = 0),
+        list(width = "90px",  targets = 1),
+        list(width = "50px",  targets = c(3, 4)),
+        list(orderable = FALSE, targets = c(3, 4))
+      )
+    ),
+    class = "display compact"
+  )
+}
+```
+
+:::
+
+---
+
+## Report structure
+
+Each weekly report covers:
+
+| Section | Content | Format |
+|---|---|---|
+| Introduction | Export date, epiweek dates | [Text]{.fmt-text} |
+| Category 1 at a glance | Suspected & confirmed counts, all Category 1 conditions | [Table]{.fmt-table} |
+| Confirmed Notifications — Epitable | Weekly confirmed counts per epiweek (with CI & baseline) | [Table]{.fmt-table} |
+| Confirmed Notifications — Trends | Epicurve with rolling average for selected conditions | [Figure]{.fmt-fig} |
+| All Notifications — Epitable | Weekly all-notification counts per epiweek | [Table]{.fmt-table} |
+| All Notifications — Trends | Trends including Fever-Rash composite | [Figure]{.fmt-fig} |
+
+: Report sections {#tbl-report-structure .striped .hover tbl-colwidths="[30,55,15]"}
+
+---
+
+::: {.callout-tip collapse="true" title="How to generate reports"}
+**Last 4 weeks (default):**
+
+```r
+source("weekly-reports/run_all_weekly.R")
+```
+
+**Adjust number of weeks** — edit `N_WEEKS` at the top of `run_all_weekly.R` before running.
+
+Then run `quarto render` or `source("dev/deploy.r")` to publish. A listing stub is created automatically in `weekly-reports/posts/` for each rendered week.
+:::

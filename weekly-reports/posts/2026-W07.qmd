@@ -1,0 +1,14 @@
+---
+title: "Epiweek 7, 2026"
+date: 2026-02-15
+categories: [2026, Q1]
+description: "Weekly IDSR summary: Category 1 & 2 notifications, confirmed trends, and epitable for 15 February – 21 February 2026."
+---
+
+::: {.callout-note appearance="minimal"}
+Reporting period: **15 February – 21 February 2026** (CDC Epiweek 7, 2026)
+:::
+
+[View Report](../rendered/2026-W07-weekly-report.html){.btn .btn-primary target="_blank"} &nbsp;
+[Download Word](../rendered/2026-W07-weekly-report.docx){.btn .btn-outline-primary download="2026-W07-weekly-report.docx"}
+

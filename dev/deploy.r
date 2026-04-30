@@ -96,6 +96,11 @@ cat("Generating monthly surveillance reports...\n")
 source("monthly-reports/run_all_reports.R")
 cat("✓ Monthly reports complete.\n")
 
+# 3d. Generate weekly reports (last 52 weeks).
+cat("Generating weekly IDSR reports...\n")
+source("weekly-reports/run_all_weekly.R")
+cat("✓ Weekly reports complete.\n")
+
 # 4. Render your Quarto site.
 cat("Rendering Quarto site...\n")
 system("quarto render")

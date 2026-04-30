@@ -1,0 +1,14 @@
+---
+title: "Epiweek 40, 2025"
+date: 2025-09-28
+categories: [2025, Q3]
+description: "Weekly IDSR summary: Category 1 & 2 notifications, confirmed trends, and epitable for 28 September – 04 October 2025."
+---
+
+::: {.callout-note appearance="minimal"}
+Reporting period: **28 September – 04 October 2025** (CDC Epiweek 40, 2025)
+:::
+
+[View Report](../rendered/2025-W40-weekly-report.html){.btn .btn-primary target="_blank"} &nbsp;
+[Download Word](../rendered/2025-W40-weekly-report.docx){.btn .btn-outline-primary download="2025-W40-weekly-report.docx"}
+

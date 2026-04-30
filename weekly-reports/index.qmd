@@ -1,0 +1,49 @@
+---
+title: "Weekly IDSR Reports"
+subtitle: "Notifiable Medical Conditions Surveillance System — Weekly Integrated Disease Surveillance & Response"
+sidebar: weekly-reports
+listing:
+  id: reports-listing
+  contents: posts
+  type: grid
+  sort: "date desc"
+  categories: true
+  fields: [title, description, categories]
+  grid-columns: 3
+---
+
+::: {.callout-note appearance="minimal"}
+These reports summarise conditions notified to the **NMC Surveillance System (NMCSS)** for each CDC epiweek. They cover Category 1 & 2 notifications flagged for WHO IDSR reporting, with confirmed trends, epitable, and all-notifications overview.
+:::
+
+::: {#reports-listing}
+:::
+
+::: {.callout-tip collapse="true" title="How to generate reports"}
+**Last 4 weeks (default):**
+
+```r
+source("weekly-reports/run_all_weekly.R")
+```
+
+**Adjust number of weeks** — edit `N_WEEKS` at the top of `run_all_weekly.R` before running.
+
+Then run `quarto render` or `source("dev/deploy.r")` to publish. A listing stub is created automatically in `weekly-reports/posts/` for each rendered week.
+:::
+
+---
+
+## Report structure
+
+Each weekly report covers:
+
+| Section | Content |
+|---|---|
+| Introduction | Export date, epiweek dates |
+| Category 1 at a glance | Suspected & confirmed counts, all Category 1 conditions |
+| Confirmed Notifications — Epitable | Weekly confirmed counts per epiweek (with CI & baseline) |
+| Confirmed Notifications — Trends | Epicurve with rolling average for selected conditions |
+| All Notifications — Epitable | Weekly all-notification counts per epiweek |
+| All Notifications — Trends | Trends including Fever-Rash composite |
+
+: Report sections {#tbl-report-structure .striped .hover tbl-colwidths="[30,70]"}

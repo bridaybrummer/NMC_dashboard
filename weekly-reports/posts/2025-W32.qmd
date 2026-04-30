@@ -1,0 +1,14 @@
+---
+title: "Epiweek 32, 2025"
+date: 2025-08-03
+categories: [2025, Q3]
+description: "Weekly IDSR summary: Category 1 & 2 notifications, confirmed trends, and epitable for 03 August – 09 August 2025."
+---
+
+::: {.callout-note appearance="minimal"}
+Reporting period: **03 August – 09 August 2025** (CDC Epiweek 32, 2025)
+:::
+
+[View Report](../rendered/2025-W32-weekly-report.html){.btn .btn-primary target="_blank"} &nbsp;
+[Download Word](../rendered/2025-W32-weekly-report.docx){.btn .btn-outline-primary download="2025-W32-weekly-report.docx"}
+

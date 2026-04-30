@@ -1,0 +1,14 @@
+---
+title: "November 2025"
+date: 2025-11-01
+categories: [2025, Q4]
+description: "National monthly summary of NMC notifications for November 2025 — Category 1 & 2 conditions, provincial breakdown, data quality, and NMC App statistics."
+---
+
+::: {.callout-note appearance="minimal"}
+Reporting period: **1 – 30 November 2025**. Data sourced from the NMCSS.
+:::
+
+[View Report](../rendered/2025-11-monthly-report.html){.btn .btn-primary target="_blank"} &nbsp;
+[Download Word](../rendered/2025-11-monthly-report.docx){.btn .btn-outline-primary download="2025-11-monthly-report.docx"}
+

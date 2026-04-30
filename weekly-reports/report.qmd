@@ -1,0 +1,354 @@
+---
+title: "NOTIFIABLE MEDICAL CONDITIONS SURVEILLANCE SYSTEM — Weekly IDSR Report"
+author: "The National Institute for Communicable Diseases"
+date: today
+params:
+  reporting_week_start: "2026-04-05"   # ← Sunday of the target CDC epiweek (YYYY-MM-DD)
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-float: true
+    number-sections: false
+    embed-resources: true
+    theme: cosmo
+    css: "../styles.css"
+  docx:
+    reference-doc: "../NMC_reports_scripts/extras/weekly_IDSR_V2_template.docx"
+    reference-location: "section"
+    number-sections: true
+    fig-caption: true
+    toc: true
+    toc-depth: 2
+execute:
+  echo: false
+  warning: false
+  message: false
+  error: false
+---
+
+```{r setup}
+#| label: setup
+#| include: false
+
+# ── Package management ─────────────────────────────────────────────────────────
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+
+library(NMCleaner)
+library(ragg)
+library(kableExtra)
+
+conflicted::conflicts_prefer(
+  magrittr::extract,
+  dplyr::between,
+  lubridate::isoweek,
+  dplyr::filter,
+  lubridate::week
+)
+
+# ── Global flextable settings ──────────────────────────────────────────────────
+flextable::set_flextable_defaults(
+  font.family      = "Arial",
+  font.size        = 8,
+  header.font.size = 8,
+  border.color     = "black",
+  padding          = 0.1
+)
+
+gtsummary::theme_gtsummary_language(language = "en", big.mark = " ", decimal.mark = ".")
+gtsummary::theme_gtsummary_journal("nejm")
+
+knitr::opts_chunk$set(
+  ft.align  = "left",
+  echo      = FALSE,
+  warning   = FALSE,
+  message   = FALSE,
+  out.width = "100%",
+  dev       = "ragg_png",
+  dpi       = 300
+)
+
+# ── Helper: trim gtsummary header row ─────────────────────────────────────────
+trim_tbl <- function(gt_summary_object) {
+  n <- nrow(gt_summary_object$table_body)
+  gt_summary_object$table_body <- gt_summary_object$table_body[2:n, ]
+  gt_summary_object
+}
+
+# ── Helper: combine Measles + Rubella into Fever-Rash ─────────────────────────
+make_fever_rash <- function(data, fever_rash_label = "Fever-Rash") {
+  data %>%
+    mutate(condition = if_else(
+      condition %in% c("Measles", "Rubella"), fever_rash_label, condition
+    ))
+}
+
+# ── ggplot theme ──────────────────────────────────────────────────────────────
+# Pipe style: plot %>% as_excel()  i.e.  as_excel(plot)
+as_excel <- function(.) {
+  . +
+    theme_minimal() +
+    theme(
+      text             = element_text(family = "Arial", size = 10, color = "#333333"),
+      panel.background = element_rect(fill = "#F8F8F8"),
+      plot.background  = element_rect(fill = "#F8F8F8"),
+      panel.grid       = element_line(color = "#DDDDDD"),
+      legend.background = element_rect(fill = "#F8F8F8"),
+      legend.text      = element_text(family = "Arial", color = "#333333", size = 8),
+      legend.title     = element_text(family = "Arial", color = "#333333", size = 10),
+      plot.title       = element_text(family = "Arial", size = 12, color = "#666666"),
+      plot.subtitle    = element_text(family = "Arial", size = 10, color = "#666666"),
+      plot.caption     = element_text(family = "Arial", size = 8,  color = "#666666"),
+      axis.text.x      = element_text(angle = 30)
+    )
+}
+
+# ── Load data ──────────────────────────────────────────────────────────────────
+load("~/Desktop/SAFETP/CLA/NMC_database/master/new_master.rda")
+load("~/Desktop/SAFETP/CLA/NMC_database/database_scraper_database.rda")
+
+export_date   <- database_scraper_database$export_date[1]
+file_exp_date <- as.POSIXct(export_date)
+
+# ── Reporting period from params ───────────────────────────────────────────────
+reporting_week_start <- as_date(params$reporting_week_start)
+epiweek_dates        <- seq(reporting_week_start, by = "day", length.out = 7)
+epiweek_end          <- reporting_week_start + 6
+
+# CDC epiweek number and year
+epiweek_num  <- lubridate::epiweek(reporting_week_start)
+epiweek_year <- lubridate::epiyear(reporting_week_start)
+
+end_date_month_year <- format(export_date, "%B, %Y")
+
+formatted_datetime <- format(file_exp_date, "%A, %B %d, %Y %I:%M %p")
+
+reporting_period <- paste0(
+  "for **Epiweek ", epiweek_num, "** of ", epiweek_year,
+  ", which is from **", format(reporting_week_start, "%A, %B %d"), "** to **",
+  format(epiweek_end, "%A, %B %d"), "**."
+)
+
+# ── Filter to the reporting epiweek ───────────────────────────────────────────
+df <- new_master %>%
+  dplyr::filter(as_date(notification_date) %in% epiweek_dates)
+
+df1 <- df %>% dplyr::filter(back_capture_new %in% c("Current", "Delayed", "unknown"))
+df2 <- df %>% dplyr::filter(!back_capture_new %in% c("Current", "Delayed", "unknown"))
+
+new_master1 <- new_master
+
+# ── Notifications summary table ────────────────────────────────────────────────
+df1 %>%
+  dplyr::select(nmccategories, time_to_notification) %>%
+  mutate(time_to_notification = as.numeric(time_to_notification)) %>%
+  tbl_summary(
+    by    = nmccategories,
+    label = list(time_to_notification ~ "Time to Notification")
+  ) %>%
+  modify_footnote(update = everything() ~ NA) ->
+  tbl_notifications
+
+cat1_notif_time <- tbl_notifications[["table_body"]][["stat_1"]][[1]] %>% as.character()
+```
+
+# Introduction {.unnumbered}
+
+This document reports conditions notified to the Notifiable Medical Conditions Surveillance System (NMCSS) and flagged for reporting to WHO as part of the Integrated Disease Surveillance and Response (IDSR). Data was exported from the NMCSS on `r formatted_datetime`. It covers conditions reported `r reporting_period`
+
+::: {.callout-warning appearance="minimal"}
+**Please note:** numbers reported are subject to change as verification and confirmation procedures are carried out. Numbers presented here are the best representation at the time of release.
+:::
+
+For more notes on data interpretation please see the [NMCSS Data Interpretation Infographic](https://www.nicd.ac.za/wp-content/uploads/2022/09/NMCSS-Data-Interpretation-Infographic-final2.pdf).
+
+**Category 1? Check Your Notification's Done!**
+
+---
+
+## Category 1 Conditions at a Glance {.unnumbered}
+
+```{r cat1-glance}
+#| label: tbl-cat1-glance
+#| tbl-cap: !expr 'paste0("Number of suspected and confirmed category 1 notifications, Epiweek ", epiweek_num, ", ", epiweek_year)'
+
+category_1 <- condition_df %>%
+  dplyr::filter(nmccategories == 1) %>%
+  pull(condition)
+
+cat_1_glance <- df1 %>%
+  dplyr::filter(nmccategories == 1) %>%
+  mutate(
+    condition       = factor(condition, levels = category_1),
+    case_definition = factor(case_definition, levels = c("Suspected", "Confirmed"))
+  ) %>%
+  dplyr::select(condition, case_definition) %>%
+  tbl_summary(
+    by         = case_definition,
+    percent    = "row",
+    statistic  = list(all_categorical() ~ "{n}")
+  ) %>%
+  modify_header(
+    label         = "**Condition**",
+    all_stat_cols() ~ "**{level}**, \n N = {scales::number(n)}"
+  ) %>%
+  add_overall(last = FALSE, statistic = ~"{n}", col_label = "**Total** \n N = {scales::number(n)}") %>%
+  trim_tbl() %>%
+  modify_footnote(update = everything() ~ NA) %>%
+  modify_footnote(
+    all_stat_cols() ~ "Suspected and confirmed cases are independent — not totalled."
+  )
+
+ft <- cat_1_glance %>%
+  as_flex_table() %>%
+  flextable::set_caption(paste0(
+    "Suspected and confirmed category 1 notifications, Epiweek ",
+    epiweek_num, ", ", epiweek_year
+  )) %>%
+  fontsize(size = 9, part = "header") %>%
+  flextable::set_table_properties(layout = "autofit", width = 0.99)
+
+to_bold <- which(cat_1_glance$table_body$stat_2 != 0)
+
+bold(ft, i = to_bold, j = 4) %>%
+  bg(i = to_bold, bg = "grey90", part = "body") %>%
+  bg(bg = "#A5CA64", part = "header") %>%
+  flextable::color(color = "white", part = "header")
+```
+
+---
+
+# Context {.unnumbered}
+
+## Confirmed Notifications {.unnumbered}
+
+### Epitable {.unnumbered}
+
+```{r tbl-epitable-confirmed}
+#| label: tbl-epitable-confirmed
+#| tbl-cap: "Number of confirmed notifications on NMCSS per epiweek. Grey column = most recent complete week."
+
+flextable::set_flextable_defaults(
+  font.family = "Arial", font.size = 8, header.font.size = 8,
+  border.color = "black", padding = 0.1
+)
+
+source(here::here("NMC_reports_scripts", "scripts_and_functions", "context_table.R"))
+
+max_epitable_date <- new_master1$notification_date %>% max(na.rm = TRUE)
+
+context_table(
+  new_master1 %>%
+    dplyr::filter(grepl("confirmed", ignore.case = TRUE, case_definition)),
+  as_date(max_epitable_date)
+) -> ft_confirmed
+
+grey_column <- 1
+
+ft_confirmed[[1]] %>%
+  autofit() %>%
+  fontsize(size = 7, part = "all") %>%
+  bg(j = length(ft_confirmed[[1]]$col_keys) - grey_column, bg = "grey90", part = "body") %>%
+  theme_zebra() %>%
+  bg(bg = "#A5CA64", part = "header") %>%
+  flextable::color(color = "white", part = "header")
+```
+
+### Trends Plot {.unnumbered}
+
+```{r fig-epicurve-confirmed}
+#| label: fig-epicurve-confirmed
+#| fig-cap: !expr 'paste0("Trend of weekly confirmed notifications for selected conditions, South Africa; January 2022–", end_date_month_year)'
+
+current_year <- as.integer(format(Sys.Date(), "%Y"))
+
+df_epicurve_confirmed <- new_master1 %>%
+  dplyr::filter(case_definition %in% "Confirmed") %>%
+  dplyr::filter(nmccategories %in% c(1, 2)) %>%
+  epicurve_df(., date_index = "notification_date", grouping_vars = "condition")
+
+df_epicurve_confirmed1 <- df_epicurve_confirmed %>%
+  dplyr::filter(year %in% 2022:current_year) %>%
+  mutate(year = factor(year, levels = 2022:current_year))
+
+plot_confirmed <- df_epicurve_confirmed1 %>%
+  dplyr::filter(condition %in% c(
+    "Cholera", "Listeriosis", "Diphtheria", "Malaria",
+    "Measles", "Mpox", "Pertussis", "Rubella",
+    "Hepatitis A", "Agricultural or stock remedy poisoning",
+    "Food borne illness outbreak"
+  )) %>%
+  plot_epicurve_df(
+    x_axis_option   = "epiweek",
+    grouping_vars   = "condition",
+    color_select    = "olivedrab",
+    add_bar         = TRUE,
+    add_rolling_avg = c(TRUE, 7),
+    axis_text_size  = 7
+  )
+
+plot_confirmed$plot +
+  theme(strip.text.y.right = element_text(hjust = 0))
+```
+
+---
+
+## All Notifications {.unnumbered}
+
+### Epitable {.unnumbered}
+
+```{r tbl-epitable-all}
+#| label: tbl-epitable-all
+#| tbl-cap: "Number of all (suspected + confirmed) notifications on NMCSS per epiweek. Grey column = most recent complete week."
+
+source(here::here("NMC_reports_scripts", "scripts_and_functions", "context_table.R"))
+
+context_table(new_master1 %>% make_fever_rash(), as_date(max_epitable_date)) -> ft_all
+
+ft_all[[1]] %>%
+  autofit() %>%
+  fontsize(size = 7, part = "all") %>%
+  bg(j = length(ft_all[[1]]$col_keys) - grey_column, bg = "grey90", part = "body") %>%
+  theme_zebra() %>%
+  bg(bg = "#A5CA64", part = "header") %>%
+  flextable::color(color = "white", part = "header")
+```
+
+### Trends Plot {.unnumbered}
+
+```{r fig-epicurve-all}
+#| label: fig-epicurve-all
+#| fig-cap: !expr 'paste0("Trend of weekly all notifications for selected conditions, South Africa; January 2022–", end_date_month_year)'
+
+df_epicurve_all <- new_master1 %>%
+  make_fever_rash() %>%
+  dplyr::filter(nmccategories %in% c(1, 2)) %>%
+  epicurve_df(., date_index = "notification_date", grouping_vars = "condition")
+
+df_epicurve_all1 <- df_epicurve_all %>%
+  dplyr::filter(year %in% 2022:current_year) %>%
+  mutate(year = factor(year, levels = 2022:current_year))
+
+plot_all <- df_epicurve_all1 %>%
+  dplyr::filter(condition %in% c(
+    "Cholera", "Listeriosis", "Diphtheria", "Malaria",
+    "Fever-Rash", "Mpox", "Pertussis",
+    "Hepatitis A", "Hepatitis B", "Hepatitis C", "Hepatitis E",
+    "Bilharzia (schistosomiasis)",
+    "Agricultural or stock remedy poisoning",
+    "Food borne illness outbreak"
+  )) %>%
+  plot_epicurve_df(
+    x_axis_option  = "epiweek",
+    grouping_vars  = "condition",
+    color_select   = "olivedrab",
+    axis_text_size = 7
+  )
+
+plot_all$plot +
+  theme(strip.text.y.right = element_text(hjust = 0))
+```
+
+---
+
+**END**

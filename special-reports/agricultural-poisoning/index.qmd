@@ -24,10 +24,8 @@ pacman::p_load(
   ggplot2, gtsummary, tidyverse, magrittr,
   conflicted, scales, data.table, lubridate,
   flextable, gt, ggrepel, zoo,
-  janitor, ragg
+  janitor
 )
-
-knitr::opts_chunk$set(dev = "ragg_png")
 
 conflicted::conflicts_prefer(dplyr::filter)
 conflicted::conflicts_prefer(dplyr::lag)
@@ -89,7 +87,7 @@ poison <- poison %>%
 theme_nmc <- function(...) {
   theme_classic() +
     theme(
-      text              = element_text(family = "Arial", size = 10, color = "#333333"),
+      text              = element_text(family = "Century Gothic", size = 10, color = "#333333"),
       panel.background  = element_rect(fill = "#F8F8F8"),
       plot.background   = element_rect(fill = "#F8F8F8"),
       panel.grid.major  = element_blank(),
