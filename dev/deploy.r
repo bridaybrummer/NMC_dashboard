@@ -7,7 +7,7 @@
 # This includes the Burden of Disease indicators (prepare_bod_data.r) and any
 # other optional preparation scripts.  Set to FALSE (default) to skip them and
 # only run the core dashboard data pipeline (prepare_dashboard_data.r).
-run_all_scripts <- TRUE
+run_all_scripts <- FALSE
 # ─────────────────────────────────────────────────────────────────────────────
 
 # 1. Resolve project root regardless of where this script is called from.

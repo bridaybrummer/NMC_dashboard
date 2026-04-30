@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Weekly IDSR Reports – SA NMC Dashboard</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-listing/list.min.js"></script>
+<script src="../site_libs/quarto-listing/quarto-listing.js"></script>
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-67bcd225d6149a0192eaea62fd59934b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script>
+
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    const listingTargetEl = window.document.querySelector('#listing-reports-listing .list');
+    if (!listingTargetEl) {
+      // No listing discovered, do not attach.
+      return; 
+    }
+
+    const options = {
+      valueNames: ['listing-title','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      page: 18,
+    pagination: { item: "<li class='page-item'><a class='page page-link' href='#'></a></li>" },
+      searchColumns: ["listing-title","listing-author","listing-date","listing-image","listing-description","listing-categories"],
+    };
+
+    window['quarto-listings'] = window['quarto-listings'] || {};
+    window['quarto-listings']['listing-reports-listing'] = new List('listing-reports-listing', options);
+
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  });
+
+  window.addEventListener('hashchange',() => {
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  })
+  </script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">SA NMC Dashboard</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> <i class="bi bi-house-door" role="img">
+</i> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../overview.html"> <i class="bi bi-bar-chart-line" role="img">
+</i> 
+<span class="menu-text">Overview</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-surveillance" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-clipboard2-pulse" role="img">
+</i> 
+ <span class="menu-text">Surveillance</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-surveillance">    
+        <li>
+    <a class="dropdown-item" href="../by-province/index.html">
+ <span class="dropdown-text">By Province — Overview</span></a>
+  </li>  
+        <li><hr class="dropdown-divider"></li>
+        <li>
+    <a class="dropdown-item" href="../by-province/ec/index.html">
+ <span class="dropdown-text">Eastern Cape</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/fs/index.html">
+ <span class="dropdown-text">Free State</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/gp/index.html">
+ <span class="dropdown-text">Gauteng</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/kzn/index.html">
+ <span class="dropdown-text">KwaZulu-Natal</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/lp/index.html">
+ <span class="dropdown-text">Limpopo</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/mp/index.html">
+ <span class="dropdown-text">Mpumalanga</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/nc/index.html">
+ <span class="dropdown-text">Northern Cape</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/nw/index.html">
+ <span class="dropdown-text">North West</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/wc/index.html">
+ <span class="dropdown-text">Western Cape</span></a>
+  </li>  
+        <li><hr class="dropdown-divider"></li>
+        <li>
+    <a class="dropdown-item" href="../by-condition/index.html">
+ <span class="dropdown-text">By Condition</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-analytics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-graph-up-arrow" role="img">
+</i> 
+ <span class="menu-text">Analytics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-analytics">    
+        <li>
+    <a class="dropdown-item" href="../by-trending/index.html">
+ <span class="dropdown-text">Trending &amp; Signals</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../burden-of-disease/index.html">
+ <span class="dropdown-text">Burden of Disease</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-forecasts/index.html">
+ <span class="dropdown-text">Forecasts &amp; Scenarios</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../explorer/index.html"> <i class="bi bi-search" role="img">
+</i> 
+<span class="menu-text">Explorer</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../monthly-reports/index.html"> <i class="bi bi-calendar3" role="img">
+</i> 
+<span class="menu-text">Monthly Reports</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="../weekly-reports/index.html" aria-current="page"> <i class="bi bi-calendar-week" role="img">
+</i> 
+<span class="menu-text">Weekly Reports</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-in-focus" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-journal-richtext" role="img">
+</i> 
+ <span class="menu-text">In Focus</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-in-focus">    
+        <li>
+    <a class="dropdown-item" href="../special-reports/index.html">
+ <span class="dropdown-text">Special Reports — Overview</span></a>
+  </li>  
+        <li><hr class="dropdown-divider"></li>
+        <li>
+    <a class="dropdown-item" href="../special-reports/agricultural-poisoning/index.html">
+ <span class="dropdown-text">Agricultural &amp; Stock Remedy Poisoning</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../quality.html"> <i class="bi bi-clipboard-check" role="img">
+</i> 
+<span class="menu-text">Data Quality</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../linkage/index.html"> <i class="bi bi-link-45deg" role="img">
+</i> 
+<span class="menu-text">Linkage</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-docs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-book" role="img">
+</i> 
+ <span class="menu-text">Docs</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-docs">    
+        <li>
+    <a class="dropdown-item" href="../methods.html">
+ <span class="dropdown-text">Methods</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../glossary.html">
+ <span class="dropdown-text">Glossary</span></a>
+  </li>  
+        <li><hr class="dropdown-divider"></li>
+        <li>
+    <a class="dropdown-item" href="../about.html">
+ <span class="dropdown-text">About &amp; Credits</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../weekly-reports/index.html">Weekly Reports — Overview</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../weekly-reports/index.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Weekly Reports — Overview</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#report-structure" id="toc-report-structure" class="nav-link active" data-scroll-target="#report-structure">Report structure</a></li>
+  </ul>
+</nav>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(47)</span></div><div class="category" data-category="MjAyNQ==">2025 <span class="quarto-category-count">(36)</span></div><div class="category" data-category="MjAyNg==">2026 <span class="quarto-category-count">(11)</span></div><div class="category" data-category="UTE=">Q1 <span class="quarto-category-count">(11)</span></div><div class="category" data-category="UTI=">Q2 <span class="quarto-category-count">(10)</span></div><div class="category" data-category="UTM=">Q3 <span class="quarto-category-count">(13)</span></div><div class="category" data-category="UTQ=">Q4 <span class="quarto-category-count">(13)</span></div></div></div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Weekly IDSR Reports</h1>
+<p class="subtitle lead">Notifiable Medical Conditions Surveillance System — Weekly Integrated Disease Surveillance &amp; Response</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-simple callout-note no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>These reports summarise conditions notified to the <strong>NMC Surveillance System (NMCSS)</strong> for each CDC epiweek. They cover Category 1 &amp; 2 notifications flagged for WHO IDSR reporting, with confirmed trends, epitable, and all-notifications overview.</p>
+</div>
+</div>
+</div>
+<div id="listing-reports-listing" class="quarto-listing quarto-listing-container-grid">
+<div class="list grid quarto-listing-cols-3">
+<div class="g-col-1" data-index="0" data-categories="MjAyNiUyQ1Ex" data-listing-date-sort="1773525600000" data-listing-file-modified-sort="1775665639866" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2026-W11.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 11, 2026
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNg=='); return false;">2026</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTE='); return false;">Q1</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 15 March – 21 March 2026.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="1" data-categories="MjAyNiUyQ1Ex" data-listing-date-sort="1772920800000" data-listing-file-modified-sort="1775665639864" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2026-W10.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 10, 2026
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNg=='); return false;">2026</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTE='); return false;">Q1</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 08 March – 14 March 2026.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="2" data-categories="MjAyNiUyQ1Ex" data-listing-date-sort="1772316000000" data-listing-file-modified-sort="1777576989189" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2026-W09.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 9, 2026
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNg=='); return false;">2026</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTE='); return false;">Q1</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 01 March – 07 March 2026.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="3" data-categories="MjAyNiUyQ1Ex" data-listing-date-sort="1771711200000" data-listing-file-modified-sort="1777576989159" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2026-W08.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 8, 2026
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNg=='); return false;">2026</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTE='); return false;">Q1</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 22 February – 28 February 2026.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="4" data-categories="MjAyNiUyQ1Ex" data-listing-date-sort="1771106400000" data-listing-file-modified-sort="1777576989153" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2026-W07.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 7, 2026
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNg=='); return false;">2026</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTE='); return false;">Q1</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 15 February – 21 February 2026.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="5" data-categories="MjAyNiUyQ1Ex" data-listing-date-sort="1770501600000" data-listing-file-modified-sort="1777576989148" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2026-W06.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 6, 2026
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNg=='); return false;">2026</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTE='); return false;">Q1</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 08 February – 14 February 2026.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="6" data-categories="MjAyNiUyQ1Ex" data-listing-date-sort="1769896800000" data-listing-file-modified-sort="1777576989140" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2026-W05.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 5, 2026
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNg=='); return false;">2026</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTE='); return false;">Q1</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 01 February – 07 February 2026.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="7" data-categories="MjAyNiUyQ1Ex" data-listing-date-sort="1769292000000" data-listing-file-modified-sort="1777576989136" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2026-W04.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 4, 2026
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNg=='); return false;">2026</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTE='); return false;">Q1</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 25 January – 31 January 2026.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="8" data-categories="MjAyNiUyQ1Ex" data-listing-date-sort="1768687200000" data-listing-file-modified-sort="1777576989128" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2026-W03.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 3, 2026
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNg=='); return false;">2026</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTE='); return false;">Q1</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 18 January – 24 January 2026.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="9" data-categories="MjAyNiUyQ1Ex" data-listing-date-sort="1768082400000" data-listing-file-modified-sort="1777576989123" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2026-W02.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 2, 2026
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNg=='); return false;">2026</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTE='); return false;">Q1</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 11 January – 17 January 2026.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="10" data-categories="MjAyNiUyQ1Ex" data-listing-date-sort="1767477600000" data-listing-file-modified-sort="1777576989116" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2026-W01.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 1, 2026
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNg=='); return false;">2026</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTE='); return false;">Q1</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 04 January – 10 January 2026.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="11" data-categories="MjAyNSUyQ1E0" data-listing-date-sort="1766872800000" data-listing-file-modified-sort="1777576989111" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W53.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 53, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTQ='); return false;">Q4</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 28 December – 03 January 2026.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="12" data-categories="MjAyNSUyQ1E0" data-listing-date-sort="1766268000000" data-listing-file-modified-sort="1777576989106" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W52.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 52, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTQ='); return false;">Q4</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 21 December – 27 December 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="13" data-categories="MjAyNSUyQ1E0" data-listing-date-sort="1765663200000" data-listing-file-modified-sort="1777576989101" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W51.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 51, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTQ='); return false;">Q4</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 14 December – 20 December 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="14" data-categories="MjAyNSUyQ1E0" data-listing-date-sort="1765058400000" data-listing-file-modified-sort="1777576989098" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W50.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 50, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTQ='); return false;">Q4</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 07 December – 13 December 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="15" data-categories="MjAyNSUyQ1E0" data-listing-date-sort="1764453600000" data-listing-file-modified-sort="1777576989093" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W49.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 49, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTQ='); return false;">Q4</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 30 November – 06 December 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="16" data-categories="MjAyNSUyQ1E0" data-listing-date-sort="1763848800000" data-listing-file-modified-sort="1777576989064" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W48.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 48, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTQ='); return false;">Q4</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 23 November – 29 November 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="17" data-categories="MjAyNSUyQ1E0" data-listing-date-sort="1763244000000" data-listing-file-modified-sort="1777576989060" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W47.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 47, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTQ='); return false;">Q4</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 16 November – 22 November 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="18" data-categories="MjAyNSUyQ1E0" data-listing-date-sort="1762639200000" data-listing-file-modified-sort="1777576989055" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W46.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 46, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTQ='); return false;">Q4</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 09 November – 15 November 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="19" data-categories="MjAyNSUyQ1E0" data-listing-date-sort="1762034400000" data-listing-file-modified-sort="1777576989049" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W45.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 45, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTQ='); return false;">Q4</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 02 November – 08 November 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="20" data-categories="MjAyNSUyQ1E0" data-listing-date-sort="1761429600000" data-listing-file-modified-sort="1777576989043" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W44.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 44, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTQ='); return false;">Q4</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 26 October – 01 November 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="21" data-categories="MjAyNSUyQ1E0" data-listing-date-sort="1760824800000" data-listing-file-modified-sort="1777576989038" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W43.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 43, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTQ='); return false;">Q4</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 19 October – 25 October 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="22" data-categories="MjAyNSUyQ1E0" data-listing-date-sort="1760220000000" data-listing-file-modified-sort="1777576989031" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W42.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 42, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTQ='); return false;">Q4</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 12 October – 18 October 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="23" data-categories="MjAyNSUyQ1E0" data-listing-date-sort="1759615200000" data-listing-file-modified-sort="1777576989025" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W41.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 41, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTQ='); return false;">Q4</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 05 October – 11 October 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="24" data-categories="MjAyNSUyQ1Ez" data-listing-date-sort="1759010400000" data-listing-file-modified-sort="1777576989020" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W40.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 40, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTM='); return false;">Q3</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 28 September – 04 October 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="25" data-categories="MjAyNSUyQ1Ez" data-listing-date-sort="1758405600000" data-listing-file-modified-sort="1777576989015" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W39.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 39, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTM='); return false;">Q3</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 21 September – 27 September 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="26" data-categories="MjAyNSUyQ1Ez" data-listing-date-sort="1757800800000" data-listing-file-modified-sort="1777576989009" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W38.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 38, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTM='); return false;">Q3</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 14 September – 20 September 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="27" data-categories="MjAyNSUyQ1Ez" data-listing-date-sort="1757196000000" data-listing-file-modified-sort="1777576989005" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W37.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 37, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTM='); return false;">Q3</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 07 September – 13 September 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="28" data-categories="MjAyNSUyQ1Ez" data-listing-date-sort="1756591200000" data-listing-file-modified-sort="1777576988998" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W36.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 36, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTM='); return false;">Q3</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 31 August – 06 September 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="29" data-categories="MjAyNSUyQ1Ez" data-listing-date-sort="1755986400000" data-listing-file-modified-sort="1777576988993" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W35.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 35, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTM='); return false;">Q3</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 24 August – 30 August 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="30" data-categories="MjAyNSUyQ1Ez" data-listing-date-sort="1755381600000" data-listing-file-modified-sort="1777576988987" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W34.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 34, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTM='); return false;">Q3</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 17 August – 23 August 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="31" data-categories="MjAyNSUyQ1Ez" data-listing-date-sort="1754776800000" data-listing-file-modified-sort="1777576988983" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W33.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 33, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTM='); return false;">Q3</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 10 August – 16 August 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="32" data-categories="MjAyNSUyQ1Ez" data-listing-date-sort="1754172000000" data-listing-file-modified-sort="1777576988979" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W32.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 32, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTM='); return false;">Q3</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 03 August – 09 August 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="33" data-categories="MjAyNSUyQ1Ez" data-listing-date-sort="1753567200000" data-listing-file-modified-sort="1777576988974" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W31.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 31, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTM='); return false;">Q3</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 27 July – 02 August 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="34" data-categories="MjAyNSUyQ1Ez" data-listing-date-sort="1752962400000" data-listing-file-modified-sort="1777576988970" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W30.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 30, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTM='); return false;">Q3</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 20 July – 26 July 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="35" data-categories="MjAyNSUyQ1Ez" data-listing-date-sort="1752357600000" data-listing-file-modified-sort="1777576988966" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W29.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 29, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTM='); return false;">Q3</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 13 July – 19 July 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="36" data-categories="MjAyNSUyQ1Ez" data-listing-date-sort="1751752800000" data-listing-file-modified-sort="1777576988961" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W28.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 28, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTM='); return false;">Q3</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 06 July – 12 July 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="37" data-categories="MjAyNSUyQ1Ey" data-listing-date-sort="1751148000000" data-listing-file-modified-sort="1777576988953" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W27.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 27, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTI='); return false;">Q2</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 29 June – 05 July 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="38" data-categories="MjAyNSUyQ1Ey" data-listing-date-sort="1750543200000" data-listing-file-modified-sort="1777576988948" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W26.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 26, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTI='); return false;">Q2</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 22 June – 28 June 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="39" data-categories="MjAyNSUyQ1Ey" data-listing-date-sort="1749938400000" data-listing-file-modified-sort="1777576988942" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W25.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 25, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTI='); return false;">Q2</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 15 June – 21 June 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="40" data-categories="MjAyNSUyQ1Ey" data-listing-date-sort="1749333600000" data-listing-file-modified-sort="1777576988935" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W24.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 24, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTI='); return false;">Q2</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 08 June – 14 June 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="41" data-categories="MjAyNSUyQ1Ey" data-listing-date-sort="1748728800000" data-listing-file-modified-sort="1777576988929" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W23.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 23, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTI='); return false;">Q2</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 01 June – 07 June 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="42" data-categories="MjAyNSUyQ1Ey" data-listing-date-sort="1748124000000" data-listing-file-modified-sort="1777576988926" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W22.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 22, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTI='); return false;">Q2</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 25 May – 31 May 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="43" data-categories="MjAyNSUyQ1Ey" data-listing-date-sort="1747519200000" data-listing-file-modified-sort="1777576988921" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W21.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 21, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTI='); return false;">Q2</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 18 May – 24 May 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="44" data-categories="MjAyNSUyQ1Ey" data-listing-date-sort="1746914400000" data-listing-file-modified-sort="1777576988916" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W20.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 20, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTI='); return false;">Q2</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 11 May – 17 May 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="45" data-categories="MjAyNSUyQ1Ey" data-listing-date-sort="1746309600000" data-listing-file-modified-sort="1777576988911" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W19.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 19, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTI='); return false;">Q2</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 04 May – 10 May 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="46" data-categories="MjAyNSUyQ1Ey" data-listing-date-sort="1745704800000" data-listing-file-modified-sort="1777576988901" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="21">
+<a href="../weekly-reports/posts/2025-W18.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Epiweek 18, 2025
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('MjAyNQ=='); return false;">2025</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UTI='); return false;">Q2</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Weekly IDSR summary: Category 1 &amp; 2 notifications, confirmed trends, and epitable for 27 April – 03 May 2025.</p>
+</div>
+</div>
+</div></a>
+</div>
+</div>
+<div class="listing-no-matching d-none">No matching items</div>
+<nav id="reports-listing-pagination" class="listing-pagination" aria-label="Page Navigation">
+  <ul class="pagination"></ul>
+</nav>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="How to generate reports">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>How to generate reports
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Last 4 weeks (default):</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"weekly-reports/run_all_weekly.R"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Adjust number of weeks</strong> — edit <code>N_WEEKS</code> at the top of <code>run_all_weekly.R</code> before running.</p>
+<p>Then run <code>quarto render</code> or <code>source("dev/deploy.r")</code> to publish. A listing stub is created automatically in <code>weekly-reports/posts/</code> for each rendered week.</p>
+</div>
+</div>
+</div>
+<hr>
+<section id="report-structure" class="level2">
+<h2 class="anchored" data-anchor-id="report-structure">Report structure</h2>
+<p>Each weekly report covers:</p>
+<div id="tbl-report-structure" class="striped hover quarto-float quarto-figure quarto-figure-center anchored" data-tbl-colwidths="[30,70]">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-report-structure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Report sections
+</figcaption>
+<div aria-describedby="tbl-report-structure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="table-striped table-hover caption-top table">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 70%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Section</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Introduction</td>
+<td>Export date, epiweek dates</td>
+</tr>
+<tr class="even">
+<td>Category 1 at a glance</td>
+<td>Suspected &amp; confirmed counts, all Category 1 conditions</td>
+</tr>
+<tr class="odd">
+<td>Confirmed Notifications — Epitable</td>
+<td>Weekly confirmed counts per epiweek (with CI &amp; baseline)</td>
+</tr>
+<tr class="even">
+<td>Confirmed Notifications — Trends</td>
+<td>Epicurve with rolling average for selected conditions</td>
+</tr>
+<tr class="odd">
+<td>All Notifications — Epitable</td>
+<td>Weekly all-notification counts per epiweek</td>
+</tr>
+<tr class="even">
+<td>All Notifications — Trends</td>
+<td>Trends including Fever-Rash composite</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Data sources: NMC, Stats SA · Last update: 2025-10-16</p>
+</div>   
+    <div class="nav-footer-center">
+<p>SA NMC Epidemiological Intelligence Dashboard</p>
+</div>
+    <div class="nav-footer-right">
+<p><a href="methods.html">Methods</a> · <a href="glossary.html">Glossary</a> · <a href="about.html">About</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
