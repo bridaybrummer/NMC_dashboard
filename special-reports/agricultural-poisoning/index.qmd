@@ -87,7 +87,7 @@ poison <- poison %>%
 theme_nmc <- function(...) {
   theme_classic() +
     theme(
-      text              = element_text(family = "Century Gothic", size = 10, color = "#333333"),
+      text              = element_text(family = "sans", size = 10, color = "#333333"),
       panel.background  = element_rect(fill = "#F8F8F8"),
       plot.background   = element_rect(fill = "#F8F8F8"),
       panel.grid.major  = element_blank(),
