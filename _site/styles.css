@@ -214,6 +214,31 @@ table.dataTable thead th {
   margin-bottom: 1rem;
 }
 
+/* ── Plotly SVG Text Visibility Fix ─────────────────────────────────────────── */
+/* Bootstrap 5 (Cosmo) can leave Plotly SVG text elements without an explicit   */
+/* fill, so they inherit `color` from a parent — sometimes white (invisible).   */
+/* Explicitly set fill on all Plotly text elements to ensure they are always     */
+/* visible regardless of surrounding Bootstrap colour context.                   */
+.js-plotly-plot .plotly text {
+  fill: #333333 !important;
+}
+.js-plotly-plot .plotly .gtitle,
+.js-plotly-plot .plotly .g-xtitle text,
+.js-plotly-plot .plotly .g-ytitle text,
+.js-plotly-plot .plotly .legendtext,
+.js-plotly-plot .plotly .colorbar-title text,
+.js-plotly-plot .plotly .xtick text,
+.js-plotly-plot .plotly .ytick text {
+  fill: #333333 !important;
+}
+/* Modebar (chart toolbar) icons — keep them visible on light backgrounds */
+.js-plotly-plot .modebar-btn path {
+  fill: #555555 !important;
+}
+.js-plotly-plot .modebar-btn:hover path {
+  fill: #111111 !important;
+}
+
 /* ── Quick-nav Hero Section ─────────────────────────────────────────────────── */
 .hero-intro {
   background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
