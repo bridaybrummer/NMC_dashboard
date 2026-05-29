@@ -12,6 +12,7 @@
 project_root <- here::here()
 
 source(file.path(project_root, "R/plot_themes.r"))
+source(file.path(project_root, "R/labels.r"))
 source(file.path(project_root, "R/epicurve_functions.r"))
 source(file.path(project_root, "R/signal_detection.r"))
 source(file.path(project_root, "R/incidence_functions.r"))

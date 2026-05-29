@@ -334,7 +334,10 @@ window.Quarto = {
   <li><a href="#dalys" id="toc-dalys" class="nav-link" data-scroll-target="#dalys">DALYs</a></li>
   <li><a href="#age-standardised-rate-asr" id="toc-age-standardised-rate-asr" class="nav-link" data-scroll-target="#age-standardised-rate-asr">Age-Standardised Rate (ASR)</a></li>
   </ul></li>
-  <li><a href="#signal-detection" id="toc-signal-detection" class="nav-link" data-scroll-target="#signal-detection">Signal Detection</a></li>
+  <li><a href="#signal-detection" id="toc-signal-detection" class="nav-link" data-scroll-target="#signal-detection">Signal Detection</a>
+  <ul class="collapse">
+  <li><a href="#stabilising-the-sd-denominator-rare-disease-handling" id="toc-stabilising-the-sd-denominator-rare-disease-handling" class="nav-link" data-scroll-target="#stabilising-the-sd-denominator-rare-disease-handling">Stabilising the SD denominator (rare-disease handling)</a></li>
+  </ul></li>
   <li><a href="#forecasting" id="toc-forecasting" class="nav-link" data-scroll-target="#forecasting">Forecasting</a></li>
   <li><a href="#qc" id="toc-qc" class="nav-link" data-scroll-target="#qc">Quality Control</a></li>
   <li><a href="#software" id="toc-software" class="nav-link" data-scroll-target="#software">Software &amp; Reproducibility</a></li>
@@ -451,13 +454,23 @@ window.Quarto = {
 </section>
 <section id="signal-detection" class="level2">
 <h2 class="anchored" data-anchor-id="signal-detection">Signal Detection</h2>
-<p>The <a href="by-trending/index.html">Trending</a> section uses:</p>
+<p>The <a href="by-trending/index.html">Trending</a> section runs two complementary detectors on daily case counts (truncated to exclude the most recent 14 days, where reporting is incomplete):</p>
 <ul>
-<li><strong>CUSUM</strong> (Cumulative Sum) — detects sustained shifts from the expected mean</li>
-<li><strong>EARS C1/C2/C3</strong> — CDC’s Early Aberration Reporting System algorithms for rapid signal detection</li>
+<li><strong>EARS-C2</strong> — rolling z-score over a 14-day lagged baseline; flags a day when <span class="math inline">\(z = (n_t - \bar n_{t-14:t-1}) / s_{t-14:t-1} &gt; 3\)</span>.</li>
+<li><strong>One-sided CUSUM</strong> — slack <span class="math inline">\(k = 0.5\)</span>, decision threshold <span class="math inline">\(h = 5\)</span>; detects sustained shifts from the long-run mean.</li>
 </ul>
-<p>Thresholds and baseline windows are documented in the trending page notes.</p>
+<section id="stabilising-the-sd-denominator-rare-disease-handling" class="level3">
+<h3 class="anchored" data-anchor-id="stabilising-the-sd-denominator-rare-disease-handling">Stabilising the SD denominator (rare-disease handling)</h3>
+<p>For rare conditions the empirical SD of the baseline can collapse to 0 (all zeros) or to a tiny non-zero value (one outlier in an otherwise quiet window). A naïve floor of <span class="math inline">\(10^{-3}\)</span> then produces <span class="math inline">\(z\)</span>-scores in the thousands for a single new case, swamping the signal log with non-actionable alerts.</p>
+<p>We therefore stabilise the denominator with <strong>two safeguards</strong>, applied by default and parameterised on <code>R/signal_detection.r</code>:</p>
+<ol type="1">
+<li><strong>Poisson SD floor</strong> (<code>sd_floor = "poisson"</code>): the SD used in the z-score is replaced by <span class="math display">\[ \tilde s_t = \max\!\bigl(s_t,\; \sqrt{\max(\bar n_t,\,1)}\bigr) \]</span> i.e.&nbsp;at least the Poisson-implied SD given the baseline mean. This is consistent with the Farrington-style adjustment used by ECDC and NICD and prevents single-case-on-zero-baseline from generating an extreme z-score.</li>
+<li><strong>Low-baseline gate</strong> (<code>min_baseline_mean = 0.5</code>): days whose baseline mean is below 0.5 cases/day are flagged <code>is_low_baseline = TRUE</code> and EARS signals are suppressed for that row. Such conditions are too sparse for EARS to be reliable; CUSUM (with the Poisson floor) is generally a better detector for them and is retained.</li>
+</ol>
+<p>For full backward-compatibility with the legacy NICD scripts, set <code>sd_floor = "fixed"</code> and <code>min_baseline_mean = 0</code> when calling <code>detect_signals()</code> / <code>detect_signals_batch()</code>.</p>
+<p>Thresholds, baselines and the truncation window are surfaced on the trending page header.</p>
 <hr>
+</section>
 </section>
 <section id="forecasting" class="level2">
 <h2 class="anchored" data-anchor-id="forecasting">Forecasting</h2>

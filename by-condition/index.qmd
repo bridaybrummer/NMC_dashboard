@@ -60,13 +60,9 @@ weekly <- agg_prov[, .(
   incidence_100k = round(mean(incidence_100k, na.rm = TRUE), 3)
 ), by = .(Week = week_start, Condition = condition, Province = prov_)]
 
-# Recode province codes to full names for display in legends and filters
-prov_labels <- c(
-  EC = "Eastern Cape", FS = "Free State",    GP  = "Gauteng",
-  KZN = "KwaZulu-Natal", LP = "Limpopo",    MP  = "Mpumalanga",
-  NC  = "Northern Cape", NW = "North West",  WC  = "Western Cape"
-)
-weekly[, Province := prov_labels[Province]]
+# Recode province codes to full names (helper from R/labels.r)
+source("R/labels.r")
+weekly[, Province := prov_label(Province)]
 
 sd_weekly <- SharedData$new(weekly)
 
@@ -74,7 +70,7 @@ sd_weekly <- SharedData$new(weekly)
 hotspots <- agg_dist[date >= (Sys.Date() - 30), .(
   Cases = sum(count)
 ), by = .(Condition = condition, Province = prov_, District = district)]
-hotspots[, Province := prov_labels[Province]]
+hotspots[, Province := prov_label(Province)]
 setorder(hotspots, -Cases)
 sd_hotspot <- SharedData$new(hotspots)
 ```

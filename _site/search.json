@@ -452,7 +452,7 @@
     "href": "special-reports/agricultural-poisoning/index.html#deaths-in-children-under-12",
     "title": "Agricultural & Stock Remedy Poisoning",
     "section": "Deaths in children under 12",
-    "text": "Deaths in children under 12\n\n\n\n\nTable 7: Vital status of agricultural or stock remedy poisoning notifications in children under 12 years, by year, South Africa.\n\n\n\n 2023202420252026CharacteristicAlive  N = 9271Deceased  N = 861Alive  N = 9591Deceased  N = 991Alive  N = 1,1091Deceased  N = 1671Alive  N = 2461Deceased  N = 451Age categoryUnder 12 years258 (90%)30 (10%)365 (90%)40 (9.9%)391 (87%)60 (13%)80 (86%)13 (14%)12 years and over664 (92%)56 (7.8%)588 (91%)59 (9.1%)707 (87%)102 (13%)165 (84%)31 (16%)Age (years)21 (9, 33)22 (5, 35)18 (1, 32)18 (4, 33)20 (3, 34)19 (3, 34)21 (5, 35)19 (5, 32)SexFemale445 (94%)27 (5.7%)459 (92%)38 (7.6%)494 (88%)68 (12%)98 (82%)22 (18%)Male480 (89%)59 (11%)499 (89%)61 (11%)615 (86%)98 (14%)148 (87%)23 (13%)ProvinceEC36 (88%)5 (12%)50 (81%)12 (19%)49 (91%)5 (9.3%)10 (100%)0 (0%)FS176 (96%)8 (4.3%)120 (94%)8 (6.3%)161 (83%)33 (17%)40 (77%)12 (23%)GP577 (93%)45 (7.2%)496 (92%)41 (7.6%)586 (93%)46 (7.3%)142 (87%)22 (13%)KZN9 (100%)0 (0%)33 (94%)2 (5.7%)47 (96%)2 (4.1%)10 (91%)1 (9.1%)LP36 (90%)4 (10%)72 (95%)4 (5.3%)89 (94%)6 (6.3%)10 (77%)3 (23%)MP16 (76%)5 (24%)42 (89%)5 (11%)40 (65%)22 (35%)9 (90%)1 (10%)NC9 (100%)0 (0%)8 (100%)0 (0%)6 (86%)1 (14%)2 (100%)0 (0%)NW22 (92%)2 (8.3%)29 (88%)4 (12%)52 (88%)7 (12%)7 (88%)1 (13%)WC46 (73%)17 (27%)109 (83%)23 (17%)79 (64%)45 (36%)16 (76%)5 (24%)1n (%); Median (Q1, Q3)",
+    "text": "Deaths in children under 12\n\n\n\nTable 7: Vital status of agricultural or stock remedy poisoning notifications in children under 12 years, by year, South Africa.",
     "crumbs": [
       "Home",
       "Poisoning",
@@ -464,7 +464,247 @@
     "href": "special-reports/agricultural-poisoning/index.html#unique-reporting-facilities-per-year",
     "title": "Agricultural & Stock Remedy Poisoning",
     "section": "Unique reporting facilities per year",
-    "text": "Unique reporting facilities per year\n\n\n\n\n\n\n\n\nFigure 16: Number of unique health facilities reporting at least one agricultural or stock remedy poisoning notification per year, South Africa.\n\n\n\n\n\n\nReport generated: 06 May 2026 | NMC Surveillance Unit",
+    "text": "Unique reporting facilities per year\n\n\n\n\n\n\n\n\nFigure 16: Number of unique health facilities reporting at least one agricultural or stock remedy poisoning notification per year, South Africa.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#summary-statistics-12-june-2025-8-may-2026",
+    "href": "special-reports/agricultural-poisoning/index.html#summary-statistics-12-june-2025-8-may-2026",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "Summary statistics: 12 June 2025 – 8 May 2026",
+    "text": "Summary statistics: 12 June 2025 – 8 May 2026\n\n\n\n\nTable 8: paste0(“Agricultural and stock remedy poisoning burden during the post-Cabinet-recommendation window (12 Jun 2025 – 08 May 2026) compared with the equivalent prior-year window (”, format(pre_start, “%d %b %Y”), ” – “, format(pre_end,”%d %b %Y”), “).”)\n\n\n\nIndicatorPost-recommendation window(12 Jun 2025 – 8 May 2026)Equivalent prior-year window(12 Jun 2024 – 8 May 2025)% ChangePeriod start12 Jun 202512 Jun 2024—Period end08 May 202608 May 2025—Duration (days)330330—Total notifications1,0251,056-3%Total deaths134122+10%Case fatality ratio (CFR)13.1%11.6%+1.5 ppWeekly notification rate (mean ± SD)25 ± 8.822 ± 8—Top province by notificationsGautengGauteng—Children &lt;12 (notifications)347406—Children &lt;12 (deaths)4547—pp = percentage points. CFR calculated as deaths ÷ total notifications × 100. Children &lt;12 based on recorded age in years.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#weekly-trend-within-the-policy-window",
+    "href": "special-reports/agricultural-poisoning/index.html#weekly-trend-within-the-policy-window",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "Weekly trend within the policy window",
+    "text": "Weekly trend within the policy window\n\n\n\n\n\n\n\n\nFigure 17: Weekly notifications and deaths for agricultural and stock remedy poisoning during the post-Cabinet-recommendation period (12 June 2025 – 8 May 2026). The dashed vertical line marks the gazetted ban date (8 May 2026).",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#provincial-breakdown-during-the-policy-window",
+    "href": "special-reports/agricultural-poisoning/index.html#provincial-breakdown-during-the-policy-window",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "Provincial breakdown during the policy window",
+    "text": "Provincial breakdown during the policy window\n\n\n\n\nTable 9: Notifications, deaths, and CFR by province during the post-Cabinet-recommendation period (12 June 2025 – 8 May 2026).\n\n\n\nProvinceNotificationsDeathsCFRChildren &lt;12 (n)Median age (years)Gauteng531438.114722Free State1753419.45026Western Cape812530.92622.5Limpopo6046.7339Mpumalanga491632.7264North West46715.2291KwaZulu-Natal4212.4242.5Eastern Cape36411.11121.5Northern Cape500.0137Total1,02513413.1347—Pink = CFR &gt; 10%. CFR not calculated for total row from adorn_totals; recalculated from column sums.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#annual-cfr-with-confidence-intervals",
+    "href": "special-reports/agricultural-poisoning/index.html#annual-cfr-with-confidence-intervals",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "Annual CFR with confidence intervals",
+    "text": "Annual CFR with confidence intervals\n\n\n\n\n\n\n\n\nFigure 18: Annual case fatality ratio (%) with 95% Wilson confidence intervals, agricultural and stock remedy poisoning, South Africa, 2020–present. Numbers above bars = annual notification count.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#cfr-by-province-and-year-heatmap",
+    "href": "special-reports/agricultural-poisoning/index.html#cfr-by-province-and-year-heatmap",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "CFR by province and year — heatmap",
+    "text": "CFR by province and year — heatmap\n\n\n\n\n\n\n\n\nFigure 19: Case fatality ratio (%) by province and year, agricultural and stock remedy poisoning, South Africa. Cell text = CFR (notifications count in parentheses). Grey = no data.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#cfr-by-age-group-forest-plot",
+    "href": "special-reports/agricultural-poisoning/index.html#cfr-by-age-group-forest-plot",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "CFR by age group — forest plot",
+    "text": "CFR by age group — forest plot\n\n\n\n\n\n\n\n\nFigure 20: Case fatality ratio by age group with 95% Wilson confidence intervals, agricultural and stock remedy poisoning, South Africa, 2020–present. Reference line = overall CFR.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#cfr-summary-table-by-key-strata",
+    "href": "special-reports/agricultural-poisoning/index.html#cfr-summary-table-by-key-strata",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "CFR summary table by key strata",
+    "text": "CFR summary table by key strata\n\n\n\n\nTable 10: Case fatality ratio (%) by key demographic and geographic strata, agricultural and stock remedy poisoning, South Africa, 2020–present.\n\n\n\ngroupStratumNotifications (n)Deaths (n)CFR (95% CI)OverallOverall5,11253110.4% (9.6–11.3%)SexFemale2,3332169.3% (8.1–10.5%)Male2,77431411.3% (10.2–12.6%)Age group10–142823211.3% (8.2–15.6%)15–195835910.1% (7.9–12.8%)1–44936212.6% (9.9–15.8%)20–24531417.7% (5.7–10.3%)25–29506499.7% (7.4–12.6%)30–344674710.1% (7.7–13.1%)35–39389328.2% (5.9–11.4%)40–44255259.8% (6.7–14.1%)45–491942412.4% (8.5–17.7%)50–541381611.6% (7.3–18%)55–59901112.2% (7–20.6%)5–92023115.3% (11–21%)60–64611118% (10.4–29.5%)65+118108.5% (4.7–14.9%)&lt;1727709.6% (7.7–12%)ProvinceEastern Cape2202712.3% (8.6–17.3%)Free State7227610.5% (8.5–13%)Gauteng2,9852267.6% (6.7–8.6%)KwaZulu-Natal11697.8% (4.1–14.1%)Limpopo262207.6% (5–11.5%)Mpumalanga1523422.4% (16.5–29.6%)North West1641710.4% (6.6–16%)Northern Cape4312.3% (0.4–12.1%)Western Cape44812127% (23.1–31.3%)95% CI calculated using the Wilson score method.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#notifications-by-facility-type",
+    "href": "special-reports/agricultural-poisoning/index.html#notifications-by-facility-type",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "Notifications by facility type",
+    "text": "Notifications by facility type\n\n\n\n\n\n\n\n\nFigure 21: Number of agricultural and stock remedy poisoning notifications by reporting facility type, South Africa, 2020–present. Facility types that account for &lt;1% combined are grouped as ‘Other’.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#facility-type-by-vital-status",
+    "href": "special-reports/agricultural-poisoning/index.html#facility-type-by-vital-status",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "Facility type by vital status",
+    "text": "Facility type by vital status\n\n\n\n\n\n\n\n\nFigure 22: Proportion of cases alive vs deceased by reporting facility type, agricultural and stock remedy poisoning, South Africa, 2020–present. Facilities with ≥10 notifications included. Red = deceased.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#cfr-by-facility-type-and-sector",
+    "href": "special-reports/agricultural-poisoning/index.html#cfr-by-facility-type-and-sector",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "CFR by facility type and sector",
+    "text": "CFR by facility type and sector\n\n\n\n\nTable 11: Notifications, deaths, and case fatality ratio by facility type, agricultural and stock remedy poisoning, South Africa, 2020–present.\n\n\n\nFacility TypeNotificationsDeathsCFRHospital4,6473006.5Laboratory18212769.8Clinic1424128.9Private Practice4436.8Other432148.8Mortuary403997.5Depot800.0Wellness Centre600.0Pink = CFR &gt;10%; Yellow = CFR 5–10%.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#facility-type-trend-over-years",
+    "href": "special-reports/agricultural-poisoning/index.html#facility-type-trend-over-years",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "Facility type trend over years",
+    "text": "Facility type trend over years\n\n\n\n\n\n\n\n\nFigure 23: Annual proportion of notifications by reporting facility type, agricultural and stock remedy poisoning, South Africa. Shift in facility mix may reflect changes in care pathways or surveillance coverage.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#public-vs-private-sector-split",
+    "href": "special-reports/agricultural-poisoning/index.html#public-vs-private-sector-split",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "Public vs private sector split",
+    "text": "Public vs private sector split\n\n\n\n\n\n\n\n\nFigure 24: Notifications by facility sector (public vs private) and year, agricultural and stock remedy poisoning, South Africa.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#crude-vs-adjusted-odds-of-dying",
+    "href": "special-reports/agricultural-poisoning/index.html#crude-vs-adjusted-odds-of-dying",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "Crude vs adjusted odds of dying",
+    "text": "Crude vs adjusted odds of dying\n\n\n\n\nTable 12: Crude and adjusted odds of dying from agricultural and stock remedy poisoning compared with all other notifiable conditions, South Africa, 2020–present. Adjusted for age group, sex, province, and year.\n\n\n\nPredictorOR95% CI lower95% CI upperp-valueASRP vs other conditions13.2411.9814.61&lt;0.001Age group: 5–140.260.220.30&lt;0.001Age group: 15–290.690.630.75&lt;0.001Age group: 30–441.141.071.22&lt;0.001Age group: 45–591.271.181.37&lt;0.001Age group: 60+1.891.752.05&lt;0.001Sex: Male1.081.031.14&lt;0.001Province: FS3.112.803.46&lt;0.001Province: GP1.241.131.37&lt;0.001Province: KZN0.890.810.990.031Province: LP1.511.341.70&lt;0.001Province: MP0.900.761.060.208Province: NC1.661.451.89&lt;0.001Province: NW1.070.931.240.336Province: WC1.291.171.43&lt;0.001Year: 20211.501.291.74&lt;0.001Year: 20220.490.430.56&lt;0.001Year: 20231.461.291.65&lt;0.001Year: 20241.461.291.65&lt;0.001Year: 20251.431.271.62&lt;0.001Year: 20261.221.031.440.021Adjusted OR for ASRP vs other conditions: 13.24 (95% CI: 11.98–14.61, p &lt;0.001). Reference categories: age &lt;5, Female, EC province, earliest year.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#forest-plot-of-adjusted-odds-ratios",
+    "href": "special-reports/agricultural-poisoning/index.html#forest-plot-of-adjusted-odds-ratios",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "Forest plot of adjusted odds ratios",
+    "text": "Forest plot of adjusted odds ratios\n\n\n\n\n\n\n\n\nFigure 25: Adjusted odds ratios (OR) for death from logistic regression model. Reference line at OR = 1.0. ASRP vs other conditions highlighted in red.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#cfr-comparison-across-all-notifiable-conditions",
+    "href": "special-reports/agricultural-poisoning/index.html#cfr-comparison-across-all-notifiable-conditions",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "CFR comparison across all notifiable conditions",
+    "text": "CFR comparison across all notifiable conditions\n\n\n\n\n\n\n\n\nFigure 26: Case fatality ratio (%) for all notifiable conditions with ≥50 notifications, South Africa, 2020–present. Agricultural and stock remedy poisoning highlighted in red. Points sized by notification count.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#time-from-notification-to-death",
+    "href": "special-reports/agricultural-poisoning/index.html#time-from-notification-to-death",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "Time from notification to death",
+    "text": "Time from notification to death\n\n\n\n\n\n\n\n\nFigure 27: Distribution of days between date of notification and date of death for agricultural and stock remedy poisoning fatalities, South Africa, 2020–present. Cases with negative values (death recorded before notification) are excluded. Median and IQR annotated.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#notification-lag-date-of-illness-onset-to-notification-date",
+    "href": "special-reports/agricultural-poisoning/index.html#notification-lag-date-of-illness-onset-to-notification-date",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "Notification lag: date of illness onset to notification date",
+    "text": "Notification lag: date of illness onset to notification date\n\n\n\n\n\n\n\n\nFigure 28: Distribution of days between reported date of illness onset and date of notification, agricultural and stock remedy poisoning, South Africa, 2020–present. Longer lags indicate delays in surveillance detection.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#missing-data-profile",
+    "href": "special-reports/agricultural-poisoning/index.html#missing-data-profile",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "Missing data profile",
+    "text": "Missing data profile\n\n\n\n\nTable 13: Completeness of key surveillance variables for agricultural and stock remedy poisoning notifications, South Africa, 2020–present. Stratified by year.\n\n\n\nVariableTotal2020_Complete2021_Complete2022_Complete2023_Complete2024_Complete2025_Complete2026_Complete2020_% Complete2021_% Complete2022_% Complete2023_% Complete2024_% Complete2025_% Complete2026_% CompleteAge (years)44043498.6Age (years)25625198.0Age (years)77874295.4Age (years)1,0131,00899.5Age (years)1,0581,05299.4Age (years)1,2761,26098.7Age (years)29128999.3Sex440440100.0Sex256256100.0Sex77877799.9Sex1,0131,01199.8Sex1,0581,05799.9Sex1,2761,27599.9Sex291291100.0Notification date440440100.0Notification date256256100.0Notification date778778100.0Notification date1,0131,013100.0Notification date1,0581,058100.0Notification date1,2761,276100.0Notification date291291100.0Onset date44036983.9Onset date25623993.4Onset date77877199.1Onset date1,0131,01299.9Onset date1,0581,05699.8Onset date1,2761,27399.8Onset date29129099.7Date of death (deaths only)440173.9Date of death (deaths only)256124.7Date of death (deaths only)7789011.6Date of death (deaths only)1,01312011.8Date of death (deaths only)1,05819418.3Date of death (deaths only)1,27623618.5Date of death (deaths only)2917224.7Vital status440440100.0Vital status256256100.0Vital status778778100.0Vital status1,0131,013100.0Vital status1,0581,058100.0Vital status1,2761,276100.0Vital status291291100.0District440440100.0District256256100.0District778778100.0District1,0131,013100.0District1,0581,058100.0District1,2761,276100.0District291291100.0Reporting facility440440100.0Reporting facility256256100.0Reporting facility778778100.0Reporting facility1,0131,013100.0Reporting facility1,0581,058100.0Reporting facility1,2761,276100.0Reporting facility291291100.0Facility type440440100.0Facility type256256100.0Facility type778778100.0Facility type1,0131,013100.0Facility type1,0581,058100.0Facility type1,2761,276100.0Facility type291291100.0Orange text = at least one year with completeness &lt;70%. Date of death evaluated across all cases (not only deaths).",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#repeat-reporting-facilities-top-contributors",
+    "href": "special-reports/agricultural-poisoning/index.html#repeat-reporting-facilities-top-contributors",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "Repeat reporting facilities — top contributors",
+    "text": "Repeat reporting facilities — top contributors\n\n\n\n\nTable 14: Top 20 reporting facilities by total notification count, agricultural and stock remedy poisoning, South Africa, 2020–present.\n\n\n\nfacilityProvinceNotificationsDeathsCFRYears activeFacility typeleratong hospitalGauteng761597.87HOSPITALchris hani baragwanath hospGauteng683213.17HOSPITALbheki mlangeni hospitalGauteng23920.87HOSPITALedenvale hospitalGauteng16742.46HOSPITALdr yusaf dadoo hospitalGauteng13732.26HOSPITALodi community hospitalGauteng13386.06HOSPITALsteve biko academic hospitalGauteng13143.17HOSPITALkalafong hospitalGauteng10754.77HOSPITALboitumelo hospitalFree State10487.76HOSPITALpietersburg hospitalLimpopo10298.87HOSPITALthusanong hospitalFree State9622.13HOSPITALcecilia makiwane hospitalEastern Cape8522.45HOSPITALpotchefstroom hospitalNorth West6446.27HOSPITALmohau hospitalFree State6211.64HOSPITALbongani regional hospitalFree State6023.36HOSPITALforensic services pretoriaGauteng6060100.06LABORATORYuniversitas laboratoryFree State541324.12LABORATORYbronkhorstspruit hospitalGauteng5323.85HOSPITALtygerberg hospitalWestern Cape50816.07HOSPITALmankweng hospitalLimpopo4824.25HOSPITALPink = CFR &gt; 10%.",
+    "crumbs": [
+      "Home",
+      "Poisoning",
+      "Agricultural & Stock Remedy Poisoning"
+    ]
+  },
+  {
+    "objectID": "special-reports/agricultural-poisoning/index.html#annual-cfr-trend-with-policy-annotations",
+    "href": "special-reports/agricultural-poisoning/index.html#annual-cfr-trend-with-policy-annotations",
+    "title": "Agricultural & Stock Remedy Poisoning",
+    "section": "Annual CFR trend with policy annotations",
+    "text": "Annual CFR trend with policy annotations\n\n\n\n\n\n\n\n\nFigure 29: Monthly case fatality ratio (%) for agricultural and stock remedy poisoning, 2020–present, with key policy milestones annotated. Shaded band = 95% Wilson confidence interval.\n\n\n\n\n\n\nReport generated: 29 May 2026 | NMC Surveillance Unit",
     "crumbs": [
       "Home",
       "Poisoning",
@@ -1269,7 +1509,7 @@
     "href": "quality.html",
     "title": "Data Quality",
     "section": "",
-    "text": "NoteDevelopment Roadmap — Data Quality\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nReporting completeness by province (% days with ≥ 1 case)\n✅ Done\n\n\nv0.1\nWeekly submission heatmap\n✅ Done\n\n\nv0.2\nTimeliness metrics (median days from onset to notification)\n🔲 Planned\n\n\nv0.2\nDuplicate detection summary\n🔲 Planned\n\n\nv0.3\nMissing-field rates by condition (name, age, sex, district)\n🔲 Planned\n\n\nv0.3\nFacility-level reporting participation rates\n🔲 Planned\n\n\nv0.4\nAutomated data-quality score card (red/amber/green)\n🔲 Planned\n\n\nv0.5\nHistoric trend of completeness to track improvement\n🔲 Planned\n\n\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_province.rds\nData through: 16 March 2026"
+    "text": "NoteDevelopment Roadmap — Data Quality\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nReporting completeness by province (% days with ≥ 1 case)\n✅ Done\n\n\nv0.1\nWeekly submission heatmap\n✅ Done\n\n\nv0.2\nTimeliness metrics (median days from onset to notification)\n✅ Done\n\n\nv0.2\nLinkage-field completeness trend (ID / folder / MRN)\n✅ Done\n\n\nv0.3\nDuplicate detection summary\n🔲 Planned\n\n\nv0.3\nMissing-field rates by condition (name, age, sex, district)\n🔲 Planned\n\n\nv0.3\nFacility-level reporting participation rates\n🔲 Planned\n\n\nv0.4\nAutomated data-quality score card (red/amber/green)\n🔲 Planned\n\n\nv0.5\nHistoric trend of completeness to track improvement\n🔲 Planned\n\n\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_province.rds"
   },
   {
     "objectID": "quality.html#reporting-completeness-by-province",
@@ -1290,7 +1530,21 @@
     "href": "quality.html#completeness-table",
     "title": "Data Quality",
     "section": "Completeness Table",
-    "text": "Completeness Table\n\n\n\n\nTable 1\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipRelated Pages\n\n\n\n\nMethods — full technical documentation of quality checks and indicator definitions\nOverview — national-level surveillance summary\nBy Province — province-level data that depends on reporting quality\nGlossary — abbreviations and term definitions"
+    "text": "Completeness Table\n\n\n\n\nTable 1"
+  },
+  {
+    "objectID": "quality.html#notification-timeliness",
+    "href": "quality.html#notification-timeliness",
+    "title": "Data Quality",
+    "section": "Notification Timeliness",
+    "text": "Notification Timeliness\nMedian days from symptom onset (or earliest available date) to NMC notification, by condition and month. Lower is better; sustained increases flag a slowdown in the reporting chain.\n\n\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\nWarning in RColorBrewer::brewer.pal(max(N, 3L), \"Set2\"): n too large, allowed maximum for palette Set2 is 8\nReturning the palette you asked for with that many colors\n\n\n\n\n\n\n\n\nFigure 3: Median onset-to-notification delay (days) — last 24 months\n\n\n\n\n\n\n\n\nTable 2"
+  },
+  {
+    "objectID": "quality.html#linkage-field-completeness-last-12-months",
+    "href": "quality.html#linkage-field-completeness-last-12-months",
+    "title": "Data Quality",
+    "section": "Linkage-Field Completeness — Last 12 Months",
+    "text": "Linkage-Field Completeness — Last 12 Months\nProportion of notifications with a non-missing patient identifier (SA ID number, hospital folder number, MRN) — required for record linkage to lab results, vital registration and other surveillance systems.\n\n\n\n\nLinkage-field completeness (%) by province\n\n\n\n\n\n\n\n\n\nTipRelated Pages\n\n\n\n\nMethods — full technical documentation of quality checks and indicator definitions\nOverview — national-level surveillance summary\nBy Province — province-level data that depends on reporting quality\nGlossary — abbreviations and term definitions"
   },
   {
     "objectID": "index.html",
@@ -1421,7 +1675,7 @@
     "href": "methods.html#signal-detection",
     "title": "Methods",
     "section": "Signal Detection",
-    "text": "Signal Detection\nThe Trending section uses:\n\nCUSUM (Cumulative Sum) — detects sustained shifts from the expected mean\nEARS C1/C2/C3 — CDC’s Early Aberration Reporting System algorithms for rapid signal detection\n\nThresholds and baseline windows are documented in the trending page notes.",
+    "text": "Signal Detection\nThe Trending section runs two complementary detectors on daily case counts (truncated to exclude the most recent 14 days, where reporting is incomplete):\n\nEARS-C2 — rolling z-score over a 14-day lagged baseline; flags a day when \\(z = (n_t - \\bar n_{t-14:t-1}) / s_{t-14:t-1} &gt; 3\\).\nOne-sided CUSUM — slack \\(k = 0.5\\), decision threshold \\(h = 5\\); detects sustained shifts from the long-run mean.\n\n\nStabilising the SD denominator (rare-disease handling)\nFor rare conditions the empirical SD of the baseline can collapse to 0 (all zeros) or to a tiny non-zero value (one outlier in an otherwise quiet window). A naïve floor of \\(10^{-3}\\) then produces \\(z\\)-scores in the thousands for a single new case, swamping the signal log with non-actionable alerts.\nWe therefore stabilise the denominator with two safeguards, applied by default and parameterised on R/signal_detection.r:\n\nPoisson SD floor (sd_floor = \"poisson\"): the SD used in the z-score is replaced by \\[ \\tilde s_t = \\max\\!\\bigl(s_t,\\; \\sqrt{\\max(\\bar n_t,\\,1)}\\bigr) \\] i.e. at least the Poisson-implied SD given the baseline mean. This is consistent with the Farrington-style adjustment used by ECDC and NICD and prevents single-case-on-zero-baseline from generating an extreme z-score.\nLow-baseline gate (min_baseline_mean = 0.5): days whose baseline mean is below 0.5 cases/day are flagged is_low_baseline = TRUE and EARS signals are suppressed for that row. Such conditions are too sparse for EARS to be reliable; CUSUM (with the Poisson floor) is generally a better detector for them and is retained.\n\nFor full backward-compatibility with the legacy NICD scripts, set sd_floor = \"fixed\" and min_baseline_mean = 0 when calling detect_signals() / detect_signals_batch().\nThresholds, baselines and the truncation window are surfaced on the trending page header.",
     "crumbs": [
       "Methods"
     ]
@@ -1971,37 +2225,57 @@
     "href": "by-trending/index.html",
     "title": "Trending Conditions",
     "section": "",
-    "text": "NoteDevelopment Roadmap — Trending / Signal Detection\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nRecent surge table — conditions with biggest % increase (last 14 days vs prior 14)\n✅ Done\n\n\nv0.1\nInteractive trend sparklines for flagged conditions\n✅ Done\n\n\nv0.2\nCUSUM / EARS algorithm signal detection integration\n🔲 Planned\n\n\nv0.2\nProvince → district hotspot drill-down for flagged conditions\n🔲 Planned\n\n\nv0.3\nAnalyst notes & alert log (manual triage layer)\n🔲 Planned\n\n\nv0.3\nAutomated alert email / webhook on threshold breach\n🔲 Planned\n\n\nv0.4\nLink to Forecasts page — auto-trigger EpiNow2 for flagged conditions\n🔲 Planned\n\n\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_national.rds Forecasting extension: by-forecasts/index.qmd (uses EpiNow2)\nData through: 16 March 2026",
+    "text": "NoteDevelopment Roadmap — Trending / Signal Detection\n\n\n\n\n\n\n\n\n\n\n\n\n\nPhase\nFeature\nStatus\n\n\n\n\nv0.1\nRecent surge table — conditions with biggest % increase (last 14 days vs prior 14)\n✅ Done\n\n\nv0.1\nInteractive trend sparklines for flagged conditions\n✅ Done\n\n\nv0.2\nEARS-C2 + sliding-window CUSUM signal detection\n✅ Done\n\n\nv0.2\nProvince × condition signal heatmap (drill-down)\n✅ Done\n\n\nv0.2\nPersistent alert log (data/processed/alerts.rds)\n✅ Done\n\n\nv0.3\nAnalyst notes & manual triage layer\n🔲 Planned\n\n\nv0.3\nAutomated alert email / webhook on threshold breach\n🔲 Planned\n\n\nv0.4\nAuto-trigger EpiNow2 forecasts for flagged conditions\n🔲 Planned\n\n\n\nData pipeline: R/prepare_dashboard_data.r → data/processed/agg_national.rds Algorithms: R/signal_detection.r (detect_signals_batch, cusum_sliding, build_alert_log)",
     "crumbs": [
       "Trending Conditions"
     ]
   },
   {
-    "objectID": "by-trending/index.html#emerging-signals-last-14-days",
-    "href": "by-trending/index.html#emerging-signals-last-14-days",
+    "objectID": "by-trending/index.html#national-signal-log-last-28-days",
+    "href": "by-trending/index.html#national-signal-log-last-28-days",
     "title": "Trending Conditions",
-    "section": "Emerging Signals — Last 14 Days",
-    "text": "Emerging Signals — Last 14 Days\nConditions with the largest percentage increase comparing the most recent 14-day window to the preceding 14 days.\n\nSurge Table\n\n\n\n\nTable 1",
+    "section": "National Signal Log — Last 28 Days",
+    "text": "National Signal Log — Last 28 Days\nEARS-C2 (rolling 14-day z-score, threshold = 3) and one-sided CUSUM (slack k = 0.5, threshold = 5) applied to each condition’s daily series. Signals are de-duplicated to one row per (condition × method × episode) and persisted to data/processed/alerts.rds.\n\n\n\n\n\n\nNoteStabilising z-scores for rare conditions\n\n\n\n\n\nThe baseline SD used in the EARS-C2 z-score is replaced by \\(\\tilde s = \\max\\!\\bigl(s,\\,\\sqrt{\\max(\\bar n,\\,1)}\\bigr)\\) — i.e. at least the Poisson-implied SD given the baseline mean (sd_floor = \"poisson\"). EARS signals are additionally suppressed when the baseline mean is below 0.5 cases/day (min_baseline_mean = 0.5); these rows are still computed but shown only via CUSUM, which is more stable on sparse counts. See Methods → Signal Detection for the full rationale.\n\n\n\n\n\n\n\nTable 1",
     "crumbs": [
       "Trending Conditions"
     ]
   },
   {
-    "objectID": "by-trending/index.html#trend-sparklines-flagged-conditions",
-    "href": "by-trending/index.html#trend-sparklines-flagged-conditions",
+    "objectID": "by-trending/index.html#province-condition-signal-heatmap",
+    "href": "by-trending/index.html#province-condition-signal-heatmap",
     "title": "Trending Conditions",
-    "section": "Trend Sparklines — Flagged Conditions",
-    "text": "Trend Sparklines — Flagged Conditions\nWeekly trends for the top flagged conditions over the last 26 weeks.\n\n\n\n\n\n\n\n\nFigure 1",
+    "section": "Province × Condition Signal Heatmap",
+    "text": "Province × Condition Signal Heatmap\nConditions on the y-axis, provinces on the x-axis; cell colour indicates the peak CUSUM score within the last 28 days. Empty cells = no signal.\n\n\n\n\n\n\n\n\nFigure 1",
     "crumbs": [
       "Trending Conditions"
     ]
   },
   {
-    "objectID": "by-trending/index.html#next-steps",
-    "href": "by-trending/index.html#next-steps",
+    "objectID": "by-trending/index.html#recent-14-day-surge-quick-triage",
+    "href": "by-trending/index.html#recent-14-day-surge-quick-triage",
     "title": "Trending Conditions",
-    "section": "Next Steps",
-    "text": "Next Steps\n\n\n\n\n\n\nTipFuture: CUSUM / EARS Integration\n\n\n\nThe trending page will integrate formal signal-detection algorithms (CUSUM, EARS C1/C2/C3) from the surveillance R package. Detected signals will be highlighted automatically and linked to the Forecasts tab for EpiNow2-based short-term projections.\nSee Forecasts →\n\n\n\n\n\n\n\n\n\nTipRelated Sections\n\n\n\n\nForecasts & Scenarios — short-term predictive models fed by signals\nBurden of Disease — quantified health impact of conditions\nBy Condition — condition-level national trends\nBy Province — province-level surveillance detail\nMethods — signal detection methodology documentation",
+    "section": "Recent 14-day Surge — Quick Triage",
+    "text": "Recent 14-day Surge — Quick Triage\nConditions ordered by absolute change in the most recent 14-day window vs the preceding 14 days. Use the signal table above as the primary trigger; this view is a complementary, formula-free sanity check and is not delay-corrected.\n\n\n\n\nTable 2",
+    "crumbs": [
+      "Trending Conditions"
+    ]
+  },
+  {
+    "objectID": "by-trending/index.html#seasonal-context-top-flagged-condition",
+    "href": "by-trending/index.html#seasonal-context-top-flagged-condition",
+    "title": "Trending Conditions",
+    "section": "Seasonal Context — Top Flagged Condition",
+    "text": "Seasonal Context — Top Flagged Condition\nCurrent epiyear (solid red) overlaid on the historical median + IQR + 5–95% ribbon from the prior five years. The dotted segment marks provisional weeks inside the reporting-delay window.\n\n\n\n\n\n\n\n\nFigure 2: Weekly notifications vs 5-year historical baseline",
+    "crumbs": [
+      "Trending Conditions"
+    ]
+  },
+  {
+    "objectID": "by-trending/index.html#trend-sparklines-top-flagged-conditions",
+    "href": "by-trending/index.html#trend-sparklines-top-flagged-conditions",
+    "title": "Trending Conditions",
+    "section": "Trend Sparklines — Top Flagged Conditions",
+    "text": "Trend Sparklines — Top Flagged Conditions\n\n\n\n\n\n\n\n\nFigure 3\n\n\n\n\n\n\n\n\n\n\n\nTipRelated Sections\n\n\n\n\nForecasts & Scenarios — short-term predictive models fed by signals\nBurden of Disease — quantified health impact of conditions\nBy Condition — condition-level national trends\nBy Province — province-level surveillance detail\nMethods — signal detection methodology documentation",
     "crumbs": [
       "Trending Conditions"
     ]

@@ -24,7 +24,7 @@ pacman::p_load(
   ggplot2, gtsummary, tidyverse, magrittr,
   conflicted, scales, data.table, lubridate,
   flextable, gt, ggrepel, zoo,
-  janitor
+  janitor, binom, broom
 )
 
 conflicted::conflicts_prefer(dplyr::filter)
@@ -285,12 +285,16 @@ ggplot(trend12_df, aes(x = month_date)) +
   geom_line(aes(y = rolling3), colour = "#C62828", linewidth = 1.3, na.rm = TRUE) +
   geom_point(aes(y = rolling3), colour = "#C62828", size = 2.5, na.rm = TRUE) +
   geom_text(aes(y = n, label = n), vjust = -0.5, size = 3.2, colour = "#333333") +
-  scale_x_date(date_labels = "%b\n%Y", date_breaks = "1 month", expand = expansion(mult = c(0.02, 0.02))) +
+  scale_x_date(
+    date_labels      = "%b %Y",
+    date_breaks      = "1 month",
+    expand           = expansion(mult = c(0.03, 0.03))
+  ) +
   scale_y_continuous(name = "Notifications", expand = expansion(mult = c(0, 0.15))) +
   labs(x = NULL,
        caption = "Red line = 3-month rolling average. Yellow shading = Sep–Nov seasonal peak.") +
   theme_nmc() +
-  theme(axis.text.x = element_text(size = 8))
+  theme(axis.text.x = element_text(size = 9, angle = 45, hjust = 1, vjust = 1))
 ```
 
 ## Provincial Burden
@@ -921,7 +925,7 @@ poison %>%
         type    = list(Age_years ~ "continuous"), percent = "row"
       ) %>% bold_labels()
   ) %>%
-  as_flex_table()
+  as_flex_table()%>%save_as_docx(path = "/Users/briday/Desktop/under12_deaths.docx")
 ```
 
 ---
@@ -947,6 +951,923 @@ ggplot(fac_df, aes(x = factor(Year_notification))) +
   labs(x = "Year", y = "Unique reporting facilities (n)") +
   theme_nmc() +
   theme(legend.position = "bottom")
+```
+
+---
+
+# Post-Ban Burden: Cabinet Recommendation to Gazetted Ban {#sec-terbufos}
+
+::: {.callout-important appearance="minimal"}
+**Policy window** — The Cabinet recommended a ban on terbufos on **12 June 2025**. The ban was formally gazetted on **8 May 2026**. This section describes the poisoning and mortality burden observed during this 330-day interim period.
+:::
+
+```{r terbufos-setup}
+#| label: terbufos-setup
+#| include: false
+
+ban_recommend <- as_date("2025-06-12")   # Cabinet recommendation date
+ban_gazette   <- as_date("2026-05-08")   # Gazetted ban date
+
+# Post-recommendation period subset
+poison_ban <- poison %>%
+  filter(!is.na(notification_date)) %>%
+  mutate(nd = as_date(notification_date)) %>%
+  filter(nd >= ban_recommend, nd <= ban_gazette)
+
+# Pre-recommendation equivalent period (same window duration, one year prior)
+window_days  <- as.integer(ban_gazette - ban_recommend)
+pre_start    <- ban_recommend - years(1)
+pre_end      <- pre_start + days(window_days)
+
+poison_pre <- poison %>%
+  filter(!is.na(notification_date)) %>%
+  mutate(nd = as_date(notification_date)) %>%
+  filter(nd >= pre_start, nd <= pre_end)
+
+# Summary statistics
+ban_n      <- nrow(poison_ban)
+ban_deaths <- sum(poison_ban$deceased, na.rm = TRUE)
+ban_cfr    <- round(ban_deaths / max(ban_n, 1) * 100, 1)
+pre_n      <- nrow(poison_pre)
+pre_deaths <- sum(poison_pre$deceased, na.rm = TRUE)
+pre_cfr    <- round(pre_deaths / max(pre_n, 1) * 100, 1)
+pct_chg_n  <- round((ban_n - pre_n) / max(pre_n, 1) * 100)
+pct_chg_d  <- round((ban_deaths - pre_deaths) / max(pre_deaths, 1) * 100)
+```
+
+## Summary statistics: 12 June 2025 – 8 May 2026
+
+```{r terbufos-summary-table}
+#| label: tbl-terbufos-summary
+#| tbl-cap: !expr 'paste0("Agricultural and stock remedy poisoning burden during the post-Cabinet-recommendation window (12 Jun 2025 – 08 May 2026) compared with the equivalent prior-year window (", format(pre_start, \"%d %b %Y\"), " – ", format(pre_end, \"%d %b %Y\"), ").")'
+
+tibble(
+  Indicator = c(
+    "Period start", "Period end", "Duration (days)",
+    "Total notifications", "Total deaths",
+    "Case fatality ratio (CFR)",
+    "Weekly notification rate (mean ± SD)",
+    "Top province by notifications",
+    "Children <12 (notifications)",
+    "Children <12 (deaths)"
+  ),
+  `Post-recommendation window\n(12 Jun 2025 – 8 May 2026)` = c(
+    format(ban_recommend, "%d %b %Y"),
+    format(ban_gazette,   "%d %b %Y"),
+    as.character(window_days),
+    scales::comma(ban_n),
+    scales::comma(ban_deaths),
+    paste0(ban_cfr, "%"),
+    {
+      wk <- poison_ban %>%
+        mutate(wk = floor_date(nd, "week")) %>%
+        count(wk)
+      paste0(round(mean(wk$n), 1), " ± ", round(sd(wk$n), 1))
+    },
+    {
+      poison_ban %>% count(Province, sort = TRUE) %>%
+        slice(1) %>% pull(Province) %>% as.character()
+    },
+    scales::comma(sum(poison_ban$Age_years < 12, na.rm = TRUE)),
+    scales::comma(sum(poison_ban$deceased[poison_ban$Age_years < 12], na.rm = TRUE))
+  ),
+  `Equivalent prior-year window\n(12 Jun 2024 – 8 May 2025)` = c(
+    format(pre_start, "%d %b %Y"),
+    format(pre_end,   "%d %b %Y"),
+    as.character(window_days),
+    scales::comma(pre_n),
+    scales::comma(pre_deaths),
+    paste0(pre_cfr, "%"),
+    {
+      wk <- poison_pre %>%
+        mutate(wk = floor_date(nd, "week")) %>%
+        count(wk)
+      paste0(round(mean(wk$n), 1), " ± ", round(sd(wk$n), 1))
+    },
+    {
+      poison_pre %>% count(Province, sort = TRUE) %>%
+        slice(1) %>% pull(Province) %>% as.character()
+    },
+    scales::comma(sum(poison_pre$Age_years < 12, na.rm = TRUE)),
+    scales::comma(sum(poison_pre$deceased[poison_pre$Age_years < 12], na.rm = TRUE))
+  ),
+  `% Change` = c(
+    "—", "—", "—",
+    paste0(ifelse(pct_chg_n >= 0, "+", ""), pct_chg_n, "%"),
+    paste0(ifelse(pct_chg_d >= 0, "+", ""), pct_chg_d, "%"),
+    paste0(ifelse(ban_cfr - pre_cfr >= 0, "+", ""), round(ban_cfr - pre_cfr, 1), " pp"),
+    "—", "—", "—", "—"
+  )
+) %>%
+  flextable() %>%
+  bold(part = "header") %>%
+  bold(i = 4:6, j = 1) %>%
+  bg(i = 4:6, bg = "#FFF3E0") %>%
+  color(i = 4, j = 4,
+        color = if (pct_chg_n > 10) "#C62828" else if (pct_chg_n < -10) "#2E7D32" else "#F57C00") %>%
+  color(i = 5, j = 4,
+        color = if (pct_chg_d > 10) "#C62828" else if (pct_chg_d < -10) "#2E7D32" else "#F57C00") %>%
+  set_table_properties(layout = "autofit", width = 1) %>%
+  fontsize(size = 10, part = "all") %>%
+  add_footer_lines("pp = percentage points. CFR calculated as deaths ÷ total notifications × 100. Children <12 based on recorded age in years.")
+```
+
+## Weekly trend within the policy window
+
+```{r terbufos-weekly-trend}
+#| label: fig-terbufos-weekly
+#| fig-cap: "Weekly notifications and deaths for agricultural and stock remedy poisoning during the post-Cabinet-recommendation period (12 June 2025 – 8 May 2026). The dashed vertical line marks the gazetted ban date (8 May 2026)."
+#| fig-height: 4.5
+
+poison_ban %>%
+  mutate(week = floor_date(nd, "week")) %>%
+  group_by(week) %>%
+  summarise(n = n(), deaths = sum(deceased, na.rm = TRUE), .groups = "drop") -> ban_weekly
+
+ggplot(ban_weekly, aes(x = week)) +
+  geom_col(aes(y = n),      fill = "#90CAF9", colour = "#64B5F6", width = 5.5, alpha = 0.9) +
+  geom_col(aes(y = deaths), fill = "#EF9A9A", colour = "#E57373", width = 5.5, alpha = 0.9) +
+  geom_line(aes(y = zoo::rollmean(n, k = 4, fill = NA, align = "right")),
+            colour = "#1565C0", linewidth = 1.1, na.rm = TRUE) +
+  geom_vline(xintercept = as.numeric(ban_gazette),
+             linetype = "dashed", colour = "#B71C1C", linewidth = 0.8) +
+  annotate("text", x = ban_gazette + days(3),
+           y = max(ban_weekly$n, na.rm = TRUE) * 0.92,
+           label = "Gazetted ban\n8 May 2026",
+           colour = "#B71C1C", size = 3, hjust = 0) +
+  scale_x_date(date_labels = "%d %b\n%Y", date_breaks = "4 weeks",
+               expand = expansion(mult = c(0.01, 0.05))) +
+  scale_y_continuous(name = "Notifications / deaths (n)", breaks = pretty_breaks(5)) +
+  labs(x = "Week start",
+       caption = "Blue bars = all notifications; red bars = deaths; blue line = 4-week rolling average.") +
+  theme_nmc() +
+  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1))
+```
+
+## Provincial breakdown during the policy window
+
+```{r terbufos-prov-breakdown}
+#| label: tbl-terbufos-prov
+#| tbl-cap: "Notifications, deaths, and CFR by province during the post-Cabinet-recommendation period (12 June 2025 – 8 May 2026)."
+
+poison_ban %>%
+  group_by(Province) %>%
+  summarise(
+    Notifications = n(),
+    Deaths        = sum(deceased, na.rm = TRUE),
+    CFR           = round(Deaths / Notifications * 100, 1),
+    `Children <12 (n)` = sum(Age_years < 12, na.rm = TRUE),
+    `Median age (years)` = round(median(Age_years, na.rm = TRUE), 1),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(Notifications)) %>%
+  adorn_totals("row", fill = "—", na.rm = TRUE,
+               cols = c(Notifications, Deaths, `Children <12 (n)`)) %>%
+  mutate(CFR = round(Deaths / Notifications * 100, 1)) %>%
+  flextable() %>%
+  bold(part = "header") %>%
+  bold(i = ~ Province == "Total") %>%
+  bg(i = ~ Province == "Total", bg = "#E3F2FD") %>%
+  bg(i = ~ CFR > 10 & Province != "Total", j = "CFR", bg = "#FFCDD2") %>%
+  set_table_properties(layout = "autofit", width = 1) %>%
+  fontsize(size = 10, part = "all") %>%
+  add_footer_lines("Pink = CFR > 10%. CFR not calculated for total row from adorn_totals; recalculated from column sums.")
+```
+
+---
+
+# Case Fatality Rate: Detailed Profile {#sec-cfr-detail}
+
+```{r cfr-detail-setup}
+#| include: false
+
+# Overall CFR across full dataset
+cfr_overall <- round(sum(poison$deceased, na.rm = TRUE) / nrow(poison) * 100, 1)
+
+# CFR with exact 95% CI using Wilson method
+cfr_ci <- binom::binom.wilson(
+  x = sum(poison$deceased, na.rm = TRUE),
+  n = nrow(poison)
+)
+cfr_lo <- round(cfr_ci$lower * 100, 1)
+cfr_hi <- round(cfr_ci$upper * 100, 1)
+```
+
+::: {.callout-note appearance="minimal"}
+Overall CFR for the full surveillance period (2020–present): **`r cfr_overall`%** (95% CI: `r cfr_lo`–`r cfr_hi`%).
+:::
+
+## Annual CFR with confidence intervals
+
+```{r cfr-annual-ci}
+#| label: fig-cfr-annual-ci
+#| fig-cap: "Annual case fatality ratio (%) with 95% Wilson confidence intervals, agricultural and stock remedy poisoning, South Africa, 2020–present. Numbers above bars = annual notification count."
+#| fig-height: 4.5
+
+poison %>%
+  group_by(Year_notification) %>%
+  summarise(
+    n      = n(),
+    deaths = sum(deceased, na.rm = TRUE),
+    cfr    = deaths / n * 100,
+    .groups = "drop"
+  ) %>%
+  rowwise() %>%
+  mutate(
+    lo = binom::binom.wilson(deaths, n)$lower * 100,
+    hi = binom::binom.wilson(deaths, n)$upper * 100
+  ) %>%
+  ungroup() -> cfr_annual_ci
+
+ggplot(cfr_annual_ci, aes(x = factor(Year_notification), y = cfr)) +
+  geom_col(fill = "#EF9A9A", colour = "#E57373", width = 0.65, alpha = 0.9) +
+  geom_errorbar(aes(ymin = lo, ymax = hi), width = 0.25,
+                colour = "#B71C1C", linewidth = 0.8) +
+  geom_text(aes(y = hi + 0.3, label = scales::comma(n)),
+            size = 3.2, vjust = 0, colour = "#333333") +
+  scale_y_continuous(name = "Case fatality ratio (%)", expand = expansion(mult = c(0, 0.15))) +
+  labs(x = "Year",
+       caption = "Error bars = 95% Wilson confidence intervals. Numbers = total notifications per year.") +
+  theme_nmc()
+```
+
+## CFR by province and year — heatmap
+
+```{r cfr-prov-heatmap}
+#| label: fig-cfr-prov-heatmap
+#| fig-cap: "Case fatality ratio (%) by province and year, agricultural and stock remedy poisoning, South Africa. Cell text = CFR (notifications count in parentheses). Grey = no data."
+#| fig-height: 5.5
+
+poison %>%
+  group_by(Province, Year_notification) %>%
+  summarise(n = n(), deaths = sum(deceased, na.rm = TRUE),
+            cfr = round(deaths / n * 100, 1), .groups = "drop") %>%
+  complete(Province, Year_notification, fill = list(n = NA_real_, deaths = NA_real_, cfr = NA_real_)) -> cfr_heat_df
+
+ggplot(cfr_heat_df, aes(x = factor(Year_notification), y = Province, fill = cfr)) +
+  geom_tile(colour = "white", linewidth = 0.5) +
+  geom_text(aes(label = ifelse(!is.na(cfr),
+                               paste0(cfr, "%\n(n=", scales::comma(n), ")"), "—")),
+            size = 2.6, lineheight = 0.85) +
+  scale_fill_gradient(low = "#FFF9C4", high = "#B71C1C", na.value = "grey88",
+                      name = "CFR (%)") +
+  labs(x = "Year", y = NULL) +
+  theme_nmc() +
+  theme(legend.position = "right", panel.grid = element_blank())
+```
+
+## CFR by age group — forest plot
+
+```{r cfr-age-forest}
+#| label: fig-cfr-age-forest
+#| fig-cap: "Case fatality ratio by age group with 95% Wilson confidence intervals, agricultural and stock remedy poisoning, South Africa, 2020–present. Reference line = overall CFR."
+#| fig-height: 5
+
+poison %>%
+  filter(!is.na(age_group)) %>%
+  group_by(age_group) %>%
+  summarise(n = n(), deaths = sum(deceased, na.rm = TRUE), .groups = "drop") %>%
+  rowwise() %>%
+  mutate(
+    cfr = binom::binom.wilson(deaths, n)$mean  * 100,
+    lo  = binom::binom.wilson(deaths, n)$lower * 100,
+    hi  = binom::binom.wilson(deaths, n)$upper * 100
+  ) %>%
+  ungroup() -> cfr_age_df
+
+ggplot(cfr_age_df, aes(x = cfr, y = fct_rev(age_group))) +
+  geom_vline(xintercept = cfr_overall, linetype = "dashed",
+             colour = "grey50", linewidth = 0.5) +
+  geom_errorbarh(aes(xmin = lo, xmax = hi), height = 0.3,
+                 colour = "#B71C1C", linewidth = 0.8) +
+  geom_point(aes(size = n), colour = "#B71C1C", shape = 18) +
+  geom_text(aes(x = hi + 0.3, label = paste0(round(cfr, 1), "%")),
+            hjust = 0, size = 3, colour = "#333333") +
+  scale_size_continuous(range = c(2, 8), name = "Notifications (n)") +
+  scale_x_continuous(name = "Case fatality ratio (%)",
+                     expand = expansion(mult = c(0, 0.15))) +
+  annotate("text", x = cfr_overall + 0.1,
+           y = nrow(cfr_age_df) + 0.5, label = paste0("Overall CFR = ", cfr_overall, "%"),
+           hjust = 0, size = 3, colour = "grey40") +
+  labs(y = "Age group (years)") +
+  theme_nmc() +
+  theme(legend.position = "bottom",
+        panel.grid.major.x = element_line(colour = "#EEEEEE", linewidth = 0.3))
+```
+
+## CFR summary table by key strata
+
+```{r cfr-strata-table}
+#| label: tbl-cfr-strata
+#| tbl-cap: "Case fatality ratio (%) by key demographic and geographic strata, agricultural and stock remedy poisoning, South Africa, 2020–present."
+
+bind_rows(
+  # Overall
+  poison %>%
+    summarise(Stratum = "Overall", n = n(),
+              deaths = sum(deceased, na.rm = TRUE)) %>%
+    mutate(group = "Overall"),
+  # By sex
+  poison %>% filter(!is.na(sex)) %>%
+    group_by(Stratum = sex) %>%
+    summarise(n = n(), deaths = sum(deceased, na.rm = TRUE), .groups = "drop") %>%
+    mutate(group = "Sex"),
+  # By age group
+  poison %>% filter(!is.na(age_group)) %>%
+    group_by(Stratum = as.character(age_group)) %>%
+    summarise(n = n(), deaths = sum(deceased, na.rm = TRUE), .groups = "drop") %>%
+    mutate(group = "Age group"),
+  # By province
+  poison %>%
+    group_by(Stratum = as.character(Province)) %>%
+    summarise(n = n(), deaths = sum(deceased, na.rm = TRUE), .groups = "drop") %>%
+    mutate(group = "Province")
+) %>%
+  rowwise() %>%
+  mutate(
+    CFR = round(binom::binom.wilson(deaths, n)$mean  * 100, 1),
+    Lo  = round(binom::binom.wilson(deaths, n)$lower * 100, 1),
+    Hi  = round(binom::binom.wilson(deaths, n)$upper * 100, 1)
+  ) %>%
+  ungroup() %>%
+  mutate(`CFR (95% CI)` = paste0(CFR, "% (", Lo, "–", Hi, "%)")) %>%
+  select(group, Stratum, `Notifications (n)` = n, `Deaths (n)` = deaths, `CFR (95% CI)`) %>%
+  flextable() %>%
+  merge_v(j = "group") %>%
+  bold(part = "header") %>%
+  bold(i = ~ group == "Overall") %>%
+  bg(i = ~ group == "Overall", bg = "#E3F2FD") %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit", width = 1) %>%
+  fontsize(size = 10, part = "all") %>%
+  add_footer_lines("95% CI calculated using the Wilson score method.")
+```
+
+---
+
+# Facility Profile {#sec-facility-profile}
+
+::: {.callout-note appearance="minimal"}
+This section describes **which types of health facilities** are reporting agricultural and stock remedy poisoning notifications, indicating care-seeking pathways and potential surveillance gaps.
+:::
+
+```{r facility-setup}
+#| include: false
+
+# Standardise facility_type to title case and collapse rare types to "Other"
+poison %>%
+  filter(!is.na(facility_type)) %>%
+  mutate(
+    fac_type = str_to_title(str_trim(facility_type)),
+    fac_type = fct_lump_n(fac_type, n = 8, other_level = "Other")
+  ) -> poison_fac
+
+poison %>%
+  filter(!is.na(facility_sector)) %>%
+  mutate(fac_sector = str_to_title(str_trim(facility_sector))) -> poison_sec
+```
+
+## Notifications by facility type
+
+```{r facility-type-bar}
+#| label: fig-facility-type
+#| fig-cap: "Number of agricultural and stock remedy poisoning notifications by reporting facility type, South Africa, 2020–present. Facility types that account for <1% combined are grouped as 'Other'."
+#| fig-height: 5
+
+poison_fac %>%
+  count(fac_type, sort = TRUE) %>%
+  mutate(
+    pct      = n / sum(n) * 100,
+    fac_type = fct_reorder(fac_type, n)
+  ) -> fac_type_df
+
+ggplot(fac_type_df, aes(x = n, y = fac_type)) +
+  geom_col(fill = "#5C6BC0", alpha = 0.88, width = 0.7) +
+  geom_text(aes(label = paste0(scales::comma(n), " (", round(pct, 1), "%)")),
+            hjust = -0.08, size = 3.1, colour = "#333333") +
+  scale_x_continuous(name = "Notifications (n)",
+                     expand = expansion(mult = c(0, 0.2)),
+                     labels = scales::comma) +
+  labs(y = NULL) +
+  theme_nmc() +
+  theme(panel.grid.major.x = element_line(colour = "#EEEEEE", linewidth = 0.3))
+```
+
+## Facility type by vital status
+
+```{r facility-vital}
+#| label: fig-facility-vital
+#| fig-cap: "Proportion of cases alive vs deceased by reporting facility type, agricultural and stock remedy poisoning, South Africa, 2020–present. Facilities with ≥10 notifications included. Red = deceased."
+#| fig-height: 5.5
+
+poison_fac %>%
+  filter(!is.na(patient_vital_status),
+         patient_vital_status %in% c("Alive", "Deceased")) %>%
+  group_by(fac_type) %>%
+  filter(n() >= 10) %>%
+  ungroup() %>%
+  count(fac_type, patient_vital_status) %>%
+  group_by(fac_type) %>%
+  mutate(
+    total = sum(n),
+    pct   = n / total * 100,
+    fac_type = fct_reorder(fac_type, total)
+  ) %>%
+  ungroup() -> fac_vital_df
+
+ggplot(fac_vital_df, aes(x = pct, y = fac_type, fill = patient_vital_status)) +
+  geom_col(position = "fill", width = 0.7) +
+  geom_text(data = fac_vital_df %>% filter(patient_vital_status == "Deceased"),
+            aes(x = pct / 100, label = paste0(round(pct, 1), "%")),
+            hjust = 1.1, size = 3, colour = "white", fontface = "bold") +
+  scale_x_continuous(labels = scales::percent_format(scale = 100),
+                     name = "Proportion of notifications (%)") +
+  scale_fill_manual(values = c("Alive" = "#81C784", "Deceased" = "#E57373"), name = NULL) +
+  labs(y = NULL) +
+  theme_nmc() +
+  theme(legend.position = "bottom")
+```
+
+## CFR by facility type and sector
+
+```{r facility-cfr-table}
+#| label: tbl-facility-cfr
+#| tbl-cap: "Notifications, deaths, and case fatality ratio by facility type, agricultural and stock remedy poisoning, South Africa, 2020–present."
+
+poison_fac %>%
+  group_by(`Facility Type` = fac_type) %>%
+  summarise(
+    Notifications = n(),
+    Deaths        = sum(deceased, na.rm = TRUE),
+    CFR           = round(Deaths / Notifications * 100, 1),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(Notifications)) %>%
+  flextable() %>%
+  bold(part = "header") %>%
+  bg(i = ~ CFR > 10, j = "CFR", bg = "#FFCDD2") %>%
+  bg(i = ~ CFR <= 10 & CFR > 5, j = "CFR", bg = "#FFF9C4") %>%
+  set_table_properties(layout = "autofit", width = 1) %>%
+  fontsize(size = 10, part = "all") %>%
+  add_footer_lines("Pink = CFR >10%; Yellow = CFR 5–10%.")
+```
+
+## Facility type trend over years
+
+```{r facility-type-trend}
+#| label: fig-facility-type-trend
+#| fig-cap: "Annual proportion of notifications by reporting facility type, agricultural and stock remedy poisoning, South Africa. Shift in facility mix may reflect changes in care pathways or surveillance coverage."
+#| fig-height: 5
+
+poison_fac %>%
+  count(Year_notification, fac_type) %>%
+  group_by(Year_notification) %>%
+  mutate(pct = n / sum(n) * 100) %>%
+  ungroup() %>%
+  ggplot(aes(x = factor(Year_notification), y = pct, fill = fac_type)) +
+  geom_col(position = "fill", width = 0.75) +
+  scale_y_continuous(labels = scales::percent_format(scale = 100),
+                     name = "Proportion of notifications (%)") +
+  scale_fill_brewer(palette = "Set2", name = "Facility type") +
+  labs(x = "Year") +
+  theme_nmc() +
+  theme(legend.position = "bottom") +
+  guides(fill = guide_legend(nrow = 3))
+```
+
+## Public vs private sector split
+
+```{r facility-sector-bar}
+#| label: fig-facility-sector
+#| fig-cap: "Notifications by facility sector (public vs private) and year, agricultural and stock remedy poisoning, South Africa."
+#| fig-height: 4.5
+
+poison %>%
+  filter(!is.na(facility_sector)) %>%
+  mutate(Sector = str_to_title(str_trim(facility_sector))) %>%
+  count(Year_notification, Sector) %>%
+  group_by(Year_notification) %>%
+  mutate(pct = n / sum(n) * 100) %>%
+  ungroup() %>%
+  ggplot(aes(x = factor(Year_notification), y = pct, fill = Sector)) +
+  geom_col(position = "fill", width = 0.75) +
+  geom_text(aes(label = paste0(round(pct), "%")),
+            position = position_fill(vjust = 0.5),
+            size = 3, colour = "white", fontface = "bold") +
+  scale_y_continuous(labels = scales::percent_format(scale = 100),
+                     name = "Proportion of notifications (%)") +
+  scale_fill_manual(values = c("Public" = "#1565C0", "Private" = "#2E7D32",
+                               "Unknown" = "grey70"), name = "Sector") +
+  labs(x = "Year") +
+  theme_nmc() +
+  theme(legend.position = "bottom")
+```
+
+---
+
+# Odds of Death: ASRP vs Other Notifiable Conditions {#sec-odds-death}
+
+::: {.callout-note appearance="minimal"}
+Logistic regression comparing the odds of dying from agricultural and stock remedy poisoning versus all other notifiable conditions reported in the same period, adjusted for age group, sex, province, and year.
+:::
+
+```{r odds-setup}
+#| label: odds-setup
+#| include: false
+
+# Load full master dataset for comparison conditions
+new_master %>%
+  filter(
+    as.integer(Year_notification) %in% 2020:year(Sys.Date()),
+    !is.na(prov_), !is.na(patient_vital_status)
+  ) %>%
+  mutate(
+    deceased_bin = as.integer(patient_vital_status %in% "Deceased"),
+    is_asrp      = as.integer(condition %in% CONDITION),
+    Age_years    = as.numeric(Age_years),
+    age_group_lr = cut(
+      Age_years,
+      breaks = c(-Inf, 5, 15, 30, 45, 60, Inf),
+      labels = c("<5", "5–14", "15–29", "30–44", "45–59", "60+"),
+      right  = FALSE
+    ),
+    sex_lr = case_when(
+      patient_gender %in% c("Male",   "M") ~ "Male",
+      patient_gender %in% c("Female", "F") ~ "Female",
+      TRUE ~ NA_character_
+    ),
+    year_lr = as.factor(as.integer(Year_notification))
+  ) %>%
+  filter(!is.na(sex_lr), !is.na(age_group_lr), !is.na(prov_)) -> lr_data
+
+# Logistic regression: deceased ~ is_asrp + age_group + sex + prov_ + year
+lr_model <- glm(
+  deceased_bin ~ is_asrp + age_group_lr + sex_lr + prov_ + year_lr,
+  data   = lr_data,
+  family = binomial(link = "logit")
+)
+
+# Extract OR and CI for is_asrp
+lr_tidy <- broom::tidy(lr_model, exponentiate = TRUE, conf.int = TRUE)
+
+asrp_or <- lr_tidy %>%
+  filter(term == "is_asrp") %>%
+  mutate(
+    OR   = round(estimate,   2),
+    lo95 = round(conf.low,   2),
+    hi95 = round(conf.high,  2),
+    p    = round(p.value,    4)
+  )
+```
+
+## Crude vs adjusted odds of dying
+
+```{r odds-table}
+#| label: tbl-odds-asrp
+#| tbl-cap: "Crude and adjusted odds of dying from agricultural and stock remedy poisoning compared with all other notifiable conditions, South Africa, 2020–present. Adjusted for age group, sex, province, and year."
+
+# Crude OR
+crude_model <- glm(deceased_bin ~ is_asrp, data = lr_data, family = binomial())
+crude_tidy  <- broom::tidy(crude_model, exponentiate = TRUE, conf.int = TRUE) %>%
+  filter(term == "is_asrp")
+
+# All model terms formatted
+lr_tidy %>%
+  mutate(
+    OR   = round(estimate,  2),
+    lo95 = round(conf.low,  2),
+    hi95 = round(conf.high, 2),
+    p    = ifelse(p.value < 0.001, "<0.001", round(p.value, 3))
+  ) %>%
+  mutate(
+    `OR (95% CI)` = paste0(OR, " (", lo95, "–", hi95, ")"),
+    Predictor     = case_when(
+      term == "is_asrp"                   ~ "ASRP vs other conditions",
+      str_starts(term, "age_group_lr")    ~ paste0("Age group: ", str_remove(term, "age_group_lr")),
+      str_starts(term, "sex_lr")          ~ paste0("Sex: ",       str_remove(term, "sex_lr")),
+      str_starts(term, "prov_")           ~ paste0("Province: ",  str_remove(term, "prov_")),
+      str_starts(term, "year_lr")         ~ paste0("Year: ",      str_remove(term, "year_lr")),
+      term == "(Intercept)"               ~ "Intercept",
+      TRUE ~ term
+    )
+  ) %>%
+  filter(term != "(Intercept)") %>%
+  select(Predictor, OR, `95% CI lower` = lo95, `95% CI upper` = hi95, `p-value` = p) %>%
+  flextable() %>%
+  bold(part = "header") %>%
+  bold(i = ~ Predictor == "ASRP vs other conditions") %>%
+  bg(i   = ~ Predictor == "ASRP vs other conditions", bg = "#FFF3E0") %>%
+  color(i = ~ OR > 3 & Predictor != "Intercept", j = "OR", color = "#C62828") %>%
+  set_table_properties(layout = "autofit", width = 1) %>%
+  fontsize(size = 10, part = "all") %>%
+  add_footer_lines(paste0(
+    "Adjusted OR for ASRP vs other conditions: ",
+    asrp_or$OR, " (95% CI: ", asrp_or$lo95, "–", asrp_or$hi95,
+    ", p ", ifelse(asrp_or$p < 0.001, "<0.001", asrp_or$p), "). ",
+    "Reference categories: age <5, Female, EC province, earliest year."
+  ))
+```
+
+## Forest plot of adjusted odds ratios
+
+```{r odds-forest}
+#| label: fig-odds-forest
+#| fig-cap: "Adjusted odds ratios (OR) for death from logistic regression model. Reference line at OR = 1.0. ASRP vs other conditions highlighted in red."
+#| fig-height: 8
+
+lr_tidy %>%
+  filter(term != "(Intercept)") %>%
+  mutate(
+    OR    = round(estimate,  2),
+    lo95  = round(conf.low,  2),
+    hi95  = round(conf.high, 2),
+    label = case_when(
+      term == "is_asrp"                   ~ "ASRP vs other conditions",
+      str_starts(term, "age_group_lr")    ~ paste0("Age: ",     str_remove(term, "age_group_lr")),
+      str_starts(term, "sex_lr")          ~ paste0("Sex: ",     str_remove(term, "sex_lr")),
+      str_starts(term, "prov_")           ~ paste0("Province: ",str_remove(term, "prov_")),
+      str_starts(term, "year_lr")         ~ paste0("Year: ",    str_remove(term, "year_lr")),
+      TRUE ~ term
+    ),
+    is_asrp_term = term == "is_asrp"
+  ) %>%
+  mutate(label = fct_reorder(label, OR)) -> forest_df
+
+ggplot(forest_df, aes(x = OR, y = label,
+                      colour = is_asrp_term,
+                      size   = is_asrp_term)) +
+  geom_vline(xintercept = 1, linetype = "dashed", colour = "grey50", linewidth = 0.5) +
+  geom_errorbarh(aes(xmin = lo95, xmax = hi95),
+                 height = 0.3, linewidth = 0.8) +
+  geom_point(shape = 18) +
+  geom_text(aes(x = hi95 + 0.05,
+                label = paste0(OR, " (", lo95, "–", hi95, ")")),
+            hjust = 0, size = 2.8, colour = "#333333") +
+  scale_colour_manual(values = c("TRUE" = "#B71C1C", "FALSE" = "#455A64"),
+                      guide = "none") +
+  scale_size_manual(values = c("TRUE" = 5, "FALSE" = 3), guide = "none") +
+  scale_x_continuous(name = "Adjusted odds ratio (OR)",
+                     expand = expansion(mult = c(0.02, 0.3))) +
+  labs(y = NULL,
+       caption = "Reference: age <5, Female, Eastern Cape, earliest year in dataset.") +
+  theme_nmc() +
+  theme(panel.grid.major.x = element_line(colour = "#EEEEEE", linewidth = 0.3),
+        axis.text.y = element_text(size = 8))
+```
+
+## CFR comparison across all notifiable conditions
+
+```{r cfr-all-conditions}
+#| label: fig-cfr-conditions
+#| fig-cap: "Case fatality ratio (%) for all notifiable conditions with ≥50 notifications, South Africa, 2020–present. Agricultural and stock remedy poisoning highlighted in red. Points sized by notification count."
+#| fig-height: 8
+
+new_master %>%
+  filter(
+    as.integer(Year_notification) %in% 2020:year(Sys.Date()),
+    !is.na(patient_vital_status)
+  ) %>%
+  group_by(condition) %>%
+  summarise(
+    n      = n(),
+    deaths = sum(patient_vital_status %in% "Deceased", na.rm = TRUE),
+    cfr    = deaths / n * 100,
+    .groups = "drop"
+  ) %>%
+  filter(n >= 50) %>%
+  mutate(
+    is_asrp   = condition %in% CONDITION,
+    condition = fct_reorder(condition, cfr)
+  ) -> cfr_all_df
+
+ggplot(cfr_all_df, aes(x = cfr, y = condition,
+                        colour = is_asrp, size = n)) +
+  geom_vline(xintercept = weighted.mean(cfr_all_df$cfr, cfr_all_df$n),
+             linetype = "dashed", colour = "grey50", linewidth = 0.4) +
+  geom_point(alpha = 0.85, shape = 16) +
+  geom_text(data = cfr_all_df %>% filter(is_asrp),
+            aes(label = paste0(round(cfr, 1), "% (n=", scales::comma(n), ")")),
+            hjust = -0.15, size = 3.2, colour = "#B71C1C", fontface = "bold") +
+  scale_colour_manual(values = c("TRUE" = "#B71C1C", "FALSE" = "#607D8B"),
+                      guide = "none") +
+  scale_size_continuous(range = c(2, 10), name = "Notifications (n)",
+                        labels = scales::comma) +
+  scale_x_continuous(name = "Case fatality ratio (%)",
+                     expand = expansion(mult = c(0.01, 0.25))) +
+  labs(y = NULL,
+       caption = "Dashed line = weighted mean CFR across all conditions. Red = agricultural and stock remedy poisoning.") +
+  theme_nmc() +
+  theme(
+    axis.text.y      = element_text(size = 7.5),
+    legend.position  = "bottom",
+    panel.grid.major.x = element_line(colour = "#EEEEEE", linewidth = 0.3)
+  )
+```
+
+---
+
+# Additional Epidemiological Analyses {#sec-additional-epi}
+
+## Time from notification to death
+
+```{r time-to-death}
+#| label: fig-time-to-death
+#| fig-cap: "Distribution of days between date of notification and date of death for agricultural and stock remedy poisoning fatalities, South Africa, 2020–present. Cases with negative values (death recorded before notification) are excluded. Median and IQR annotated."
+#| fig-height: 4.5
+
+poison %>%
+  filter(deceased, !is.na(notification_date), !is.na(patient_death_date)) %>%
+  mutate(
+    nd  = as_date(notification_date),
+    dod = as_date(patient_death_date),
+    days_to_death = as.integer(dod - nd)
+  ) %>%
+  filter(days_to_death >= 0, days_to_death <= 60) -> ttd_df
+
+if (nrow(ttd_df) >= 10) {
+  med_ttd <- median(ttd_df$days_to_death, na.rm = TRUE)
+  iqr_ttd <- IQR(ttd_df$days_to_death,   na.rm = TRUE)
+
+  ggplot(ttd_df, aes(x = days_to_death)) +
+    geom_histogram(binwidth = 1, fill = "#EF9A9A", colour = "#E57373", alpha = 0.9) +
+    geom_vline(xintercept = med_ttd, linetype = "dashed",
+               colour = "#B71C1C", linewidth = 0.9) +
+    annotate("text", x = med_ttd + 1,
+             y = max(table(ttd_df$days_to_death)) * 0.9,
+             label = paste0("Median = ", med_ttd, " days\nIQR = ", round(iqr_ttd, 1), " days"),
+             hjust = 0, size = 3.2, colour = "#B71C1C") +
+    scale_x_continuous(name = "Days from notification to death",
+                       breaks = pretty_breaks(8)) +
+    scale_y_continuous(name = "Deaths (n)", breaks = pretty_breaks(5)) +
+    labs(caption = "Limited to 0–60 days. Dashed line = median.") +
+    theme_nmc()
+} else {
+  cat("Insufficient date-of-death data available to generate this plot.")
+}
+```
+
+## Notification lag: date of illness onset to notification date
+
+```{r notification-lag}
+#| label: fig-notif-lag
+#| fig-cap: "Distribution of days between reported date of illness onset and date of notification, agricultural and stock remedy poisoning, South Africa, 2020–present. Longer lags indicate delays in surveillance detection."
+#| fig-height: 4.5
+
+poison %>%
+  filter(!is.na(notification_date), !is.na(symptom_date)) %>%
+  mutate(
+    nd    = as_date(notification_date),
+    onset = as_date(symptom_date),
+    lag   = as.integer(nd - onset)
+  ) %>%
+  filter(lag >= 0, lag <= 90) -> lag_df
+
+if (nrow(lag_df) >= 10) {
+  med_lag <- median(lag_df$lag, na.rm = TRUE)
+  iqr_lag <- IQR(lag_df$lag,   na.rm = TRUE)
+
+  ggplot(lag_df, aes(x = lag)) +
+    geom_histogram(binwidth = 1, fill = "#90CAF9", colour = "#64B5F6", alpha = 0.9) +
+    geom_vline(xintercept = med_lag, linetype = "dashed",
+               colour = "#1565C0", linewidth = 0.9) +
+    annotate("text", x = med_lag + 2,
+             y = max(table(lag_df$lag)) * 0.88,
+             label = paste0("Median = ", med_lag, " days\nIQR = ", round(iqr_lag, 1), " days"),
+             hjust = 0, size = 3.2, colour = "#1565C0") +
+    scale_x_continuous(name = "Days from onset to notification",
+                       breaks = pretty_breaks(8)) +
+    scale_y_continuous(name = "Notifications (n)", breaks = pretty_breaks(5)) +
+    labs(caption = "Limited to 0–90 days.") +
+    theme_nmc()
+} else {
+  cat("Insufficient onset-date data available to generate this plot.")
+}
+```
+
+## Missing data profile
+
+```{r missing-data}
+#| label: tbl-missing
+#| tbl-cap: "Completeness of key surveillance variables for agricultural and stock remedy poisoning notifications, South Africa, 2020–present. Stratified by year."
+
+vars_of_interest <- c(
+  "Age_years"            = "Age (years)",
+  "sex"                  = "Sex",
+  "notification_date"    = "Notification date",
+  "symptom_date"         = "Onset date",
+  "patient_death_date"   = "Date of death (deaths only)",
+  "patient_vital_status" = "Vital status",
+  "district"             = "District",
+  "facility"             = "Reporting facility",
+  "facility_type"        = "Facility type"
+)
+
+missing_wide <- purrr::map_dfr(names(vars_of_interest), function(v) {
+  poison %>%
+    group_by(Year = Year_notification) %>%
+    summarise(
+      Variable    = vars_of_interest[[v]],
+      Total       = n(),
+      `Complete`  = sum(!is.na(.data[[v]]) & .data[[v]] != ""),
+      .groups = "drop"
+    ) %>%
+    mutate(`% Complete` = round(`Complete` / Total * 100, 1))
+}) %>%
+  select(Variable, Year, Total, `Complete`, `% Complete`) %>%
+  pivot_wider(names_from = Year,
+              values_from = c(`Complete`, `% Complete`),
+              names_glue  = "{Year}_{.value}")
+
+# pre-compute which rows have any year with completeness < 70%
+pct_cols <- grep("% Complete", names(missing_wide), value = TRUE)
+low_rows <- which(rowSums(missing_wide[pct_cols] < 70, na.rm = TRUE) > 0)
+
+ft <- flextable(missing_wide) %>%
+  bold(part = "header") %>%
+  set_table_properties(layout = "autofit", width = 1) %>%
+  fontsize(size = 9, part = "all") %>%
+  add_footer_lines("Orange text = at least one year with completeness <70%. Date of death evaluated across all cases (not only deaths).")
+
+if (length(low_rows) > 0) ft <- color(ft, i = low_rows, color = "#E65100")
+ft
+```
+
+## Repeat reporting facilities — top contributors
+
+```{r top-facilities-table}
+#| label: tbl-top-facilities
+#| tbl-cap: "Top 20 reporting facilities by total notification count, agricultural and stock remedy poisoning, South Africa, 2020–present."
+
+poison %>%
+  filter(!is.na(facility), facility != "") %>%
+  group_by(facility, Province) %>%
+  summarise(
+    Notifications  = n(),
+    Deaths         = sum(deceased, na.rm = TRUE),
+    CFR            = round(Deaths / Notifications * 100, 1),
+    `Years active` = n_distinct(Year_notification),
+    `Facility type` = first(facility_type),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(Notifications)) %>%
+  slice(1:20) %>%
+  flextable() %>%
+  bold(part = "header") %>%
+  bg(i = ~ CFR > 10, j = "CFR", bg = "#FFCDD2") %>%
+  set_table_properties(layout = "autofit", width = 1) %>%
+  fontsize(size = 9, part = "all") %>%
+  add_footer_lines("Pink = CFR > 10%.")
+```
+
+## Annual CFR trend with policy annotations
+
+```{r cfr-policy-timeline}
+#| label: fig-cfr-policy
+#| fig-cap: "Monthly case fatality ratio (%) for agricultural and stock remedy poisoning, 2020–present, with key policy milestones annotated. Shaded band = 95% Wilson confidence interval."
+#| fig-height: 5
+
+poison %>%
+  filter(!is.na(notification_date)) %>%
+  mutate(month_date = floor_date(as_date(notification_date), "month")) %>%
+  group_by(month_date) %>%
+  summarise(
+    n      = n(),
+    deaths = sum(deceased, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  filter(n >= 5) %>%
+  rowwise() %>%
+  mutate(
+    cfr = binom::binom.wilson(deaths, n)$mean  * 100,
+    lo  = binom::binom.wilson(deaths, n)$lower * 100,
+    hi  = binom::binom.wilson(deaths, n)$upper * 100
+  ) %>%
+  ungroup() -> cfr_monthly_df
+
+policy_events <- tibble(
+  date  = c(as_date("2025-06-12"), as_date("2026-05-08")),
+  label = c("Cabinet ban\nrecommendation", "Gazetted ban"),
+  y     = c(max(cfr_monthly_df$hi, na.rm = TRUE) * 0.85,
+            max(cfr_monthly_df$hi, na.rm = TRUE) * 0.70)
+)
+
+ggplot(cfr_monthly_df, aes(x = month_date)) +
+  geom_ribbon(aes(ymin = lo, ymax = hi), fill = "#FFCDD2", alpha = 0.4) +
+  geom_line(aes(y = cfr), colour = "#B71C1C", linewidth = 1.1) +
+  geom_point(aes(y = cfr, size = n), colour = "#B71C1C", alpha = 0.8) +
+  geom_vline(data = policy_events, aes(xintercept = as.numeric(date)),
+             linetype = "dashed", colour = "#1A237E", linewidth = 0.7) +
+  geom_label(data = policy_events,
+             aes(x = date, y = y, label = label),
+             size = 2.8, colour = "#1A237E", fill = "white",
+             label.size = 0.2, hjust = 0, nudge_x = 15) +
+  scale_x_date(date_labels = "%b\n%Y", date_breaks = "6 months",
+               expand = expansion(add = c(0, 0))) +
+  scale_y_continuous(name = "Monthly CFR (%)", breaks = pretty_breaks(5)) +
+  scale_size_continuous(range = c(1.5, 5), name = "n", guide = "none") +
+  labs(x = "Month",
+       caption = "Shaded band = 95% Wilson CI. Only months with ≥5 notifications shown.") +
+  theme_nmc()
 ```
 
 ---

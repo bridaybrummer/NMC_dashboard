@@ -344,7 +344,7 @@ Premature mortality burden: for each death at age $x$, YLL $= e(x)$ where $e(x)$
 if (has_data && !is.null(yll_national)) {
   p <- plot_yll_ranking(yll_national, top_n = 20,
                         title = "Top 20 Conditions — Years of Life Lost")
-  ggplotly(p, tooltip = c("y", "text"))
+  ggplotly(p, tooltip = c("y", "text")) |> partial_bundle()
 }
 ```
 
@@ -398,7 +398,7 @@ DALY $=$ YLL $+$ YLD, combining premature mortality with morbidity ($\text{YLD} 
 if (has_data) {
   p_daly <- plot_daly_ranking(daly_national, top_n = 20,
                                title = "Top 20 Conditions — DALYs")
-  ggplotly(p_daly, tooltip = c("x", "y", "fill"))
+  ggplotly(p_daly, tooltip = c("x", "y", "fill")) |> partial_bundle()
 }
 ```
 
@@ -470,7 +470,7 @@ if (has_data) {
     ) +
     theme_bod()
 
-  ggplotly(p_comp, tooltip = c("x", "y", "fill"))
+  ggplotly(p_comp, tooltip = c("x", "y", "fill")) |> partial_bundle()
 }
 ```
 
@@ -524,7 +524,7 @@ if (!is.null(cfr_national) && nrow(cfr_national) > 0) {
       panel.grid.minor = element_blank()
     )
 
-  ggplotly(p_cfr, tooltip = c("y", "x"))
+  ggplotly(p_cfr, tooltip = c("y", "x")) |> partial_bundle()
 }
 ```
 
@@ -594,7 +594,7 @@ if (!is.null(cfr_age_sex) && nrow(cfr_age_sex) > 0) {
     theme_bod(base_size = 11) +
     theme(panel.grid.major.x = element_blank())
 
-  ggplotly(p_cfr_as, tooltip = c("x", "y", "colour"))
+  ggplotly(p_cfr_as, tooltip = c("x", "y", "colour")) |> partial_bundle()
 }
 ```
 
@@ -626,7 +626,7 @@ if (!is.null(cfr_year) && nrow(cfr_year) > 0) {
     theme(panel.grid.major.x = element_blank()) +
     guides(colour = guide_legend(nrow = 2))
 
-  ggplotly(p_cfr_yr, tooltip = c("x", "y", "colour"))
+  ggplotly(p_cfr_yr, tooltip = c("x", "y", "colour")) |> partial_bundle()
 }
 ```
 
@@ -677,7 +677,7 @@ if (!is.null(pypll_national) && nrow(pypll_national) > 0) {
     ) +
     theme_bod()
 
-  ggplotly(p_pypll, tooltip = c("y", "text"))
+  ggplotly(p_pypll, tooltip = c("y", "text")) |> partial_bundle()
 }
 ```
 
@@ -723,7 +723,7 @@ if (!is.null(pypll_national) && has_data) {
     ) +
     theme_bod()
 
-  ggplotly(p_cmp, tooltip = c("x", "y", "fill"))
+  ggplotly(p_cmp, tooltip = c("x", "y", "fill")) |> partial_bundle()
 }
 ```
 
@@ -804,7 +804,7 @@ Direct standardisation using the WHO World Standard Population (Ahmad et al. 200
 
 if (has_asr) {
   p_asr <- asr_line_plot(asr_national, condition_label = "All NMC Conditions — Age-Specific Rates by Sex")
-  ggplotly(p_asr, tooltip = c("x", "y", "colour"))
+  ggplotly(p_asr, tooltip = c("x", "y", "colour")) |> partial_bundle()
 }
 ```
 
@@ -900,7 +900,7 @@ if (!is.null(asr_comparison) && nrow(asr_comparison) > 0) {
     ) +
     theme_bod()
 
-  ggplotly(p_comp, tooltip = c("x", "y", "colour"))
+  ggplotly(p_comp, tooltip = c("x", "y", "colour")) |> partial_bundle()
 }
 ```
 
@@ -1028,7 +1028,7 @@ if (!is.null(asr_by_province) && length(asr_by_province) > 0) {
       ) +
       theme_bod()
 
-    ggplotly(p_prov_asr, tooltip = c("x", "y", "colour"))
+    ggplotly(p_prov_asr, tooltip = c("x", "y", "colour")) |> partial_bundle()
   }
 }
 ```
@@ -1100,7 +1100,7 @@ if (!is.null(prov_summary) && nrow(prov_summary) > 0) {
     ps, metric_col = "daly_rate_100k",
     title = "Total NMC DALY Rate by Province"
   )
-  ggplotly(p_prov_daly, tooltip = c("y"))
+  ggplotly(p_prov_daly, tooltip = c("y")) |> partial_bundle()
 }
 ```
 
@@ -1116,7 +1116,7 @@ if (!is.null(prov_summary) && nrow(prov_summary) > 0) {
     prov_summary, metric_col = "yll_rate_100k",
     title = "Total NMC YLL Rate by Province"
   )
-  ggplotly(p_prov_yll, tooltip = c("y"))
+  ggplotly(p_prov_yll, tooltip = c("y")) |> partial_bundle()
 }
 ```
 
@@ -1212,7 +1212,7 @@ if (!is.null(daly_year) && nrow(daly_year) > 0) {
     title = "Annual DALY Trends",
     top_n = 10
   )
-  ggplotly(p_trend, tooltip = c("x", "y", "colour"))
+  ggplotly(p_trend, tooltip = c("x", "y", "colour")) |> partial_bundle()
 }
 ```
 
@@ -1230,7 +1230,7 @@ if (!is.null(yll_year) && nrow(yll_year) > 0) {
     title = "Annual YLL Trends",
     top_n = 10
   )
-  ggplotly(p_yll_trend, tooltip = c("x", "y", "colour"))
+  ggplotly(p_yll_trend, tooltip = c("x", "y", "colour")) |> partial_bundle()
 }
 ```
 
@@ -1269,7 +1269,7 @@ if (!is.null(deaths_dt) && nrow(deaths_dt) > 0) {
     theme_bod() +
     guides(fill = guide_legend(nrow = 2))
 
-  ggplotly(p_age, tooltip = c("x", "y", "fill"))
+  ggplotly(p_age, tooltip = c("x", "y", "fill")) |> partial_bundle()
 }
 ```
 
@@ -1319,7 +1319,7 @@ if (!is.null(pyramid_national) && nrow(pyramid_national) > 0) {
     ) +
     theme_bod()
 
-  ggplotly(p_pyr, tooltip = c("x", "y", "fill"))
+  ggplotly(p_pyr, tooltip = c("x", "y", "fill")) |> partial_bundle()
 }
 ```
 
@@ -1352,7 +1352,7 @@ if (!is.null(pyramid_condition) && nrow(pyramid_condition) > 0) {
     ) +
     theme_bod(base_size = 11)
 
-  ggplotly(p_pyr_c, tooltip = c("x", "y", "fill"))
+  ggplotly(p_pyr_c, tooltip = c("x", "y", "fill")) |> partial_bundle()
 }
 ```
 

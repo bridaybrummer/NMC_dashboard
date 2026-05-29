@@ -13,14 +13,15 @@ format:
 |-------|---------|--------|
 | **v0.1** | Recent surge table — conditions with biggest % increase (last 14 days vs prior 14) | ✅ Done |
 | **v0.1** | Interactive trend sparklines for flagged conditions | ✅ Done |
-| **v0.2** | CUSUM / EARS algorithm signal detection integration | 🔲 Planned |
-| **v0.2** | Province → district hotspot drill-down for flagged conditions | 🔲 Planned |
-| **v0.3** | Analyst notes & alert log (manual triage layer) | 🔲 Planned |
+| **v0.2** | EARS-C2 + sliding-window CUSUM signal detection | ✅ Done |
+| **v0.2** | Province × condition signal heatmap (drill-down) | ✅ Done |
+| **v0.2** | Persistent alert log (`data/processed/alerts.rds`) | ✅ Done |
+| **v0.3** | Analyst notes & manual triage layer | 🔲 Planned |
 | **v0.3** | Automated alert email / webhook on threshold breach | 🔲 Planned |
-| **v0.4** | Link to Forecasts page — auto-trigger EpiNow2 for flagged conditions | 🔲 Planned |
+| **v0.4** | Auto-trigger EpiNow2 forecasts for flagged conditions | 🔲 Planned |
 
 *Data pipeline:* `R/prepare_dashboard_data.r` → `data/processed/agg_national.rds`
-Forecasting extension: `by-forecasts/index.qmd` (uses `EpiNow2`)
+*Algorithms:* `R/signal_detection.r` (`detect_signals_batch`, `cusum_sliding`, `build_alert_log`)
 :::
 
 ```{r}
@@ -34,22 +35,167 @@ suppressPackageStartupMessages({
   library(plotly)
   library(DT)
   library(lubridate)
+  library(ggplot2)
+  library(htmltools)
 })
 
-agg_nat <- readRDS("data/processed/agg_national.rds")
-setDT(agg_nat)
+source("R/_load_all.r")
+
+agg_nat  <- readRDS("data/processed/agg_national.rds")
+agg_prov <- readRDS("data/processed/agg_province.rds")
+setDT(agg_nat); setDT(agg_prov)
 agg_nat[, date := as.Date(date)]
+agg_prov[, date := as.Date(date)]
+agg_prov <- agg_prov[!is.na(prov_) & prov_ != ""]
+
+# Column harmonisation: signal_detection.r expects `n` (daily count)
+agg_nat[, n := count]
+agg_prov[, n := count]
 
 latest_date <- max(agg_nat$date)
+
+# Reporting-delay window — last 14 days are provisional and biased low.
+TRUNC_DAYS <- 14L
+
+agg_nat_eval  <- agg_nat[date <= (latest_date - TRUNC_DAYS)]
+agg_prov_eval <- agg_prov[date <= (latest_date - TRUNC_DAYS)]
 ```
 
-**Data through:** `r format(latest_date, "%d %B %Y")`
+::: {.data-through-banner}
+**Data through:** `r format(latest_date, "%d %B %Y")` &nbsp;·&nbsp;
+**Signal-detection cutoff:** `r format(latest_date - TRUNC_DAYS, "%d %B %Y")`
+<span class="muted">— the last `r TRUNC_DAYS` days are excluded from algorithms (reporting incomplete)</span>
+:::
 
 ---
 
-## Emerging Signals — Last 14 Days
+## National Signal Log — Last 28 Days
 
-Conditions with the largest percentage increase comparing the most recent 14-day window to the preceding 14 days.
+EARS-C2 (rolling 14-day z-score, threshold = 3) and one-sided CUSUM
+(slack k = 0.5, threshold = 5) applied to each condition's daily series.
+Signals are de-duplicated to one row per (condition × method × episode) and
+persisted to `data/processed/alerts.rds`.
+
+::: {.callout-note collapse="true"}
+## Stabilising z-scores for rare conditions
+
+The baseline SD used in the EARS-C2 z-score is replaced by
+$\tilde s = \max\!\bigl(s,\,\sqrt{\max(\bar n,\,1)}\bigr)$ — i.e. at least the
+Poisson-implied SD given the baseline mean (`sd_floor = "poisson"`). EARS
+signals are additionally suppressed when the baseline mean is below
+0.5 cases/day (`min_baseline_mean = 0.5`); these rows are still computed but
+shown only via CUSUM, which is more stable on sparse counts. See
+[Methods → Signal Detection](../methods.html#signal-detection) for the full
+rationale.
+:::
+
+```{r}
+#| label: signal-detect-national
+sig_nat <- detect_signals_batch(
+  agg_nat_eval[, .(condition, date, n)],
+  group_cols        = "condition",
+  baseline          = 14L,
+  z_thresh          = 3,
+  k                 = 0.5,
+  cusum_thresh      = 5,
+  sd_floor          = "poisson",
+  min_baseline_mean = 0.5
+)
+
+alert_nat <- build_alert_log(sig_nat, group_cols = "condition", recent_days = 28L)
+
+invisible(persist_alerts(alert_nat,
+                         group_cols = "condition",
+                         path       = "data/processed/alerts.rds"))
+```
+
+```{r}
+#| label: tbl-alerts
+if (nrow(alert_nat) == 0L) {
+  htmltools::tags$p(
+    "No EARS or CUSUM signals in the last 28 days.",
+    style = "color:#475569;font-style:italic;"
+  )
+} else {
+  display <- alert_nat[, .(
+    Condition      = condition,
+    Method         = method,
+    `First signal` = format(first_signal, "%d %b %Y"),
+    `Last signal`  = format(last_signal,  "%d %b %Y"),
+    `Signal days`  = n_signal_days,
+    `Peak score`   = round(peak_value, 2),
+    `Latest count` = latest_n
+  )]
+  DT::datatable(display, rownames = FALSE,
+                options = list(pageLength = 15, dom = "ftp",
+                               order = list(list(3, "desc"))))
+}
+```
+
+---
+
+## Province × Condition Signal Heatmap
+
+Conditions on the y-axis, provinces on the x-axis; cell colour indicates the
+peak CUSUM score within the last 28 days. Empty cells = no signal.
+
+```{r}
+#| label: signal-prov
+sig_prov <- detect_signals_batch(
+  agg_prov_eval[, .(condition, prov_, date, n)],
+  group_cols        = c("condition", "prov_"),
+  baseline          = 14L,
+  z_thresh          = 3,
+  k                 = 0.5,
+  cusum_thresh      = 5,
+  sd_floor          = "poisson",
+  min_baseline_mean = 0.5
+)
+
+alert_prov <- build_alert_log(sig_prov,
+                              group_cols  = c("condition", "prov_"),
+                              recent_days = 28L)
+
+if (nrow(alert_prov) > 0L) {
+  alert_prov[, Province := prov_label(prov_)]
+  heat <- alert_prov[method == "CUSUM",
+                     .(score = max(peak_value, na.rm = TRUE)),
+                     by = .(Condition = condition, Province)]
+} else {
+  heat <- data.table(Condition = character(), Province = character(),
+                     score = numeric())
+}
+```
+
+```{r}
+#| label: fig-signal-heatmap
+#| fig-height: 5
+if (nrow(heat) == 0L) {
+  htmltools::tags$p(
+    "No province-level CUSUM signals in the last 28 days.",
+    style = "color:#475569;font-style:italic;"
+  )
+} else {
+  plot_ly(heat,
+          x = ~Province, y = ~Condition, z = ~score,
+          type = "heatmap",
+          colorscale = list(c(0, "#fee2e2"), c(1, "#7f1d1d")),
+          hoverinfo = "text",
+          text = ~paste0(Condition, " — ", Province,
+                         "<br>Peak CUSUM: ", round(score, 2))) |>
+    layout(xaxis = list(title = ""),
+           yaxis = list(title = ""),
+           margin = list(l = 160))
+}
+```
+
+---
+
+## Recent 14-day Surge — Quick Triage
+
+Conditions ordered by absolute change in the most recent 14-day window vs the
+preceding 14 days. Use the **signal table above** as the primary trigger; this
+view is a complementary, formula-free sanity check and is **not** delay-corrected.
 
 ```{r}
 #| label: surge-calc
@@ -58,82 +204,103 @@ prior_start  <- latest_date - 27
 prior_end    <- latest_date - 14
 
 recent <- agg_nat[date >= recent_start, .(recent_cases = sum(count)), by = condition]
-prior  <- agg_nat[date >= prior_start & date <= prior_end, .(prior_cases = sum(count)), by = condition]
+prior  <- agg_nat[date >= prior_start & date <= prior_end,
+                  .(prior_cases = sum(count)), by = condition]
 
 surge <- merge(recent, prior, by = "condition", all = TRUE)
 surge[is.na(recent_cases), recent_cases := 0L]
-surge[is.na(prior_cases), prior_cases := 0L]
+surge[is.na(prior_cases),  prior_cases  := 0L]
+surge[, abs_change := recent_cases - prior_cases]
 surge[, pct_change := fifelse(
   prior_cases > 0,
   round((recent_cases - prior_cases) / prior_cases * 100, 1),
   fifelse(recent_cases > 0, Inf, 0)
 )]
-surge[, abs_change := recent_cases - prior_cases]
-setorder(surge, -pct_change)
+surge[, low_count := recent_cases < 10]
+setorder(surge, -abs_change)
 
-# Flag conditions with material increase
 flagged <- surge[recent_cases >= 5 & pct_change > 0]
 ```
-
-### Surge Table
 
 ```{r}
 #| label: tbl-surge
 display <- flagged[, .(
-  Condition      = condition,
-  `Last 14 days` = recent_cases,
-  `Prior 14 days`= prior_cases,
-  `Abs Δ`        = abs_change,
-  `% Δ`          = fifelse(is.infinite(pct_change), "New", paste0(pct_change, "%"))
+  Condition       = condition,
+  `Last 14 days`  = recent_cases,
+  `Prior 14 days` = prior_cases,
+  `Abs Δ`         = abs_change,
+  `% Δ`           = fifelse(is.infinite(pct_change), "New", paste0(pct_change, "%")),
+  Caveat          = fifelse(low_count, "low count", "")
 )]
 
 DT::datatable(display, rownames = FALSE,
-              options = list(pageLength = 15, dom = "ftp", order = list(list(3, "desc"))))
+              options = list(pageLength = 15, dom = "ftp",
+                             order = list(list(3, "desc"))))
 ```
 
 ---
 
-## Trend Sparklines — Flagged Conditions
+## Seasonal Context — Top Flagged Condition
 
-Weekly trends for the top flagged conditions over the last 26 weeks.
+Current epiyear (solid red) overlaid on the historical median + IQR + 5–95%
+ribbon from the prior five years. The dotted segment marks provisional weeks
+inside the reporting-delay window.
+
+```{r}
+#| label: fig-seasonal
+#| fig-cap: "Weekly notifications vs 5-year historical baseline"
+#| fig-height: 5
+top_cond <- if (nrow(alert_nat) > 0L) {
+              alert_nat$condition[1]
+            } else if (nrow(flagged) > 0L) {
+              flagged$condition[1]
+            } else {
+              agg_nat[, .(tot = sum(count)), by = condition][order(-tot)][1, condition]
+            }
+
+cond_dt <- agg_nat[condition == top_cond, .(date, count)]
+
+plot_epicurve_seasonal(
+  cond_dt,
+  title         = top_cond,
+  subtitle      = "Current year vs historical median + IQR + 5–95% baseline",
+  truncate_days = TRUNC_DAYS
+)
+```
+
+---
+
+## Trend Sparklines — Top Flagged Conditions
 
 ```{r}
 #| label: fig-sparklines
 #| fig-height: 8
-top_flagged <- head(flagged$condition, 8)
-spark_data  <- agg_nat[condition %chin% top_flagged]
-spark_data[, week := floor_date(date, "week")]
-spark_weekly <- spark_data[week >= (latest_date - 26*7),
-                           .(cases = sum(count)), by = .(condition, week)]
+top_flagged <- if (nrow(alert_nat) > 0L) {
+                 head(unique(alert_nat$condition), 8)
+               } else {
+                 head(flagged$condition, 8)
+               }
 
-plot_ly() %>%
-  {
-    p <- .
-    for (cond in top_flagged) {
-      d <- spark_weekly[condition == cond]
-      p <- add_trace(p, data = d, x = ~week, y = ~cases,
-                     type = "scatter", mode = "lines+markers",
-                     name = cond, marker = list(size = 4))
-    }
-    p
-  } %>%
-  layout(xaxis = list(title = "Week"),
-         yaxis = list(title = "Weekly Cases"),
-         legend = list(orientation = "h", y = -0.15),
-         title = "26-Week Trend for Flagged Conditions")
+if (length(top_flagged) > 0L) {
+  spark_data <- agg_nat[condition %chin% top_flagged]
+  spark_data[, week := mmwr_week_start(date)]
+  spark_weekly <- spark_data[week >= (latest_date - 26 * 7),
+                             .(cases = sum(count)), by = .(condition, week)]
+
+  plot_ly(spark_weekly,
+          x = ~week, y = ~cases,
+          color = ~condition, split = ~condition,
+          type = "scatter", mode = "lines+markers",
+          marker = list(size = 4)) |>
+    layout(xaxis  = list(title = "Week (MMWR start)"),
+           yaxis  = list(title = "Weekly cases"),
+           legend = list(orientation = "h", y = -0.15),
+           title  = "26-week trend — flagged conditions")
+} else {
+  htmltools::tags$p("No flagged conditions to plot.",
+                    style = "color:#475569;font-style:italic;")
+}
 ```
-
----
-
-## Next Steps
-
-::: {.callout-tip}
-### Future: CUSUM / EARS Integration
-
-The trending page will integrate formal signal-detection algorithms (CUSUM, EARS C1/C2/C3) from the `surveillance` R package. Detected signals will be highlighted automatically and linked to the **Forecasts** tab for EpiNow2-based short-term projections.
-
-See [Forecasts →](../by-forecasts/index.html)
-:::
 
 ---
 

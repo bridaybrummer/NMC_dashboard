@@ -65,12 +65,43 @@ Where $w_i$ is the WHO standard population weight for age group $i$ and $r_i$ is
 
 ## Signal Detection {#signal-detection}
 
-The [Trending](by-trending/index.html) section uses:
+The [Trending](by-trending/index.html) section runs two complementary
+detectors on daily case counts (truncated to exclude the most recent 14 days,
+where reporting is incomplete):
 
-- **CUSUM** (Cumulative Sum) — detects sustained shifts from the expected mean
-- **EARS C1/C2/C3** — CDC's Early Aberration Reporting System algorithms for rapid signal detection
+- **EARS-C2** — rolling z-score over a 14-day lagged baseline; flags a day
+  when $z = (n_t - \bar n_{t-14:t-1}) / s_{t-14:t-1} > 3$.
+- **One-sided CUSUM** — slack $k = 0.5$, decision threshold $h = 5$;
+  detects sustained shifts from the long-run mean.
 
-Thresholds and baseline windows are documented in the trending page notes.
+### Stabilising the SD denominator (rare-disease handling)
+
+For rare conditions the empirical SD of the baseline can collapse to 0 (all
+zeros) or to a tiny non-zero value (one outlier in an otherwise quiet
+window). A naïve floor of $10^{-3}$ then produces $z$-scores in the thousands
+for a single new case, swamping the signal log with non-actionable alerts.
+
+We therefore stabilise the denominator with **two safeguards**, applied by
+default and parameterised on `R/signal_detection.r`:
+
+1. **Poisson SD floor** (`sd_floor = "poisson"`): the SD used in the z-score
+   is replaced by
+   $$ \tilde s_t = \max\!\bigl(s_t,\; \sqrt{\max(\bar n_t,\,1)}\bigr) $$
+   i.e. at least the Poisson-implied SD given the baseline mean. This is
+   consistent with the Farrington-style adjustment used by ECDC and NICD and
+   prevents single-case-on-zero-baseline from generating an extreme z-score.
+2. **Low-baseline gate** (`min_baseline_mean = 0.5`): days whose baseline
+   mean is below 0.5 cases/day are flagged `is_low_baseline = TRUE` and EARS
+   signals are suppressed for that row. Such conditions are too sparse for
+   EARS to be reliable; CUSUM (with the Poisson floor) is generally a better
+   detector for them and is retained.
+
+For full backward-compatibility with the legacy NICD scripts, set
+`sd_floor = "fixed"` and `min_baseline_mean = 0` when calling
+`detect_signals()` / `detect_signals_batch()`.
+
+Thresholds, baselines and the truncation window are surfaced on the trending
+page header.
 
 ---
 

@@ -13,8 +13,9 @@ format:
 |-------|---------|--------|
 | **v0.1** | Reporting completeness by province (% days with ≥ 1 case) | ✅ Done |
 | **v0.1** | Weekly submission heatmap | ✅ Done |
-| **v0.2** | Timeliness metrics (median days from onset to notification) | 🔲 Planned |
-| **v0.2** | Duplicate detection summary | 🔲 Planned |
+| **v0.2** | Timeliness metrics (median days from onset to notification) | ✅ Done |
+| **v0.2** | Linkage-field completeness trend (ID / folder / MRN) | ✅ Done |
+| **v0.3** | Duplicate detection summary | 🔲 Planned |
 | **v0.3** | Missing-field rates by condition (name, age, sex, district) | 🔲 Planned |
 | **v0.3** | Facility-level reporting participation rates | 🔲 Planned |
 | **v0.4** | Automated data-quality score card (red/amber/green) | 🔲 Planned |
@@ -34,7 +35,10 @@ suppressPackageStartupMessages({
   library(plotly)
   library(DT)
   library(lubridate)
+  library(htmltools)
 })
+
+source("R/_load_all.r")
 
 agg_prov <- readRDS("data/processed/agg_province.rds")
 setDT(agg_prov)
@@ -44,7 +48,9 @@ agg_prov[, date := as.Date(date)]
 latest_date <- max(agg_prov$date)
 ```
 
-**Data through:** `r format(latest_date, "%d %B %Y")`
+::: {.data-through-banner}
+**Data through:** `r format(latest_date, "%d %B %Y")` <span class="muted">— provincial reporting completeness, weekly volume, timeliness & linkage</span>
+:::
 
 ---
 
@@ -62,6 +68,7 @@ completeness <- last90[count > 0, .(
   days_reported = uniqueN(date)
 ), by = .(Province = prov_)]
 completeness[, pct := round(days_reported / total_days * 100, 1)]
+completeness[, Province := prov_label(Province)]
 
 plot_ly(completeness, x = ~Province, y = ~pct,
         type = "bar",
@@ -85,6 +92,7 @@ plot_ly(completeness, x = ~Province, y = ~pct,
 last_year <- agg_prov[date >= (latest_date - 365)]
 last_year[, week := floor_date(date, "week")]
 heat_dt <- last_year[, .(cases = sum(count)), by = .(week, Province = prov_)]
+heat_dt[, Province := prov_label(Province)]
 
 plot_ly(heat_dt, x = ~week, y = ~Province, z = ~cases,
         type = "heatmap",
@@ -104,6 +112,134 @@ plot_ly(heat_dt, x = ~week, y = ~Province, z = ~cases,
 #| label: tbl-completeness
 DT::datatable(completeness, rownames = FALSE,
               options = list(pageLength = 10, dom = "t"))
+```
+
+---
+
+## Notification Timeliness
+
+Median days from symptom onset (or earliest available date) to NMC
+notification, by condition and month. Lower is better; sustained increases
+flag a slowdown in the reporting chain.
+
+```{r}
+#| label: timeliness-load
+#| message: false
+#| warning: false
+agg_time_path <- "data/processed/agg_timeliness.rds"
+agg_time <- if (file.exists(agg_time_path)) {
+  as.data.table(readRDS(agg_time_path))
+} else {
+  data.table()
+}
+```
+
+```{r}
+#| label: fig-timeliness
+#| fig-cap: "Median onset-to-notification delay (days) — last 24 months"
+if (nrow(agg_time) == 0L) {
+  htmltools::tags$p(
+    "Timeliness data not available — re-run R/prepare_dashboard_data.r ",
+    "with a `time_to_notification` column to populate this section.",
+    style = "color:#475569;font-style:italic;"
+  )
+} else {
+  agg_time[, month := as.Date(month)]
+  cutoff_24 <- max(agg_time$month) - months(24)
+  recent <- agg_time[month >= cutoff_24 & n_cases >= 5]
+
+  # Top 12 conditions by total case volume in the window
+  top_cond <- recent[, .(tot = sum(n_cases)), by = condition][
+    order(-tot)][seq_len(min(12L, .N)), condition]
+
+  plot_ly(recent[condition %chin% top_cond],
+          x = ~month, y = ~median_days,
+          color = ~condition, split = ~condition,
+          type = "scatter", mode = "lines+markers",
+          marker = list(size = 5),
+          hoverinfo = "text",
+          text = ~paste0(condition, "<br>", format(month, "%b %Y"),
+                         "<br>Median: ", median_days, " d",
+                         "<br>IQR: ", q25, "–", q75,
+                         "<br>n = ", n_cases)) |>
+    layout(xaxis  = list(title = "Month"),
+           yaxis  = list(title = "Median delay (days)"),
+           legend = list(orientation = "h", y = -0.15),
+           shapes = list(list(type = "line",
+                              x0 = min(recent$month), x1 = max(recent$month),
+                              y0 = 7, y1 = 7,
+                              line = list(dash = "dash", color = "#65a30d"))))
+}
+```
+
+```{r}
+#| label: tbl-timeliness-current
+if (nrow(agg_time) > 0L) {
+  current_month <- max(agg_time$month)
+  curr <- agg_time[month == current_month & n_cases >= 1]
+  setorder(curr, -median_days)
+  display <- curr[, .(
+    Condition          = condition,
+    Month              = format(month, "%b %Y"),
+    `Median (days)`    = round(median_days, 1),
+    `IQR (days)`       = paste0(round(q25, 1), "–", round(q75, 1)),
+    `Cases`            = n_cases
+  )]
+  DT::datatable(display, rownames = FALSE,
+                caption = paste0("Current-month timeliness — ",
+                                 format(current_month, "%B %Y")),
+                options = list(pageLength = 10, dom = "ftp"))
+}
+```
+
+---
+
+## Linkage-Field Completeness — Last 12 Months
+
+Proportion of notifications with a non-missing patient identifier (SA ID
+number, hospital folder number, MRN) — required for record linkage to lab
+results, vital registration and other surveillance systems.
+
+```{r}
+#| label: linkage-completeness
+#| fig-cap: "Linkage-field completeness (%) by province"
+lnk_path <- "data/processed/agg_linkage_prov.rds"
+lnk <- if (file.exists(lnk_path)) as.data.table(readRDS(lnk_path)) else data.table()
+
+if (nrow(lnk) == 0L) {
+  htmltools::tags$p(
+    "Linkage completeness data not available.",
+    style = "color:#475569;font-style:italic;"
+  )
+} else {
+  lnk[, month := as.Date(month)]
+  cutoff_12 <- max(lnk$month) - months(12)
+  lnk12 <- lnk[month >= cutoff_12, .(
+    n_total          = sum(n_total),
+    n_id_present     = sum(n_id_present),
+    n_folder_present = sum(n_folder_present),
+    n_mrn_present    = sum(n_mrn_present)
+  ), by = prov_]
+  lnk12[, `:=`(
+    `SA ID`        = round(n_id_present     / n_total * 100, 1),
+    `Folder no.`   = round(n_folder_present / n_total * 100, 1),
+    `MRN`          = round(n_mrn_present    / n_total * 100, 1)
+  )]
+  lnk12[, Province := prov_label(prov_)]
+
+  long <- melt(lnk12[, .(Province, `SA ID`, `Folder no.`, MRN)],
+               id.vars = "Province",
+               variable.name = "Field", value.name = "pct")
+
+  plot_ly(long, x = ~Province, y = ~pct, color = ~Field,
+          type = "bar",
+          hoverinfo = "text",
+          text = ~paste0(Province, " — ", Field, ": ", pct, "%")) |>
+    layout(barmode = "group",
+           yaxis = list(title = "% complete", range = c(0, 100)),
+           xaxis = list(title = ""),
+           legend = list(orientation = "h", y = -0.15))
+}
 ```
 
 ---
