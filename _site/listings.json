@@ -2,6 +2,8 @@
   {
     "listing": "/monthly-reports/index.html",
     "items": [
+      "/monthly-reports/posts/2026-05.html",
+      "/monthly-reports/posts/2026-04.html",
       "/monthly-reports/posts/2026-03.html",
       "/monthly-reports/posts/2026-02.html",
       "/monthly-reports/posts/2026-01.html",
@@ -19,6 +21,10 @@
   {
     "listing": "/weekly-reports/index.html",
     "items": [
+      "/weekly-reports/posts/2026-W24.html",
+      "/weekly-reports/posts/2026-W23.html",
+      "/weekly-reports/posts/2026-W22.html",
+      "/weekly-reports/posts/2026-W21.html",
       "/weekly-reports/posts/2026-W11.html",
       "/weekly-reports/posts/2026-W10.html",
       "/weekly-reports/posts/2026-W09.html",
