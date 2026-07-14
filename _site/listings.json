@@ -1,26 +1,10 @@
 [
   {
-    "listing": "/monthly-reports/index.html",
-    "items": [
-      "/monthly-reports/posts/2026-05.html",
-      "/monthly-reports/posts/2026-04.html",
-      "/monthly-reports/posts/2026-03.html",
-      "/monthly-reports/posts/2026-02.html",
-      "/monthly-reports/posts/2026-01.html",
-      "/monthly-reports/posts/2025-12.html",
-      "/monthly-reports/posts/2025-11.html",
-      "/monthly-reports/posts/2025-10.html",
-      "/monthly-reports/posts/2025-09.html",
-      "/monthly-reports/posts/2025-08.html",
-      "/monthly-reports/posts/2025-07.html",
-      "/monthly-reports/posts/2025-06.html",
-      "/monthly-reports/posts/2025-05.html",
-      "/monthly-reports/posts/2025-04.html"
-    ]
-  },
-  {
     "listing": "/weekly-reports/index.html",
     "items": [
+      "/weekly-reports/posts/2026-W27.html",
+      "/weekly-reports/posts/2026-W26.html",
+      "/weekly-reports/posts/2026-W25.html",
       "/weekly-reports/posts/2026-W24.html",
       "/weekly-reports/posts/2026-W23.html",
       "/weekly-reports/posts/2026-W22.html",
@@ -72,6 +56,26 @@
       "/weekly-reports/posts/2025-W20.html",
       "/weekly-reports/posts/2025-W19.html",
       "/weekly-reports/posts/2025-W18.html"
+    ]
+  },
+  {
+    "listing": "/monthly-reports/index.html",
+    "items": [
+      "/monthly-reports/posts/2026-06.html",
+      "/monthly-reports/posts/2026-05.html",
+      "/monthly-reports/posts/2026-04.html",
+      "/monthly-reports/posts/2026-03.html",
+      "/monthly-reports/posts/2026-02.html",
+      "/monthly-reports/posts/2026-01.html",
+      "/monthly-reports/posts/2025-12.html",
+      "/monthly-reports/posts/2025-11.html",
+      "/monthly-reports/posts/2025-10.html",
+      "/monthly-reports/posts/2025-09.html",
+      "/monthly-reports/posts/2025-08.html",
+      "/monthly-reports/posts/2025-07.html",
+      "/monthly-reports/posts/2025-06.html",
+      "/monthly-reports/posts/2025-05.html",
+      "/monthly-reports/posts/2025-04.html"
     ]
   }
 ]
