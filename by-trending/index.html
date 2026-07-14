@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Trending Conditions – SA NMC Dashboard</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-67bcd225d6149a0192eaea62fd59934b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<link href="../site_libs/htmltools-fill-0.5.9/fill.css" rel="stylesheet">
+<script src="../site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<link href="../site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet">
+<script src="../site_libs/datatables-binding-0.34.0/datatables.js"></script>
+<script src="../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="../site_libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="../site_libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet">
+<script src="../site_libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
+<link href="../site_libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet">
+<script src="../site_libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+<script src="../site_libs/plotly-binding-4.12.0/plotly.js"></script>
+<script src="../site_libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="../site_libs/plotly-htmlwidgets-css-2.25.2/plotly-htmlwidgets.css" rel="stylesheet">
+<script src="../site_libs/plotly-main-2.25.2/plotly-latest.min.js"></script>
+<link href="../site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="../site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">SA NMC Dashboard</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> <i class="bi bi-house-door" role="img">
+</i> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../overview.html"> <i class="bi bi-bar-chart-line" role="img">
+</i> 
+<span class="menu-text">Overview</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-surveillance" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-clipboard2-pulse" role="img">
+</i> 
+ <span class="menu-text">Surveillance</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-surveillance">    
+        <li>
+    <a class="dropdown-item" href="../by-province/index.html">
+ <span class="dropdown-text">By Province — Overview</span></a>
+  </li>  
+        <li><hr class="dropdown-divider"></li>
+        <li>
+    <a class="dropdown-item" href="../by-province/ec/index.html">
+ <span class="dropdown-text">Eastern Cape</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/fs/index.html">
+ <span class="dropdown-text">Free State</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/gp/index.html">
+ <span class="dropdown-text">Gauteng</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/kzn/index.html">
+ <span class="dropdown-text">KwaZulu-Natal</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/lp/index.html">
+ <span class="dropdown-text">Limpopo</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/mp/index.html">
+ <span class="dropdown-text">Mpumalanga</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/nc/index.html">
+ <span class="dropdown-text">Northern Cape</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/nw/index.html">
+ <span class="dropdown-text">North West</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-province/wc/index.html">
+ <span class="dropdown-text">Western Cape</span></a>
+  </li>  
+        <li><hr class="dropdown-divider"></li>
+        <li>
+    <a class="dropdown-item" href="../by-condition/index.html">
+ <span class="dropdown-text">By Condition</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-analytics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-graph-up-arrow" role="img">
+</i> 
+ <span class="menu-text">Analytics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-analytics">    
+        <li>
+    <a class="dropdown-item" href="../by-trending/index.html">
+ <span class="dropdown-text">Trending &amp; Signals</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../burden-of-disease/index.html">
+ <span class="dropdown-text">Burden of Disease</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../by-forecasts/index.html">
+ <span class="dropdown-text">Forecasts &amp; Scenarios</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../explorer/index.html"> <i class="bi bi-search" role="img">
+</i> 
+<span class="menu-text">Explorer</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../monthly-reports/index.html"> <i class="bi bi-calendar3" role="img">
+</i> 
+<span class="menu-text">Monthly Reports</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../weekly-reports/index.html"> <i class="bi bi-calendar-week" role="img">
+</i> 
+<span class="menu-text">Weekly Reports</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-in-focus" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-journal-richtext" role="img">
+</i> 
+ <span class="menu-text">In Focus</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-in-focus">    
+        <li>
+    <a class="dropdown-item" href="../special-reports/index.html">
+ <span class="dropdown-text">Special Reports — Overview</span></a>
+  </li>  
+        <li><hr class="dropdown-divider"></li>
+        <li>
+    <a class="dropdown-item" href="../special-reports/agricultural-poisoning/index.html">
+ <span class="dropdown-text">Agricultural &amp; Stock Remedy Poisoning</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../quality.html"> <i class="bi bi-clipboard-check" role="img">
+</i> 
+<span class="menu-text">Data Quality</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../linkage/index.html"> <i class="bi bi-link-45deg" role="img">
+</i> 
+<span class="menu-text">Linkage</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-docs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-book" role="img">
+</i> 
+ <span class="menu-text">Docs</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-docs">    
+        <li>
+    <a class="dropdown-item" href="../methods.html">
+ <span class="dropdown-text">Methods</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../glossary.html">
+ <span class="dropdown-text">Glossary</span></a>
+  </li>  
+        <li><hr class="dropdown-divider"></li>
+        <li>
+    <a class="dropdown-item" href="../about.html">
+ <span class="dropdown-text">About &amp; Credits</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../by-trending/index.html">Trending Conditions</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../by-trending/index.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Trending Conditions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../burden-of-disease/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Burden of Disease</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../by-forecasts/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Predictive Modelling – NMC Conditions</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#national-signal-log-last-28-days" id="toc-national-signal-log-last-28-days" class="nav-link active" data-scroll-target="#national-signal-log-last-28-days">National Signal Log — Last 28 Days</a></li>
+  <li><a href="#province-condition-signal-heatmap" id="toc-province-condition-signal-heatmap" class="nav-link" data-scroll-target="#province-condition-signal-heatmap">Province × Condition Signal Heatmap</a></li>
+  <li><a href="#recent-14-day-surge-quick-triage" id="toc-recent-14-day-surge-quick-triage" class="nav-link" data-scroll-target="#recent-14-day-surge-quick-triage">Recent 14-day Surge — Quick Triage</a></li>
+  <li><a href="#seasonal-context-top-flagged-condition" id="toc-seasonal-context-top-flagged-condition" class="nav-link" data-scroll-target="#seasonal-context-top-flagged-condition">Seasonal Context — Top Flagged Condition</a></li>
+  <li><a href="#trend-sparklines-top-flagged-conditions" id="toc-trend-sparklines-top-flagged-conditions" class="nav-link" data-scroll-target="#trend-sparklines-top-flagged-conditions">Trend Sparklines — Top Flagged Conditions</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Trending Conditions</h1>
+<p class="subtitle lead">Signal detection, emerging hotspots &amp; alert log</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Development Roadmap — Trending / Signal Detection
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 29%">
+<col style="width: 37%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Phase</th>
+<th>Feature</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>v0.1</strong></td>
+<td>Recent surge table — conditions with biggest % increase (last 14 days vs prior 14)</td>
+<td>✅ Done</td>
+</tr>
+<tr class="even">
+<td><strong>v0.1</strong></td>
+<td>Interactive trend sparklines for flagged conditions</td>
+<td>✅ Done</td>
+</tr>
+<tr class="odd">
+<td><strong>v0.2</strong></td>
+<td>EARS-C2 + sliding-window CUSUM signal detection</td>
+<td>✅ Done</td>
+</tr>
+<tr class="even">
+<td><strong>v0.2</strong></td>
+<td>Province × condition signal heatmap (drill-down)</td>
+<td>✅ Done</td>
+</tr>
+<tr class="odd">
+<td><strong>v0.2</strong></td>
+<td>Persistent alert log (<code>data/processed/alerts.rds</code>)</td>
+<td>✅ Done</td>
+</tr>
+<tr class="even">
+<td><strong>v0.3</strong></td>
+<td>Analyst notes &amp; manual triage layer</td>
+<td>🔲 Planned</td>
+</tr>
+<tr class="odd">
+<td><strong>v0.3</strong></td>
+<td>Automated alert email / webhook on threshold breach</td>
+<td>🔲 Planned</td>
+</tr>
+<tr class="even">
+<td><strong>v0.4</strong></td>
+<td>Auto-trigger EpiNow2 forecasts for flagged conditions</td>
+<td>🔲 Planned</td>
+</tr>
+</tbody>
+</table>
+<p><em>Data pipeline:</em> <code>R/prepare_dashboard_data.r</code> → <code>data/processed/agg_national.rds</code> <em>Algorithms:</em> <code>R/signal_detection.r</code> (<code>detect_signals_batch</code>, <code>cusum_sliding</code>, <code>build_alert_log</code>)</p>
+</div>
+</div>
+</div>
+<div class="data-through-banner">
+<p><strong>Data through:</strong> 16 March 2026 &nbsp;·&nbsp; <strong>Signal-detection cutoff:</strong> 02 March 2026 <span class="muted">— the last 14 days are excluded from algorithms (reporting incomplete)</span></p>
+</div>
+<hr>
+<section id="national-signal-log-last-28-days" class="level2">
+<h2 class="anchored" data-anchor-id="national-signal-log-last-28-days">National Signal Log — Last 28 Days</h2>
+<p>EARS-C2 (rolling 14-day z-score, threshold = 3) and one-sided CUSUM (slack k = 0.5, threshold = 5) applied to each condition’s daily series. Signals are de-duplicated to one row per (condition × method × episode) and persisted to <code>data/processed/alerts.rds</code>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Stabilising z-scores for rare conditions
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The baseline SD used in the EARS-C2 z-score is replaced by <span class="math inline">\(\tilde s = \max\!\bigl(s,\,\sqrt{\max(\bar n,\,1)}\bigr)\)</span> — i.e.&nbsp;at least the Poisson-implied SD given the baseline mean (<code>sd_floor = "poisson"</code>). EARS signals are additionally suppressed when the baseline mean is below 0.5 cases/day (<code>min_baseline_mean = 0.5</code>); these rows are still computed but shown only via CUSUM, which is more stable on sparse counts. See <a href="../methods.html#signal-detection">Methods → Signal Detection</a> for the full rationale.</p>
+</div>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-alerts" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-alerts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1
+</figcaption>
+<div aria-describedby="tbl-alerts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-bddfb74396609bc95431" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-bddfb74396609bc95431">{"x":{"filter":"none","vertical":false,"data":[["Tuberculosis:extra-pulmonary","Tuberculosis:pulmonary","Measles","Tuberculosis: multidrug- resistant (MDR -TB)","Rubella","Diphtheria","Mpox","Agricultural or stock remedy poisoning","Pertussis","Legionellosis","Enteric fever (typhoid or paratyphoid fever)","Congenital rubella syndrome","Congenital syphilis","Lead poisoning","Listeriosis","Rabies","Legionellosis","Agricultural or stock remedy poisoning","Enteric fever (typhoid or paratyphoid fever)","Congenital rubella syndrome","Cholera","Mpox","Acute flaccid paralysis","Measles","Rubella","Maternal death (pregnancy, childbirth and puerperium)","Leprosy","Shigellosis","Acute rheumatic fever","Endemic arboviral diseases west nile virus","Brucellosis","Acute flaccid paralysis","Anthrax","Non-typhoidal salmonellosis","Bilharzia (schistosomiasis)","Hepatitis E","Haemophilus influenzae type B","Tuberculosis: extensively drug -resistant (XDR -TB)","Soil transmitted helminths","Hepatitis C","Tetanus","Botulism","Maternal death (pregnancy, childbirth and puerperium)","Brucellosis"],["CUSUM","CUSUM","CUSUM","CUSUM","CUSUM","CUSUM","CUSUM","CUSUM","CUSUM","CUSUM","CUSUM","CUSUM","CUSUM","CUSUM","EARS-C2","CUSUM","EARS-C2","EARS-C2","EARS-C2","EARS-C2","EARS-C2","EARS-C2","CUSUM","EARS-C2","EARS-C2","CUSUM","EARS-C2","EARS-C2","EARS-C2","CUSUM","EARS-C2","EARS-C2","CUSUM","CUSUM","EARS-C2","EARS-C2","EARS-C2","EARS-C2","EARS-C2","EARS-C2","EARS-C2","CUSUM","EARS-C2","CUSUM"],["02 Feb 2026","02 Feb 2026","02 Feb 2026","02 Feb 2026","02 Feb 2026","02 Feb 2026","02 Feb 2026","02 Feb 2026","02 Feb 2026","02 Feb 2026","02 Feb 2026","02 Feb 2026","02 Feb 2026","02 Feb 2026","23 Feb 2026","24 Feb 2026","10 Feb 2026","26 Feb 2026","17 Feb 2026","24 Feb 2026","18 Feb 2026","20 Feb 2026","13 Feb 2026","02 Feb 2026","03 Feb 2026","02 Feb 2026","06 Feb 2026","17 Feb 2026","13 Feb 2026","02 Feb 2026","12 Feb 2026","12 Feb 2026","02 Feb 2026","10 Feb 2026","10 Feb 2026","05 Feb 2026","06 Feb 2026","05 Feb 2026","04 Feb 2026","04 Feb 2026","03 Feb 2026","02 Feb 2026","03 Feb 2026","02 Feb 2026"],["02 Mar 2026","02 Mar 2026","02 Mar 2026","02 Mar 2026","02 Mar 2026","02 Mar 2026","02 Mar 2026","02 Mar 2026","02 Mar 2026","02 Mar 2026","02 Mar 2026","02 Mar 2026","02 Mar 2026","02 Mar 2026","02 Mar 2026","01 Mar 2026","27 Feb 2026","26 Feb 2026","26 Feb 2026","25 Feb 2026","23 Feb 2026","23 Feb 2026","23 Feb 2026","23 Feb 2026","23 Feb 2026","21 Feb 2026","19 Feb 2026","17 Feb 2026","13 Feb 2026","13 Feb 2026","12 Feb 2026","12 Feb 2026","11 Feb 2026","10 Feb 2026","10 Feb 2026","06 Feb 2026","06 Feb 2026","05 Feb 2026","04 Feb 2026","04 Feb 2026","03 Feb 2026","03 Feb 2026","03 Feb 2026","02 Feb 2026"],[29,29,29,29,29,29,29,29,29,29,29,29,29,29,2,6,2,1,2,2,2,2,6,3,2,20,2,1,1,12,1,1,10,1,1,2,1,1,1,1,1,2,1,1],[588.8200000000001,570.5,420.64,325.26,237.96,226.46,213.72,140.21,119.72,68.29000000000001,53.79,37.39,37.3,19.73,3.47,7.87,4.19,7.04,3.71,5.11,1000,1000,7.58,6.23,4.75,18.5,3.47,4.2,1000,11.97,1000,6.37,10.08,5.01,3.44,3.47,3.47,3.08,3.47,3.4,1000,5.96,3.66,5.41],[64,273,47,15,8,0,0,11,7,0,3,0,14,0,1,0,1,23,5,2,1,2,1,67,14,0,1,7,1,0,1,6,0,4,60,1,1,2,1,3,1,0,2,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Condition<\/th>\n      <th>Method<\/th>\n      <th>First signal<\/th>\n      <th>Last signal<\/th>\n      <th>Signal days<\/th>\n      <th>Peak score<\/th>\n      <th>Latest count<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":15,"dom":"ftp","order":[[3,"desc"]],"columnDefs":[{"className":"dt-right","targets":[4,5,6]},{"name":"Condition","targets":0},{"name":"Method","targets":1},{"name":"First signal","targets":2},{"name":"Last signal","targets":3},{"name":"Signal days","targets":4},{"name":"Peak score","targets":5},{"name":"Latest count","targets":6}],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,15,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<hr>
+</section>
+<section id="province-condition-signal-heatmap" class="level2">
+<h2 class="anchored" data-anchor-id="province-condition-signal-heatmap">Province × Condition Signal Heatmap</h2>
+<p>Conditions on the y-axis, provinces on the x-axis; cell colour indicates the peak CUSUM score within the last 28 days. Empty cells = no signal.</p>
+<div class="cell">
+<div id="fig-signal-heatmap" class="cell-output-display quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-signal-heatmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-3c6474783a7ce433eb9f" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-3c6474783a7ce433eb9f">{"x":{"visdat":{"eb5d543a2119":["function () ","plotlyVisDat"]},"cur_data":"eb5d543a2119","attrs":{"eb5d543a2119":{"x":{},"y":{},"z":{},"colorscale":[["0","#fee2e2"],["1","#7f1d1d"]],"hoverinfo":"text","text":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"heatmap"}},"layout":{"margin":{"b":40,"l":160,"t":25,"r":10},"xaxis":{"domain":[0,1],"automargin":true,"title":"","type":"category","categoryorder":"array","categoryarray":["Eastern Cape","Free State","Gauteng","KwaZulu-Natal","Limpopo","Mpumalanga","North West","Northern Cape","Western Cape"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"","type":"category","categoryorder":"array","categoryarray":["Acute flaccid paralysis","Acute rheumatic fever","Agricultural or stock remedy poisoning","Anthrax","Bilharzia (schistosomiasis)","Botulism","Brucellosis","Congenital rubella syndrome","Congenital syphilis","Crimean-congo viral haemorrhagic fever (human)","Diphtheria","Endemic arboviral diseases chikungunya virus","Endemic arboviral diseases west nile virus","Enteric fever (typhoid or paratyphoid fever)","Food borne illness outbreak","Hepatitis A","Hepatitis C","Hepatitis E","Lead poisoning","Legionellosis","Leprosy","Listeriosis","Malaria","Marburg virus (VHF)","Maternal death (pregnancy, childbirth and puerperium)","Measles","Meningococcal disease","Mpox","Non-typhoidal salmonellosis","Pertussis","Rabies","Rubella","Shigellosis","Soil transmitted helminths","Tetanus","Tuberculosis: extensively drug -resistant (XDR -TB)","Tuberculosis: multidrug- resistant (MDR -TB)","Tuberculosis:extra-pulmonary","Tuberculosis:pulmonary"]},"scene":{"zaxis":{"title":"score"}},"hovermode":"closest","showlegend":false,"legend":{"yanchor":"top","y":0.5}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"colorbar":{"title":"score","ticklen":2,"len":0.5,"lenmode":"fraction","y":1,"yanchor":"top"},"colorscale":[["0","#fee2e2"],["1","#7f1d1d"]],"showscale":true,"x":["KwaZulu-Natal","Gauteng","Gauteng","Western Cape","KwaZulu-Natal","Mpumalanga","Western Cape","Mpumalanga","Limpopo","Western Cape","Free State","North West","Gauteng","Northern Cape","Free State","Eastern Cape","Mpumalanga","Free State","Northern Cape","North West","Western Cape","Limpopo","Limpopo","Free State","Northern Cape","Northern Cape","Eastern Cape","Gauteng","Eastern Cape","Gauteng","Western Cape","KwaZulu-Natal","North West","Western Cape","Gauteng","KwaZulu-Natal","Mpumalanga","Mpumalanga","Gauteng","Mpumalanga","KwaZulu-Natal","KwaZulu-Natal","Mpumalanga","Gauteng","KwaZulu-Natal","Gauteng","Limpopo","Mpumalanga","KwaZulu-Natal","Eastern Cape","Eastern Cape","Western Cape","Limpopo","North West","Mpumalanga","Mpumalanga","Limpopo","Western Cape","Eastern Cape","Mpumalanga","North West","Northern Cape","KwaZulu-Natal","Free State","KwaZulu-Natal","Limpopo","Northern Cape","Western Cape","Free State","Northern Cape","Mpumalanga","Gauteng","KwaZulu-Natal","Gauteng","North West","KwaZulu-Natal","Mpumalanga","Northern Cape","Eastern Cape","Free State","Mpumalanga","Western Cape","Western Cape","Free State","Northern Cape","Gauteng","Mpumalanga","Free State","Western Cape","Free State","Eastern Cape","Northern Cape","North West","KwaZulu-Natal","KwaZulu-Natal","KwaZulu-Natal","KwaZulu-Natal","Western Cape","Eastern Cape","Eastern Cape","Eastern Cape","Western Cape","Gauteng","Mpumalanga","Eastern Cape","Gauteng","Gauteng","Free State","Mpumalanga","Western Cape","Limpopo","Limpopo","Gauteng","KwaZulu-Natal","Eastern Cape","Free State","Mpumalanga","North West","Western Cape","KwaZulu-Natal","Western Cape","Western Cape","Northern Cape","Western Cape","Western Cape","Gauteng","North West","North West","Free State","North West","Limpopo","Free State","KwaZulu-Natal","Northern Cape","Gauteng","Gauteng","Eastern Cape","Gauteng","Free State"],"y":["Tuberculosis:pulmonary","Tuberculosis:extra-pulmonary","Tuberculosis:pulmonary","Tuberculosis:pulmonary","Tuberculosis:extra-pulmonary","Tuberculosis:pulmonary","Measles","Measles","Tuberculosis:pulmonary","Tuberculosis:extra-pulmonary","Tuberculosis:pulmonary","Rubella","Measles","Tuberculosis:pulmonary","Measles","Tuberculosis:pulmonary","Rubella","Tuberculosis:extra-pulmonary","Measles","Tuberculosis:pulmonary","Rubella","Measles","Rubella","Rubella","Rubella","Tuberculosis:extra-pulmonary","Rubella","Tuberculosis: multidrug- resistant (MDR -TB)","Tuberculosis:extra-pulmonary","Mpox","Diphtheria","Rubella","Tuberculosis:extra-pulmonary","Tuberculosis: multidrug- resistant (MDR -TB)","Rubella","Malaria","Hepatitis A","Diphtheria","Hepatitis A","Enteric fever (typhoid or paratyphoid fever)","Measles","Mpox","Tuberculosis:extra-pulmonary","Enteric fever (typhoid or paratyphoid fever)","Tuberculosis: multidrug- resistant (MDR -TB)","Legionellosis","Tuberculosis:extra-pulmonary","Brucellosis","Lead poisoning","Botulism","Measles","Pertussis","Marburg virus (VHF)","Pertussis","Anthrax","Maternal death (pregnancy, childbirth and puerperium)","Diphtheria","Rabies","Crimean-congo viral haemorrhagic fever (human)","Leprosy","Malaria","Food borne illness outbreak","Hepatitis A","Agricultural or stock remedy poisoning","Legionellosis","Lead poisoning","Tetanus","Acute rheumatic fever","Tuberculosis: multidrug- resistant (MDR -TB)","Hepatitis C","Agricultural or stock remedy poisoning","Agricultural or stock remedy poisoning","Agricultural or stock remedy poisoning","Diphtheria","Rabies","Pertussis","Malaria","Acute flaccid paralysis","Acute flaccid paralysis","Bilharzia (schistosomiasis)","Rabies","Congenital syphilis","Agricultural or stock remedy poisoning","Tuberculosis: extensively drug -resistant (XDR -TB)","Meningococcal disease","Rabies","Shigellosis","Brucellosis","Meningococcal disease","Hepatitis A","Enteric fever (typhoid or paratyphoid fever)","Shigellosis","Brucellosis","Diphtheria","Hepatitis C","Maternal death (pregnancy, childbirth and puerperium)","Tuberculosis: extensively drug -resistant (XDR -TB)","Enteric fever (typhoid or paratyphoid fever)","Diphtheria","Agricultural or stock remedy poisoning","Acute rheumatic fever","Tuberculosis: extensively drug -resistant (XDR -TB)","Acute rheumatic fever","Listeriosis","Rabies","Endemic arboviral diseases west nile virus","Malaria","Congenital syphilis","Tuberculosis: extensively drug -resistant (XDR -TB)","Hepatitis E","Rabies","Food borne illness outbreak","Food borne illness outbreak","Acute flaccid paralysis","Shigellosis","Non-typhoidal salmonellosis","Food borne illness outbreak","Enteric fever (typhoid or paratyphoid fever)","Mpox","Soil transmitted helminths","Endemic arboviral diseases chikungunya virus","Maternal death (pregnancy, childbirth and puerperium)","Tuberculosis: multidrug- resistant (MDR -TB)","Endemic arboviral diseases west nile virus","Non-typhoidal salmonellosis","Non-typhoidal salmonellosis","Agricultural or stock remedy poisoning","Tuberculosis: extensively drug -resistant (XDR -TB)","Malaria","Measles","Congenital rubella syndrome","Legionellosis","Brucellosis","Agricultural or stock remedy poisoning","Pertussis","Maternal death (pregnancy, childbirth and puerperium)","Legionellosis","Brucellosis","Hepatitis E"],"z":[647.45376381110589,640.58096895467042,619.68344555938427,544.84899388838232,528.09124781607022,466.79259142065257,442.42698799774712,425.61162601128876,405.76638835977332,387.31035790221381,382.28424518474458,365.21614959875063,358.48158987067103,342.37720708579923,334.58730533256517,264.11567842966895,256.62089422573666,250.70342562826985,243.49957323112579,242.32764791192233,227.45404914123026,223.03656791342175,220.25482872768731,201.8422045529891,192.08463426255514,186.87634706635831,185.78109771344097,183.08848614631657,180.28581110965166,157.35093243019912,130.22269915411849,129.70315322543138,126.30152239580539,126.17154795939199,125.08718657840379,114.56433591737273,102.7412607281091,97.445569388000209,95.064314838827286,92.360155134770039,90.500426530432989,86.227822424098818,80.057432943889651,69.172331582839604,67.906652788443552,66.751309499875148,63.314116723758325,56.778427510703665,56.468413550372489,55.745592055538509,47.876772197007824,46.04857098597013,45.933655231469537,44.894214311274744,44.384402048721817,40.751731973272115,39.533748667929089,39.501572322113702,39.412969091932133,39.115611884596525,34.716453354821283,34.653647432433303,33.986295184331297,30.671465676983459,28.420183362717658,28.073471732607995,26.717646289526378,26.264692067269415,25.260678041981432,24.292809976638477,24.025801307049896,23.260340610993254,22.301074504635402,20.647209603720491,18.732791517139432,17.195482743923307,17.061955414618229,16.034218820666261,15.394564152634175,15.150080117863499,13.081616645002404,11.0541848138757,9.7281177281001643,9.6010474628728257,8.6271062285093052,7.806889694907948,6.2879681394780063,14.692523475110715,10.590730765834419,8.7246054646280147,7.0473377764848468,5.0917459533784717,19.236065655411821,13.734394488653896,11.216190886224911,19.00489710686751,11.681392040013641,5.0895664872282351,10.221094514552966,6.9877957053723563,17.392674957378311,12.691513646411952,11.639468873003262,6.236884997375105,5.8518230945084122,17.349999068905106,15.475349733668962,10.41877345777978,16.700168507968542,13.876880622787949,8.959031989212928,8.4577854952753508,5.4272234092771665,5.1827971905255499,5.3376743866223215,12.159410765163965,7.3679236115657414,5.0926280247792022,12.268191475497577,10.966023257071829,11.441619912469378,10.713511380416458,9.204367817193841,10.183686332202175,6.6905272400935463,6.2678660262128503,9.7788093168864609,9.6395804119016422,5.4035256527913642,8.8227948248335366,6.3684263091912596,8.4083440326569985,7.299294041563801,7.2377612648023701,5.7108578991392136,6.8292387299469333,6.0669604622482121,5.5382067736300371,5.3800567471672753],"hoverinfo":"text","text":["Tuberculosis:pulmonary — KwaZulu-Natal<br>Peak CUSUM: 647.45","Tuberculosis:extra-pulmonary — Gauteng<br>Peak CUSUM: 640.58","Tuberculosis:pulmonary — Gauteng<br>Peak CUSUM: 619.68","Tuberculosis:pulmonary — Western Cape<br>Peak CUSUM: 544.85","Tuberculosis:extra-pulmonary — KwaZulu-Natal<br>Peak CUSUM: 528.09","Tuberculosis:pulmonary — Mpumalanga<br>Peak CUSUM: 466.79","Measles — Western Cape<br>Peak CUSUM: 442.43","Measles — Mpumalanga<br>Peak CUSUM: 425.61","Tuberculosis:pulmonary — Limpopo<br>Peak CUSUM: 405.77","Tuberculosis:extra-pulmonary — Western Cape<br>Peak CUSUM: 387.31","Tuberculosis:pulmonary — Free State<br>Peak CUSUM: 382.28","Rubella — North West<br>Peak CUSUM: 365.22","Measles — Gauteng<br>Peak CUSUM: 358.48","Tuberculosis:pulmonary — Northern Cape<br>Peak CUSUM: 342.38","Measles — Free State<br>Peak CUSUM: 334.59","Tuberculosis:pulmonary — Eastern Cape<br>Peak CUSUM: 264.12","Rubella — Mpumalanga<br>Peak CUSUM: 256.62","Tuberculosis:extra-pulmonary — Free State<br>Peak CUSUM: 250.7","Measles — Northern Cape<br>Peak CUSUM: 243.5","Tuberculosis:pulmonary — North West<br>Peak CUSUM: 242.33","Rubella — Western Cape<br>Peak CUSUM: 227.45","Measles — Limpopo<br>Peak CUSUM: 223.04","Rubella — Limpopo<br>Peak CUSUM: 220.25","Rubella — Free State<br>Peak CUSUM: 201.84","Rubella — Northern Cape<br>Peak CUSUM: 192.08","Tuberculosis:extra-pulmonary — Northern Cape<br>Peak CUSUM: 186.88","Rubella — Eastern Cape<br>Peak CUSUM: 185.78","Tuberculosis: multidrug- resistant (MDR -TB) — Gauteng<br>Peak CUSUM: 183.09","Tuberculosis:extra-pulmonary — Eastern Cape<br>Peak CUSUM: 180.29","Mpox — Gauteng<br>Peak CUSUM: 157.35","Diphtheria — Western Cape<br>Peak CUSUM: 130.22","Rubella — KwaZulu-Natal<br>Peak CUSUM: 129.7","Tuberculosis:extra-pulmonary — North West<br>Peak CUSUM: 126.3","Tuberculosis: multidrug- resistant (MDR -TB) — Western Cape<br>Peak CUSUM: 126.17","Rubella — Gauteng<br>Peak CUSUM: 125.09","Malaria — KwaZulu-Natal<br>Peak CUSUM: 114.56","Hepatitis A — Mpumalanga<br>Peak CUSUM: 102.74","Diphtheria — Mpumalanga<br>Peak CUSUM: 97.45","Hepatitis A — Gauteng<br>Peak CUSUM: 95.06","Enteric fever (typhoid or paratyphoid fever) — Mpumalanga<br>Peak CUSUM: 92.36","Measles — KwaZulu-Natal<br>Peak CUSUM: 90.5","Mpox — KwaZulu-Natal<br>Peak CUSUM: 86.23","Tuberculosis:extra-pulmonary — Mpumalanga<br>Peak CUSUM: 80.06","Enteric fever (typhoid or paratyphoid fever) — Gauteng<br>Peak CUSUM: 69.17","Tuberculosis: multidrug- resistant (MDR -TB) — KwaZulu-Natal<br>Peak CUSUM: 67.91","Legionellosis — Gauteng<br>Peak CUSUM: 66.75","Tuberculosis:extra-pulmonary — Limpopo<br>Peak CUSUM: 63.31","Brucellosis — Mpumalanga<br>Peak CUSUM: 56.78","Lead poisoning — KwaZulu-Natal<br>Peak CUSUM: 56.47","Botulism — Eastern Cape<br>Peak CUSUM: 55.75","Measles — Eastern Cape<br>Peak CUSUM: 47.88","Pertussis — Western Cape<br>Peak CUSUM: 46.05","Marburg virus (VHF) — Limpopo<br>Peak CUSUM: 45.93","Pertussis — North West<br>Peak CUSUM: 44.89","Anthrax — Mpumalanga<br>Peak CUSUM: 44.38","Maternal death (pregnancy, childbirth and puerperium) — Mpumalanga<br>Peak CUSUM: 40.75","Diphtheria — Limpopo<br>Peak CUSUM: 39.53","Rabies — Western Cape<br>Peak CUSUM: 39.5","Crimean-congo viral haemorrhagic fever (human) — Eastern Cape<br>Peak CUSUM: 39.41","Leprosy — Mpumalanga<br>Peak CUSUM: 39.12","Malaria — North West<br>Peak CUSUM: 34.72","Food borne illness outbreak — Northern Cape<br>Peak CUSUM: 34.65","Hepatitis A — KwaZulu-Natal<br>Peak CUSUM: 33.99","Agricultural or stock remedy poisoning — Free State<br>Peak CUSUM: 30.67","Legionellosis — KwaZulu-Natal<br>Peak CUSUM: 28.42","Lead poisoning — Limpopo<br>Peak CUSUM: 28.07","Tetanus — Northern Cape<br>Peak CUSUM: 26.72","Acute rheumatic fever — Western Cape<br>Peak CUSUM: 26.26","Tuberculosis: multidrug- resistant (MDR -TB) — Free State<br>Peak CUSUM: 25.26","Hepatitis C — Northern Cape<br>Peak CUSUM: 24.29","Agricultural or stock remedy poisoning — Mpumalanga<br>Peak CUSUM: 24.03","Agricultural or stock remedy poisoning — Gauteng<br>Peak CUSUM: 23.26","Agricultural or stock remedy poisoning — KwaZulu-Natal<br>Peak CUSUM: 22.3","Diphtheria — Gauteng<br>Peak CUSUM: 20.65","Rabies — North West<br>Peak CUSUM: 18.73","Pertussis — KwaZulu-Natal<br>Peak CUSUM: 17.2","Malaria — Mpumalanga<br>Peak CUSUM: 17.06","Acute flaccid paralysis — Northern Cape<br>Peak CUSUM: 16.03","Acute flaccid paralysis — Eastern Cape<br>Peak CUSUM: 15.39","Bilharzia (schistosomiasis) — Free State<br>Peak CUSUM: 15.15","Rabies — Mpumalanga<br>Peak CUSUM: 13.08","Congenital syphilis — Western Cape<br>Peak CUSUM: 11.05","Agricultural or stock remedy poisoning — Western Cape<br>Peak CUSUM: 9.73","Tuberculosis: extensively drug -resistant (XDR -TB) — Free State<br>Peak CUSUM: 9.6","Meningococcal disease — Northern Cape<br>Peak CUSUM: 8.63","Rabies — Gauteng<br>Peak CUSUM: 7.81","Shigellosis — Mpumalanga<br>Peak CUSUM: 6.29","Brucellosis — Free State<br>Peak CUSUM: 14.69","Meningococcal disease — Western Cape<br>Peak CUSUM: 10.59","Hepatitis A — Free State<br>Peak CUSUM: 8.72","Enteric fever (typhoid or paratyphoid fever) — Eastern Cape<br>Peak CUSUM: 7.05","Shigellosis — Northern Cape<br>Peak CUSUM: 5.09","Brucellosis — North West<br>Peak CUSUM: 19.24","Diphtheria — KwaZulu-Natal<br>Peak CUSUM: 13.73","Hepatitis C — KwaZulu-Natal<br>Peak CUSUM: 11.22","Maternal death (pregnancy, childbirth and puerperium) — KwaZulu-Natal<br>Peak CUSUM: 19","Tuberculosis: extensively drug -resistant (XDR -TB) — KwaZulu-Natal<br>Peak CUSUM: 11.68","Enteric fever (typhoid or paratyphoid fever) — Western Cape<br>Peak CUSUM: 5.09","Diphtheria — Eastern Cape<br>Peak CUSUM: 10.22","Agricultural or stock remedy poisoning — Eastern Cape<br>Peak CUSUM: 6.99","Acute rheumatic fever — Eastern Cape<br>Peak CUSUM: 17.39","Tuberculosis: extensively drug -resistant (XDR -TB) — Western Cape<br>Peak CUSUM: 12.69","Acute rheumatic fever — Gauteng<br>Peak CUSUM: 11.64","Listeriosis — Mpumalanga<br>Peak CUSUM: 6.24","Rabies — Eastern Cape<br>Peak CUSUM: 5.85","Endemic arboviral diseases west nile virus — Gauteng<br>Peak CUSUM: 17.35","Malaria — Gauteng<br>Peak CUSUM: 15.48","Congenital syphilis — Free State<br>Peak CUSUM: 10.42","Tuberculosis: extensively drug -resistant (XDR -TB) — Mpumalanga<br>Peak CUSUM: 16.7","Hepatitis E — Western Cape<br>Peak CUSUM: 13.88","Rabies — Limpopo<br>Peak CUSUM: 8.96","Food borne illness outbreak — Limpopo<br>Peak CUSUM: 8.46","Food borne illness outbreak — Gauteng<br>Peak CUSUM: 5.43","Acute flaccid paralysis — KwaZulu-Natal<br>Peak CUSUM: 5.18","Shigellosis — Eastern Cape<br>Peak CUSUM: 5.34","Non-typhoidal salmonellosis — Free State<br>Peak CUSUM: 12.16","Food borne illness outbreak — Mpumalanga<br>Peak CUSUM: 7.37","Enteric fever (typhoid or paratyphoid fever) — North West<br>Peak CUSUM: 5.09","Mpox — Western Cape<br>Peak CUSUM: 12.27","Soil transmitted helminths — KwaZulu-Natal<br>Peak CUSUM: 10.97","Endemic arboviral diseases chikungunya virus — Western Cape<br>Peak CUSUM: 11.44","Maternal death (pregnancy, childbirth and puerperium) — Western Cape<br>Peak CUSUM: 10.71","Tuberculosis: multidrug- resistant (MDR -TB) — Northern Cape<br>Peak CUSUM: 9.2","Endemic arboviral diseases west nile virus — Western Cape<br>Peak CUSUM: 10.18","Non-typhoidal salmonellosis — Western Cape<br>Peak CUSUM: 6.69","Non-typhoidal salmonellosis — Gauteng<br>Peak CUSUM: 6.27","Agricultural or stock remedy poisoning — North West<br>Peak CUSUM: 9.78","Tuberculosis: extensively drug -resistant (XDR -TB) — North West<br>Peak CUSUM: 9.64","Malaria — Free State<br>Peak CUSUM: 5.4","Measles — North West<br>Peak CUSUM: 8.82","Congenital rubella syndrome — Limpopo<br>Peak CUSUM: 6.37","Legionellosis — Free State<br>Peak CUSUM: 8.41","Brucellosis — KwaZulu-Natal<br>Peak CUSUM: 7.3","Agricultural or stock remedy poisoning — Northern Cape<br>Peak CUSUM: 7.24","Pertussis — Gauteng<br>Peak CUSUM: 5.71","Maternal death (pregnancy, childbirth and puerperium) — Gauteng<br>Peak CUSUM: 6.83","Legionellosis — Eastern Cape<br>Peak CUSUM: 6.07","Brucellosis — Gauteng<br>Peak CUSUM: 5.54","Hepatitis E — Free State<br>Peak CUSUM: 5.38"],"type":"heatmap","xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-signal-heatmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1
+</figcaption>
+</figure>
+</div>
+</div>
+<hr>
+</section>
+<section id="recent-14-day-surge-quick-triage" class="level2">
+<h2 class="anchored" data-anchor-id="recent-14-day-surge-quick-triage">Recent 14-day Surge — Quick Triage</h2>
+<p>Conditions ordered by absolute change in the most recent 14-day window vs the preceding 14 days. Use the <strong>signal table above</strong> as the primary trigger; this view is a complementary, formula-free sanity check and is <strong>not</strong> delay-corrected.</p>
+<div class="cell">
+<div id="tbl-surge" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-surge-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2
+</figcaption>
+<div aria-describedby="tbl-surge-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-fe7f233ef15ddf256635" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-fe7f233ef15ddf256635">{"x":{"filter":"none","vertical":false,"data":[["Food borne illness outbreak","Hepatitis C","Legionellosis","Maternal death (pregnancy, childbirth and puerperium)","Diphtheria","Meningococcal disease"],[49,13,9,6,7,8],[39,4,1,0,4,7],[10,9,8,6,3,1],["25.6%","225%","800%","New","75%","14.3%"],["","","low count","low count","low count","low count"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Condition<\/th>\n      <th>Last 14 days<\/th>\n      <th>Prior 14 days<\/th>\n      <th>Abs Δ<\/th>\n      <th>% Δ<\/th>\n      <th>Caveat<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":15,"dom":"ftp","order":[[3,"desc"]],"columnDefs":[{"className":"dt-right","targets":[1,2,3]},{"name":"Condition","targets":0},{"name":"Last 14 days","targets":1},{"name":"Prior 14 days","targets":2},{"name":"Abs Δ","targets":3},{"name":"% Δ","targets":4},{"name":"Caveat","targets":5}],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,15,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<hr>
+</section>
+<section id="seasonal-context-top-flagged-condition" class="level2">
+<h2 class="anchored" data-anchor-id="seasonal-context-top-flagged-condition">Seasonal Context — Top Flagged Condition</h2>
+<p>Current epiyear (solid red) overlaid on the historical median + IQR + 5–95% ribbon from the prior five years. The dotted segment marks provisional weeks inside the reporting-delay window.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-seasonal" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-seasonal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-seasonal-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-seasonal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Weekly notifications vs 5-year historical baseline
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="trend-sparklines-top-flagged-conditions" class="level2">
+<h2 class="anchored" data-anchor-id="trend-sparklines-top-flagged-conditions">Trend Sparklines — Top Flagged Conditions</h2>
+<div class="cell">
+<div id="fig-sparklines" class="cell-output-display quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sparklines-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-309084f58cdebd1c4aaa" style="width:100%;height:742px;"></div>
+<script type="application/json" data-for="htmlwidget-309084f58cdebd1c4aaa">{"x":{"visdat":{"eb5d413c543c":["function () ","plotlyVisDat"]},"cur_data":"eb5d413c543c","attrs":{"eb5d413c543c":{"x":{},"y":{},"mode":"lines+markers","marker":{"size":4},"color":{},"split":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"xaxis":{"domain":[0,1],"automargin":true,"title":"Week (MMWR start)"},"yaxis":{"domain":[0,1],"automargin":true,"title":"Weekly cases"},"legend":{"orientation":"h","y":-0.14999999999999999},"title":"26-week trend — flagged conditions","hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["2025-09-21","2025-09-28","2025-10-05","2025-10-12","2025-10-19","2025-10-26","2025-11-02","2025-11-09","2025-11-16","2025-11-23","2025-11-30","2025-12-07","2025-12-14","2025-12-21","2025-12-28","2026-01-04","2026-01-11","2026-01-18","2026-01-25","2026-02-01","2026-02-08","2026-02-15","2026-02-22","2026-03-01","2026-03-08","2026-03-15"],"y":[15,23,20,28,20,25,22,35,30,43,26,37,25,16,19,31,19,27,32,39,28,13,43,37,17,3],"mode":"lines+markers","marker":{"color":"rgba(102,194,165,1)","size":4,"line":{"color":"rgba(102,194,165,1)"}},"type":"scatter","name":"Agricultural or stock remedy poisoning","textfont":{"color":"rgba(102,194,165,1)"},"error_y":{"color":"rgba(102,194,165,1)"},"error_x":{"color":"rgba(102,194,165,1)"},"line":{"color":"rgba(102,194,165,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2025-09-21","2025-09-28","2025-10-05","2025-10-12","2025-10-19","2025-10-26","2025-11-02","2025-11-09","2025-11-16","2025-11-23","2025-11-30","2025-12-07","2025-12-14","2025-12-21","2025-12-28","2026-01-04","2026-01-11","2026-01-18","2026-01-25","2026-02-01","2026-02-08","2026-02-15","2026-02-22","2026-03-01","2026-03-08","2026-03-15"],"y":[1,4,5,7,2,18,2,7,1,0,9,10,2,4,3,5,6,4,5,7,4,3,3,4,3,1],"mode":"lines+markers","marker":{"color":"rgba(252,141,98,1)","size":4,"line":{"color":"rgba(252,141,98,1)"}},"type":"scatter","name":"Diphtheria","textfont":{"color":"rgba(252,141,98,1)"},"error_y":{"color":"rgba(252,141,98,1)"},"error_x":{"color":"rgba(252,141,98,1)"},"line":{"color":"rgba(252,141,98,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2025-09-21","2025-09-28","2025-10-05","2025-10-12","2025-10-19","2025-10-26","2025-11-02","2025-11-09","2025-11-16","2025-11-23","2025-11-30","2025-12-07","2025-12-14","2025-12-21","2025-12-28","2026-01-04","2026-01-11","2026-01-18","2026-01-25","2026-02-01","2026-02-08","2026-02-15","2026-02-22","2026-03-01","2026-03-08","2026-03-15"],"y":[129,236,220,256,227,273,267,361,394,385,388,294,197,164,141,153,152,80,109,194,151,178,232,182,208,19],"mode":"lines+markers","marker":{"color":"rgba(141,160,203,1)","size":4,"line":{"color":"rgba(141,160,203,1)"}},"type":"scatter","name":"Measles","textfont":{"color":"rgba(141,160,203,1)"},"error_y":{"color":"rgba(141,160,203,1)"},"error_x":{"color":"rgba(141,160,203,1)"},"line":{"color":"rgba(141,160,203,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2025-09-21","2025-09-28","2025-10-05","2025-10-12","2025-10-19","2025-10-26","2025-11-02","2025-11-09","2025-11-16","2025-11-23","2025-11-30","2025-12-07","2025-12-14","2025-12-21","2025-12-28","2026-01-04","2026-01-11","2026-01-18","2026-01-25","2026-02-01","2026-02-08","2026-02-15","2026-02-22","2026-03-01","2026-03-08","2026-03-15"],"y":[0,1,5,1,3,0,1,1,1,1,2,4,2,3,2,1,1,1,2,1,0,1,3,0,0,0],"mode":"lines+markers","marker":{"color":"rgba(231,138,195,1)","size":4,"line":{"color":"rgba(231,138,195,1)"}},"type":"scatter","name":"Mpox","textfont":{"color":"rgba(231,138,195,1)"},"error_y":{"color":"rgba(231,138,195,1)"},"error_x":{"color":"rgba(231,138,195,1)"},"line":{"color":"rgba(231,138,195,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2025-09-21","2025-09-28","2025-10-05","2025-10-12","2025-10-19","2025-10-26","2025-11-02","2025-11-09","2025-11-16","2025-11-23","2025-11-30","2025-12-07","2025-12-14","2025-12-21","2025-12-28","2026-01-04","2026-01-11","2026-01-18","2026-01-25","2026-02-01","2026-02-08","2026-02-15","2026-02-22","2026-03-01","2026-03-08","2026-03-15"],"y":[10,99,66,128,98,83,83,113,101,91,61,56,24,15,15,14,13,10,11,31,19,21,38,27,8,0],"mode":"lines+markers","marker":{"color":"rgba(166,216,84,1)","size":4,"line":{"color":"rgba(166,216,84,1)"}},"type":"scatter","name":"Rubella","textfont":{"color":"rgba(166,216,84,1)"},"error_y":{"color":"rgba(166,216,84,1)"},"error_x":{"color":"rgba(166,216,84,1)"},"line":{"color":"rgba(166,216,84,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2025-09-21","2025-09-28","2025-10-05","2025-10-12","2025-10-19","2025-10-26","2025-11-02","2025-11-09","2025-11-16","2025-11-23","2025-11-30","2025-12-07","2025-12-14","2025-12-21","2025-12-28","2026-01-04","2026-01-11","2026-01-18","2026-01-25","2026-02-01","2026-02-08","2026-02-15","2026-02-22","2026-03-01","2026-03-08","2026-03-15"],"y":[16,43,38,38,50,45,33,39,39,41,25,30,38,17,16,30,48,49,37,37,36,45,52,48,34,6],"mode":"lines+markers","marker":{"color":"rgba(255,217,47,1)","size":4,"line":{"color":"rgba(255,217,47,1)"}},"type":"scatter","name":"Tuberculosis: multidrug- resistant (MDR -TB)","textfont":{"color":"rgba(255,217,47,1)"},"error_y":{"color":"rgba(255,217,47,1)"},"error_x":{"color":"rgba(255,217,47,1)"},"line":{"color":"rgba(255,217,47,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2025-09-21","2025-09-28","2025-10-05","2025-10-12","2025-10-19","2025-10-26","2025-11-02","2025-11-09","2025-11-16","2025-11-23","2025-11-30","2025-12-07","2025-12-14","2025-12-21","2025-12-28","2026-01-04","2026-01-11","2026-01-18","2026-01-25","2026-02-01","2026-02-08","2026-02-15","2026-02-22","2026-03-01","2026-03-08","2026-03-15"],"y":[240,397,366,306,363,366,416,369,371,371,342,332,288,188,242,286,312,325,366,304,305,362,330,319,251,28],"mode":"lines+markers","marker":{"color":"rgba(229,196,148,1)","size":4,"line":{"color":"rgba(229,196,148,1)"}},"type":"scatter","name":"Tuberculosis:extra-pulmonary","textfont":{"color":"rgba(229,196,148,1)"},"error_y":{"color":"rgba(229,196,148,1)"},"error_x":{"color":"rgba(229,196,148,1)"},"line":{"color":"rgba(229,196,148,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2025-09-21","2025-09-28","2025-10-05","2025-10-12","2025-10-19","2025-10-26","2025-11-02","2025-11-09","2025-11-16","2025-11-23","2025-11-30","2025-12-07","2025-12-14","2025-12-21","2025-12-28","2026-01-04","2026-01-11","2026-01-18","2026-01-25","2026-02-01","2026-02-08","2026-02-15","2026-02-22","2026-03-01","2026-03-08","2026-03-15"],"y":[1017,1637,1618,1574,1801,1851,1817,1745,1829,1615,1422,1480,1133,792,1096,1448,1472,1616,1660,1528,1554,1857,1707,1408,1495,140],"mode":"lines+markers","marker":{"color":"rgba(179,179,179,1)","size":4,"line":{"color":"rgba(179,179,179,1)"}},"type":"scatter","name":"Tuberculosis:pulmonary","textfont":{"color":"rgba(179,179,179,1)"},"error_y":{"color":"rgba(179,179,179,1)"},"error_x":{"color":"rgba(179,179,179,1)"},"line":{"color":"rgba(179,179,179,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-sparklines-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3
+</figcaption>
+</figure>
+</div>
+</div>
+<hr>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Related Sections
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><a href="../by-forecasts/index.html">Forecasts &amp; Scenarios</a> — short-term predictive models fed by signals</li>
+<li><a href="../burden-of-disease/index.html">Burden of Disease</a> — quantified health impact of conditions</li>
+<li><a href="../by-condition/index.html">By Condition</a> — condition-level national trends</li>
+<li><a href="../by-province/index.html">By Province</a> — province-level surveillance detail</li>
+<li><a href="../methods.html">Methods</a> — signal detection methodology documentation</li>
+</ul>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Data sources: NMC, Stats SA · Last update: 2025-10-16</p>
+</div>   
+    <div class="nav-footer-center">
+<p>SA NMC Epidemiological Intelligence Dashboard</p>
+</div>
+    <div class="nav-footer-right">
+<p><a href="methods.html">Methods</a> · <a href="glossary.html">Glossary</a> · <a href="about.html">About</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
