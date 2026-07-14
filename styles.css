@@ -492,32 +492,3 @@ table.dataTable thead th {
     font-size: 1.3rem;
   }
 }
-
-/* ── Home page section grid (responsive, mobile-friendly) ─────────────────── */
-.section-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
-  margin: 1.5rem 0;
-}
-
-/* ── "Data through" sticky banner — used on Quality / Trending / Overview ─── */
-.data-through-banner {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: #f1f5f9;
-  border-bottom: 1px solid #cbd5e1;
-  color: #1e293b;
-  font-size: 0.9rem;
-  padding: 0.45rem 1rem;
-  margin: -0.25rem -1rem 1rem -1rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-}
-.data-through-banner strong { color: #0f172a; }
-.data-through-banner .muted { color: #64748b; margin-left: 0.5rem; font-size: 0.8rem; }
-
-/* ── Status pills on home page ─────────────────────────────────────────────── */
-.status-active::before { content: "● "; color: #16a34a; }
-.status-dev::before    { content: "● "; color: #d97706; }
-.status-planned::before{ content: "○ "; color: #94a3b8; }

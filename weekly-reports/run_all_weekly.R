@@ -19,9 +19,9 @@
 
 # ── 1. Configuration ──────────────────────────────────────────────────────────
 
-N_WEEKS        <- 4                    # how many past epiweeks to render
+N_WEEKS        <- 4                     # how many past epiweeks to render
 OUTPUT_FORMATS <- c("html", "docx")     # formats to render for each week
-SKIP_EXISTING  <- FALSE                  # set FALSE to re-render all
+SKIP_EXISTING  <- TRUE                  # set FALSE to re-render all
 OUTPUT_DIR     <- file.path("weekly-reports", "rendered")
 
 # ── 2. Compute epiweek Sunday start dates ────────────────────────────────────
